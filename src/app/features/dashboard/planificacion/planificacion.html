@@ -31,20 +31,31 @@
       <div class="form-grid">
         <div class="field full">
           <label>Cliente</label>
-          <div class="autocomplete">
-            <input
-              [ngModel]="nuevo.clienteNombre"
-              (ngModelChange)="onClienteNombreChange($event)"
-              placeholder="Buscar cliente en el ERP…"
-              autocomplete="off"
-            />
-            @if (resultadosCliente().length) {
-              <div class="autocomplete-results">
-                @for (c of resultadosCliente(); track c.id) {
-                  <button type="button" (click)="seleccionarCliente(c)">{{ c.nombre }}</button>
-                }
-              </div>
-            }
+          <div style="display: flex; gap: 6px; margin-bottom: 6px">
+            <div class="pill" [class.selected]="modoBusquedaCliente() === 'nombre'" (click)="cambiarModoBusquedaCliente('nombre')">
+              Por nombre
+            </div>
+            <div class="pill" [class.selected]="modoBusquedaCliente() === 'id'" (click)="cambiarModoBusquedaCliente('id')">
+              Por ID
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px">
+            <div class="autocomplete" style="flex: 1">
+              <input
+                [ngModel]="busquedaCliente()"
+                (ngModelChange)="onBusquedaClienteChange($event)"
+                [placeholder]="modoBusquedaCliente() === 'id' ? 'Buscar por ID de cliente ERP…' : 'Buscar cliente por nombre…'"
+                autocomplete="off"
+              />
+              @if (resultadosCliente().length) {
+                <div class="autocomplete-results">
+                  @for (c of resultadosCliente(); track c.id) {
+                    <button type="button" (click)="seleccionarCliente(c)">{{ c.nombre }} <span class="mono">· {{ c.id }}</span></button>
+                  }
+                </div>
+              }
+            </div>
+            <button type="button" class="btn small" (click)="limpiarBusquedaCliente()">Limpiar</button>
           </div>
           @if (clienteSeleccionado(); as c) {
             <p style="margin: 4px 0 0; font-size: 11px; color: var(--green)">✓ Vinculado al ERP · id {{ c.id }}</p>
@@ -57,12 +68,23 @@
 
         <div class="field">
           <label>Mercaderista</label>
-          <select [(ngModel)]="nuevo.usuarioId">
-            <option [ngValue]="null">Sin asignar</option>
-            @for (m of mercaderistas(); track m.id) {
-              <option [ngValue]="m.id">{{ m.nombre }}</option>
+          <div class="autocomplete">
+            <input
+              [ngModel]="busquedaMercaderista()"
+              (ngModelChange)="onBusquedaMercaderistaChange($event)"
+              (focus)="mostrarSugerenciasMercaderista.set(true)"
+              (blur)="ocultarSugerenciasMercaderista()"
+              placeholder="Escribe el nombre…"
+              autocomplete="off"
+            />
+            @if (mostrarSugerenciasMercaderista() && mercaderistasFiltrados().length) {
+              <div class="autocomplete-results">
+                @for (m of mercaderistasFiltrados(); track m.id) {
+                  <button type="button" (click)="seleccionarMercaderista(m)">{{ m.nombre }}</button>
+                }
+              </div>
             }
-          </select>
+          </div>
         </div>
         <div class="field">
           <label>Región</label>

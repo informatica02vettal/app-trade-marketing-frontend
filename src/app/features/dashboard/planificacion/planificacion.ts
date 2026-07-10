@@ -9,6 +9,8 @@ import { ClienteErp } from '../../../core/models/cliente.model';
 
 const BADGE_CLASE: Record<string, string> = { EJECUTADA: 'ok', PENDIENTE: 'warn', REPROGRAMADA: 'bad' };
 
+type ModoBusquedaCliente = 'nombre' | 'id';
+
 function rangoSemana(): string {
   const hoy = new Date();
   const lunes = new Date(hoy);
@@ -54,9 +56,21 @@ export class Planificacion implements OnInit {
   readonly guardando = signal(false);
   readonly mostrarModal = signal(false);
 
+  // ---- Búsqueda de cliente (ERP) ----
+  readonly modoBusquedaCliente = signal<ModoBusquedaCliente>('nombre');
+  readonly busquedaCliente = signal('');
   readonly resultadosCliente = signal<ClienteErp[]>([]);
   readonly buscandoCliente = signal(false);
   readonly clienteSeleccionado = signal<ClienteErp | null>(null);
+
+  // ---- Búsqueda de mercaderista (lista ya cargada, sin llamada a API) ----
+  readonly busquedaMercaderista = signal('');
+  readonly mostrarSugerenciasMercaderista = signal(false);
+  readonly mercaderistasFiltrados = computed(() => {
+    const termino = this.busquedaMercaderista().trim().toLowerCase();
+    if (!termino) return this.mercaderistas();
+    return this.mercaderistas().filter((m) => m.nombre.toLowerCase().includes(termino));
+  });
 
   readonly ejecutadas = computed(() => this.plan().filter((p) => p.estado === 'EJECUTADA').length);
   readonly pendientes = computed(() => this.plan().filter((p) => p.estado === 'PENDIENTE').length);
@@ -79,6 +93,10 @@ export class Planificacion implements OnInit {
     this.nuevo = nuevoFormulario();
     this.clienteSeleccionado.set(null);
     this.resultadosCliente.set([]);
+    this.busquedaCliente.set('');
+    this.modoBusquedaCliente.set('nombre');
+    this.busquedaMercaderista.set('');
+    this.mostrarSugerenciasMercaderista.set(false);
     this.mostrarModal.set(true);
   }
 
@@ -86,10 +104,20 @@ export class Planificacion implements OnInit {
     this.mostrarModal.set(false);
   }
 
-  onClienteNombreChange(valor: string): void {
-    this.nuevo.clienteNombre = valor;
+  // ---- Cliente ----
+  cambiarModoBusquedaCliente(modo: ModoBusquedaCliente): void {
+    if (this.modoBusquedaCliente() === modo) return;
+    this.modoBusquedaCliente.set(modo);
+    this.limpiarBusquedaCliente();
+  }
+
+  onBusquedaClienteChange(valor: string): void {
+    this.busquedaCliente.set(valor);
     this.clienteSeleccionado.set(null);
     this.nuevo.erpClienteId = '';
+    if (this.modoBusquedaCliente() === 'nombre') {
+      this.nuevo.clienteNombre = valor;
+    }
 
     const termino = valor.trim();
     if (termino.length < 2) {
@@ -98,7 +126,9 @@ export class Planificacion implements OnInit {
     }
 
     this.buscandoCliente.set(true);
-    this.clienteService.buscar(termino).subscribe({
+    const busqueda =
+      this.modoBusquedaCliente() === 'id' ? this.clienteService.buscar(undefined, termino) : this.clienteService.buscar(termino);
+    busqueda.subscribe({
       next: (resultados) => {
         this.resultadosCliente.set(resultados);
         this.buscandoCliente.set(false);
@@ -111,7 +141,35 @@ export class Planificacion implements OnInit {
     this.clienteSeleccionado.set(cliente);
     this.nuevo.clienteNombre = cliente.nombre;
     this.nuevo.erpClienteId = cliente.id;
+    this.busquedaCliente.set(cliente.nombre);
     this.resultadosCliente.set([]);
+  }
+
+  limpiarBusquedaCliente(): void {
+    this.busquedaCliente.set('');
+    this.resultadosCliente.set([]);
+    this.clienteSeleccionado.set(null);
+    this.nuevo.clienteNombre = '';
+    this.nuevo.erpClienteId = '';
+  }
+
+  // ---- Mercaderista ----
+  onBusquedaMercaderistaChange(valor: string): void {
+    this.busquedaMercaderista.set(valor);
+    this.mostrarSugerenciasMercaderista.set(true);
+    if (!valor.trim()) {
+      this.nuevo.usuarioId = null;
+    }
+  }
+
+  seleccionarMercaderista(m: Usuario): void {
+    this.nuevo.usuarioId = m.id;
+    this.busquedaMercaderista.set(m.nombre);
+    this.mostrarSugerenciasMercaderista.set(false);
+  }
+
+  ocultarSugerenciasMercaderista(): void {
+    setTimeout(() => this.mostrarSugerenciasMercaderista.set(false), 150);
   }
 
   crear(): void {
