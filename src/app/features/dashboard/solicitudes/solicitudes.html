@@ -1,10 +1,14 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Gestión de Publicidad</h2>
-    <p class="sub">Solicitudes de avisos, exhibidores y material POP con foto, medidas y ubicación — aprobación de Mercadeo.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Gestión de Publicidad</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Solicitudes de avisos, exhibidores y material POP con foto, medidas y ubicación — aprobación de Mercadeo.</p>
   </div>
-  <div class="topbar-actions">
-    <select [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event); cargar()">
+  <div class="flex gap-2 items-center">
+    <select
+      [ngModel]="filtroEstado()"
+      (ngModelChange)="filtroEstado.set($event); cargar()"
+      class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none"
+    >
       <option value="">Todos los estados</option>
       @for (e of estados; track e) {
         <option [value]="e">{{ e }}</option>
@@ -13,43 +17,47 @@
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">Cola de aprobación — Mercadeo</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">Cola de aprobación — Mercadeo</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
-<div class="card">
-  <table>
+<div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+  <table class="w-full border-collapse text-[12.5px]">
     <thead>
       <tr>
-        <th>Marca</th>
-        <th>Materiales</th>
-        <th>Medidas</th>
-        <th>Ubicación</th>
-        <th>Solicitado por</th>
-        <th>Estado</th>
-        <th></th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Marca</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Materiales</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Medidas</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Ubicación</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Solicitado por</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
       </tr>
     </thead>
     <tbody>
       @for (s of solicitudes(); track s.id) {
-        <tr>
-          <td>{{ s.marcaNombre }} <span class="mono">· {{ s.categoria }}</span></td>
-          <td>{{ materiales(s) }}</td>
-          <td class="mono">{{ s.items[0]?.medidas || '—' }}</td>
-          <td>{{ s.items[0]?.ubicacion || '—' }}</td>
-          <td>{{ s.solicitanteNombre }}</td>
-          <td><span class="badge {{ badgeClase[s.estado] }}">{{ s.estado }}</span></td>
-          <td>
+        <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
+          <td class="px-2.5 py-2.5 align-middle">{{ s.marcaNombre }} <span class="font-mono text-[11.5px] text-muted">· {{ s.categoria }}</span></td>
+          <td class="px-2.5 py-2.5 align-middle">{{ materiales(s) }}</td>
+          <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ s.items[0]?.medidas || '—' }}</td>
+          <td class="px-2.5 py-2.5 align-middle">{{ s.items[0]?.ubicacion || '—' }}</td>
+          <td class="px-2.5 py-2.5 align-middle">{{ s.solicitanteNombre }}</td>
+          <td class="px-2.5 py-2.5 align-middle"><span [class]="badgeClase[s.estado]">{{ s.estado }}</span></td>
+          <td class="px-2.5 py-2.5 align-middle">
             @if (siguienteEstado[s.estado]; as siguiente) {
-              <button class="btn small" [disabled]="actualizando() === s.id" (click)="avanzarEstado(s)">
+              <button
+                class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover disabled:opacity-50 disabled:cursor-default"
+                [disabled]="actualizando() === s.id"
+                (click)="avanzarEstado(s)"
+              >
                 {{ siguiente.etiqueta }}
               </button>
             } @else {
-              <span class="mono">—</span>
+              <span class="font-mono text-[11.5px] text-muted">—</span>
             }
           </td>
         </tr>

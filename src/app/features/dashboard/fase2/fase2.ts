@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Chart } from 'chart.js/auto';
+import { BADGE_NEUTRAL } from '../../../shared/ui/dash/badge-classes';
 
 @Component({
   selector: 'app-fase2',
@@ -8,6 +9,8 @@ import { Chart } from 'chart.js/auto';
 })
 export class Fase2 implements AfterViewInit, OnDestroy {
   @ViewChild('chartFase2') chartRef?: ElementRef<HTMLCanvasElement>;
+
+  readonly badgeNeutral = BADGE_NEUTRAL;
 
   private chart?: Chart;
 

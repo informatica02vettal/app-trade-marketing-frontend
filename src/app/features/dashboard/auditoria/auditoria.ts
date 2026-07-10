@@ -4,9 +4,15 @@ import { AuditoriaService } from '../../../core/services/auditoria.service';
 import { VisitaService } from '../../../core/services/visita.service';
 import { AuditoriaMarca } from '../../../core/models/auditoria.model';
 import { Visita } from '../../../core/models/visita.model';
+import { BADGE_BAD, BADGE_NEUTRAL, BADGE_OK, BADGE_WARN } from '../../../shared/ui/dash/badge-classes';
 
-const BADGE_EXHIBIDOR: Record<string, string> = { OPTIMO: 'ok', REGULAR: 'warn', DETERIORADO: 'bad', NO_APLICA: 'neutral' };
-const BADGE_POP: Record<string, string> = { OPTIMO: 'ok', REGULAR: 'warn', FALTANTE: 'bad' };
+const BADGE_EXHIBIDOR: Record<string, string> = {
+  OPTIMO: BADGE_OK,
+  REGULAR: BADGE_WARN,
+  DETERIORADO: BADGE_BAD,
+  NO_APLICA: BADGE_NEUTRAL,
+};
+const BADGE_POP: Record<string, string> = { OPTIMO: BADGE_OK, REGULAR: BADGE_WARN, FALTANTE: BADGE_BAD };
 
 @Component({
   selector: 'app-auditoria',

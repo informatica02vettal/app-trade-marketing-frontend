@@ -1,44 +1,48 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Control Material POP</h2>
-    <p class="sub">Qué material tiene cada marca, su estado, fecha de instalación y evidencia registrada.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Control Material POP</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Qué material tiene cada marca, su estado, fecha de instalación y evidencia registrada.</p>
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">Inventario instalado</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">Inventario instalado</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
-<div class="card">
-  <table>
+<div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+  <table class="w-full border-collapse text-[12.5px]">
     <thead>
       <tr>
-        <th>Marca</th>
-        <th>Material</th>
-        <th>Instalado por</th>
-        <th>Instalación</th>
-        <th>Estado</th>
-        <th>Evidencia</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Marca</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Material</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Instalado por</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Instalación</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Evidencia</th>
       </tr>
     </thead>
     <tbody>
       @for (f of filas(); track $index) {
-        <tr>
-          <td>{{ f.marcaNombre }}</td>
-          <td>{{ f.materialNombre }}</td>
-          <td>{{ f.usuarioNombre }}</td>
-          <td class="mono">{{ f.fechaInstalacion || '—' }}</td>
-          <td><span class="badge ok">{{ f.estado }}</span></td>
-          <td class="mono">{{ f.fotos }} 📷</td>
+        <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
+          <td class="px-2.5 py-2.5 align-middle">{{ f.marcaNombre }}</td>
+          <td class="px-2.5 py-2.5 align-middle">{{ f.materialNombre }}</td>
+          <td class="px-2.5 py-2.5 align-middle">{{ f.usuarioNombre }}</td>
+          <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ f.fechaInstalacion || '—' }}</td>
+          <td class="px-2.5 py-2.5 align-middle">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-semibold tracking-[0.02em] bg-success/[0.13] text-success">{{ f.estado }}</span>
+          </td>
+          <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ f.fotos }} 📷</td>
         </tr>
       } @empty {
         <tr>
-          <td colspan="6">
-            <div class="empty"><b>Sin material instalado</b>Aún no hay material POP registrado.</div>
+          <td colspan="6" class="px-2.5 py-2.5 align-middle">
+            <div class="py-[26px] px-2.5 text-center text-muted text-[12.5px]">
+              <b class="text-ink block font-display text-sm mb-1">Sin material instalado</b>Aún no hay material POP registrado.
+            </div>
           </td>
         </tr>
       }

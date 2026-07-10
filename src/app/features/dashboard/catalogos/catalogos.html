@@ -1,53 +1,53 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Catálogos</h2>
-    <p class="sub">Marcas propias, competencia y materiales de Trade Marketing / Publicidad disponibles por marca.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Catálogos</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Marcas propias, competencia y materiales de Trade Marketing / Publicidad disponibles por marca.</p>
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">Marcas propias</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">Marcas propias</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
-<div class="pill-row" style="margin-bottom: 16px">
+<div class="flex flex-wrap gap-1.5 mb-4">
   @for (m of marcas(); track m.id) {
-    <div class="pill" [class.selected]="marcaSeleccionada()?.id === m.id" (click)="seleccionar(m)">{{ m.nombre }}</div>
+    <div [class]="claseMarca(m)" (click)="seleccionar(m)">{{ m.nombre }}</div>
   }
 </div>
 
 @if (marcaSeleccionada(); as marca) {
-  <div class="two-col">
-    <div class="card">
-      <p class="panel-title">Competencia de {{ marca.nombre }}</p>
-      <p class="panel-sub">Catálogo usado en el flujo de Visita para esta marca</p>
-      <div class="pill-row">
+  <div class="grid gap-3.5 grid-cols-[1.4fr_1fr] max-[1100px]:grid-cols-1">
+    <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+      <p class="font-display text-[15px] font-semibold mb-0.5">Competencia de {{ marca.nombre }}</p>
+      <p class="text-[11.5px] text-muted mb-3">Catálogo usado en el flujo de Visita para esta marca</p>
+      <div class="flex flex-wrap gap-1.5">
         @for (c of competencia(); track c.id) {
-          <div class="pill">{{ c.nombre }}</div>
+          <div [class]="pill">{{ c.nombre }}</div>
         }
       </div>
     </div>
 
-    <div class="card">
-      <p class="panel-title">Materiales disponibles</p>
-      <p class="panel-sub">Filtrados por marca — foto obligatoria según catálogo</p>
-      <table>
+    <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+      <p class="font-display text-[15px] font-semibold mb-0.5">Materiales disponibles</p>
+      <p class="text-[11.5px] text-muted mb-3">Filtrados por marca — foto obligatoria según catálogo</p>
+      <table class="w-full border-collapse text-[12.5px]">
         <thead>
           <tr>
-            <th>Material</th>
-            <th>Categoría</th>
-            <th>Fotos</th>
+            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Material</th>
+            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Categoría</th>
+            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Fotos</th>
           </tr>
         </thead>
         <tbody>
           @for (mat of materiales(); track mat.id) {
-            <tr>
-              <td>{{ mat.nombre }}</td>
-              <td class="mono">{{ mat.categoriaNombre }}</td>
-              <td class="mono">{{ mat.minimoFotos }}</td>
+            <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
+              <td class="px-2.5 py-2.5 align-middle">{{ mat.nombre }}</td>
+              <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ mat.categoriaNombre }}</td>
+              <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ mat.minimoFotos }}</td>
             </tr>
           }
         </tbody>

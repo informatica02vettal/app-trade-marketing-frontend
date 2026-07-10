@@ -5,11 +5,12 @@ import { KpiService } from '../../../core/services/kpi.service';
 import { MercadoService } from '../../../core/services/mercado.service';
 import { KpiDashboard } from '../../../core/models/kpi.model';
 import { HallazgoMercado } from '../../../core/models/mercado.model';
+import { BADGE_BAD, BADGE_OK, BADGE_WARN } from '../../../shared/ui/dash/badge-classes';
 
 function estadoCumplimiento(pct: number): { texto: string; clase: string } {
-  if (pct >= 95) return { texto: 'Al día', clase: 'ok' };
-  if (pct >= 75) return { texto: 'Atención', clase: 'warn' };
-  return { texto: 'Rezagado', clase: 'bad' };
+  if (pct >= 95) return { texto: 'Al día', clase: BADGE_OK };
+  if (pct >= 75) return { texto: 'Atención', clase: BADGE_WARN };
+  return { texto: 'Rezagado', clase: BADGE_BAD };
 }
 
 @Component({

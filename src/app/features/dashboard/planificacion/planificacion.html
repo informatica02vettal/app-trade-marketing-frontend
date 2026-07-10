@@ -1,74 +1,89 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Planificación de Visitas</h2>
-    <p class="sub">Planes semanales, mensuales y trimestrales por mercaderista y cliente.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Planificación de Visitas</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Planes semanales, mensuales y trimestrales por mercaderista y cliente.</p>
   </div>
-  <div class="topbar-actions">
-    <button class="btn primary small" (click)="abrirModal()">
+  <div class="flex gap-2 items-center">
+    <button
+      class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
+      (click)="abrirModal()"
+    >
       + Nueva visita planificada
     </button>
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">{{ rangoSemana }}</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">{{ rangoSemana }}</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
 @if (mostrarModal()) {
-  <div class="modal-overlay" (click)="cerrarModal()">
-    <div class="modal-panel" (click)="$event.stopPropagation()">
-      <div class="topbar">
+  <div class="fixed inset-0 bg-[rgba(20,24,28,0.45)] flex items-center justify-center p-5 z-[100]" (click)="cerrarModal()">
+    <div
+      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[560px] max-h-[calc(100vh-40px)] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex justify-between items-start flex-wrap gap-3.5 mb-1">
         <div>
-          <p class="panel-title">Nueva visita planificada</p>
+          <p class="font-display text-[15px] font-semibold mb-0.5">Nueva visita planificada</p>
         </div>
-        <button type="button" class="modal-close" (click)="cerrarModal()">×</button>
+        <button type="button" class="bg-transparent border-none cursor-pointer text-muted text-xl leading-none p-1 hover:text-ink" (click)="cerrarModal()">×</button>
       </div>
 
-      <div class="form-grid">
-        <div class="field full">
-          <label>Cliente</label>
-          <div style="display: flex; gap: 6px; margin-bottom: 6px">
-            <div class="pill" [class.selected]="modoBusquedaCliente() === 'nombre'" (click)="cambiarModoBusquedaCliente('nombre')">
-              Por nombre
-            </div>
-            <div class="pill" [class.selected]="modoBusquedaCliente() === 'id'" (click)="cambiarModoBusquedaCliente('id')">
-              Por ID
-            </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5 col-span-2">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Cliente</label>
+          <div class="flex gap-1.5 mb-1.5">
+            <div [class]="claseModo('nombre')" (click)="cambiarModoBusquedaCliente('nombre')">Por nombre</div>
+            <div [class]="claseModo('id')" (click)="cambiarModoBusquedaCliente('id')">Por ID</div>
           </div>
-          <div style="display: flex; gap: 6px">
-            <div class="autocomplete" style="flex: 1">
+          <div class="flex gap-1.5">
+            <div class="relative flex-1">
               <input
                 [ngModel]="busquedaCliente()"
                 (ngModelChange)="onBusquedaClienteChange($event)"
                 [placeholder]="modoBusquedaCliente() === 'id' ? 'Buscar por ID de cliente ERP…' : 'Buscar cliente por nombre…'"
                 autocomplete="off"
+                class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal w-full"
               />
               @if (resultadosCliente().length) {
-                <div class="autocomplete-results">
+                <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-panel border border-line rounded-lg shadow-[0_10px_24px_rgba(20,30,40,0.12)] max-h-[200px] overflow-y-auto z-10">
                   @for (c of resultadosCliente(); track c.id) {
-                    <button type="button" (click)="seleccionarCliente(c)">{{ c.nombre }} <span class="mono">· {{ c.id }}</span></button>
+                    <button
+                      type="button"
+                      (click)="seleccionarCliente(c)"
+                      class="block w-full text-left px-2.5 py-2 text-[13px] bg-transparent border-none border-b border-line last:border-b-0 cursor-pointer text-ink hover:bg-panel-alt"
+                    >
+                      {{ c.nombre }} <span class="font-mono text-[11.5px] text-muted">· {{ c.id }}</span>
+                    </button>
                   }
                 </div>
               }
             </div>
-            <button type="button" class="btn small" (click)="limpiarBusquedaCliente()">Limpiar</button>
+            <button
+              type="button"
+              (click)="limpiarBusquedaCliente()"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
+            >
+              Limpiar
+            </button>
           </div>
           @if (clienteSeleccionado(); as c) {
-            <p style="margin: 4px 0 0; font-size: 11px; color: var(--green)">✓ Vinculado al ERP · id {{ c.id }}</p>
+            <p class="mt-1 text-[11px] text-success">✓ Vinculado al ERP · id {{ c.id }}</p>
           } @else if (buscandoCliente()) {
-            <p style="margin: 4px 0 0; font-size: 11px; color: var(--muted)">Buscando en el ERP…</p>
+            <p class="mt-1 text-[11px] text-muted">Buscando en el ERP…</p>
           } @else if (nuevo.clienteNombre) {
-            <p style="margin: 4px 0 0; font-size: 11px; color: var(--muted)">Sin vincular al ERP (cliente nuevo o sin coincidencias)</p>
+            <p class="mt-1 text-[11px] text-muted">Sin vincular al ERP (cliente nuevo o sin coincidencias)</p>
           }
         </div>
 
-        <div class="field">
-          <label>Mercaderista</label>
-          <div class="autocomplete">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Mercaderista</label>
+          <div class="relative">
             <input
               [ngModel]="busquedaMercaderista()"
               (ngModelChange)="onBusquedaMercaderistaChange($event)"
@@ -76,95 +91,116 @@
               (blur)="ocultarSugerenciasMercaderista()"
               placeholder="Escribe el nombre…"
               autocomplete="off"
+              class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal w-full"
             />
             @if (mostrarSugerenciasMercaderista() && mercaderistasFiltrados().length) {
-              <div class="autocomplete-results">
+              <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-panel border border-line rounded-lg shadow-[0_10px_24px_rgba(20,30,40,0.12)] max-h-[200px] overflow-y-auto z-10">
                 @for (m of mercaderistasFiltrados(); track m.id) {
-                  <button type="button" (click)="seleccionarMercaderista(m)">{{ m.nombre }}</button>
+                  <button
+                    type="button"
+                    (click)="seleccionarMercaderista(m)"
+                    class="block w-full text-left px-2.5 py-2 text-[13px] bg-transparent border-none border-b border-line last:border-b-0 cursor-pointer text-ink hover:bg-panel-alt"
+                  >
+                    {{ m.nombre }}
+                  </button>
                 }
               </div>
             }
           </div>
         </div>
-        <div class="field">
-          <label>Región</label>
-          <input [(ngModel)]="nuevo.region" placeholder="Región" />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Región</label>
+          <input [(ngModel)]="nuevo.region" placeholder="Región" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
-        <div class="field">
-          <label>Fecha</label>
-          <input type="date" [(ngModel)]="nuevo.fechaProgramada" />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Fecha</label>
+          <input type="date" [(ngModel)]="nuevo.fechaProgramada" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
-        <div class="field">
-          <label>Hora</label>
-          <input type="time" [(ngModel)]="nuevo.horaProgramada" />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Hora</label>
+          <input type="time" [(ngModel)]="nuevo.horaProgramada" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
-        <div class="field full">
-          <label>Objetivo de la visita</label>
-          <input [(ngModel)]="nuevo.objetivo" placeholder="Reposición POP, auditoría de anaquel…" />
+        <div class="flex flex-col gap-1.5 col-span-2">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Objetivo de la visita</label>
+          <input [(ngModel)]="nuevo.objetivo" placeholder="Reposición POP, auditoría de anaquel…" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
-        <div class="field">
-          <label>Tipo</label>
-          <select [(ngModel)]="nuevo.tipoVisita">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Tipo</label>
+          <select [(ngModel)]="nuevo.tipoVisita" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
             <option value="PLANIFICADA">Planificada</option>
             <option value="NO_PLANIFICADA">No planificada</option>
           </select>
         </div>
       </div>
 
-      <div style="display: flex; gap: 8px; margin-top: 16px">
-        <button class="btn primary small" (click)="crear()" [disabled]="guardando() || !nuevo.clienteNombre || !nuevo.fechaProgramada">
+      <div class="flex gap-2 mt-4">
+        <button
+          class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
+          (click)="crear()"
+          [disabled]="guardando() || !nuevo.clienteNombre || !nuevo.fechaProgramada"
+        >
           Crear
         </button>
-        <button class="btn small" (click)="cerrarModal()">Cancelar</button>
+        <button
+          class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
+          (click)="cerrarModal()"
+        >
+          Cancelar
+        </button>
       </div>
     </div>
   </div>
 }
 
-<div class="grid cols-3">
-  <div class="card">
-    <p class="kpi-label">Ejecutadas</p>
-    <div class="stat-mini"><b>{{ ejecutadas() }}</b><span>visitas</span></div>
+<div class="grid gap-3.5 grid-cols-3 max-[1100px]:grid-cols-2">
+  <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+    <p class="text-[11.5px] text-muted uppercase tracking-[0.06em] font-mono mb-1">Ejecutadas</p>
+    <div class="flex items-baseline gap-1.5"><b class="font-display text-[19px]">{{ ejecutadas() }}</b><span class="text-[11px] text-muted">visitas</span></div>
   </div>
-  <div class="card">
-    <p class="kpi-label">Pendientes</p>
-    <div class="stat-mini"><b>{{ pendientes() }}</b><span>visitas</span></div>
+  <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+    <p class="text-[11.5px] text-muted uppercase tracking-[0.06em] font-mono mb-1">Pendientes</p>
+    <div class="flex items-baseline gap-1.5"><b class="font-display text-[19px]">{{ pendientes() }}</b><span class="text-[11px] text-muted">visitas</span></div>
   </div>
-  <div class="card">
-    <p class="kpi-label">Reprogramadas</p>
-    <div class="stat-mini"><b>{{ reprogramadas() }}</b><span>visitas</span></div>
+  <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+    <p class="text-[11.5px] text-muted uppercase tracking-[0.06em] font-mono mb-1">Reprogramadas</p>
+    <div class="flex items-baseline gap-1.5"><b class="font-display text-[19px]">{{ reprogramadas() }}</b><span class="text-[11px] text-muted">visitas</span></div>
   </div>
 </div>
 
-<div class="card" style="margin-top: 14px">
-  <p class="panel-title">Plan semanal por cliente</p>
-  <p class="panel-sub">Toca una fila para marcar ejecución</p>
-  <table>
+<div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)] mt-3.5">
+  <p class="font-display text-[15px] font-semibold mb-0.5">Plan semanal por cliente</p>
+  <p class="text-[11.5px] text-muted mb-3">Toca una fila para marcar ejecución</p>
+  <table class="w-full border-collapse text-[12.5px]">
     <thead>
       <tr>
-        <th>Cliente</th>
-        <th>Mercaderista</th>
-        <th>Región</th>
-        <th>Fecha / hora</th>
-        <th>Objetivo de visita</th>
-        <th>Estado</th>
-        <th></th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Cliente</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Mercaderista</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Región</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Fecha / hora</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Objetivo de visita</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
       </tr>
     </thead>
     <tbody>
       @for (p of plan(); track p.id) {
-        <tr>
-          <td>{{ p.clienteNombre }}</td>
-          <td>{{ p.usuarioNombre }}</td>
-          <td class="mono">{{ p.region }}</td>
-          <td class="mono">{{ p.fechaProgramada }} {{ p.horaProgramada }}</td>
-          <td>{{ p.objetivo }}</td>
-          <td><span class="badge {{ badgeClase[p.estado] }}">{{ p.estado }}</span></td>
-          <td>
+        <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
+          <td class="px-2.5 py-2.5 align-middle">{{ p.clienteNombre }}</td>
+          <td class="px-2.5 py-2.5 align-middle">{{ p.usuarioNombre }}</td>
+          <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ p.region }}</td>
+          <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ p.fechaProgramada }} {{ p.horaProgramada }}</td>
+          <td class="px-2.5 py-2.5 align-middle">{{ p.objetivo }}</td>
+          <td class="px-2.5 py-2.5 align-middle"><span [class]="badgeClase[p.estado]">{{ p.estado }}</span></td>
+          <td class="px-2.5 py-2.5 align-middle">
             @if (p.estado !== 'EJECUTADA') {
-              <button class="btn small" (click)="marcarEjecutada(p)">Marcar ejecutada</button>
+              <button
+                class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
+                (click)="marcarEjecutada(p)"
+              >
+                Marcar ejecutada
+              </button>
             } @else {
-              <span class="mono">—</span>
+              <span class="font-mono text-[11.5px] text-muted">—</span>
             }
           </td>
         </tr>

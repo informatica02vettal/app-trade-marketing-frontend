@@ -1,21 +1,25 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Auditoría de Marca</h2>
-    <p class="sub">Presencia de marca, participación de anaquel, estado de exhibidores y POP, y oportunidades detectadas.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Auditoría de Marca</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Presencia de marca, participación de anaquel, estado de exhibidores y POP, y oportunidades detectadas.</p>
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">Resultados por visita</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">Resultados por visita</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
-<div class="field" style="max-width: 340px; margin-bottom: 14px">
-  <label>Visita</label>
-  <select [ngModel]="visitaId()" (ngModelChange)="onVisitaSeleccionada($event)">
+<div class="flex flex-col gap-1.5 max-w-[340px] mb-3.5">
+  <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Visita</label>
+  <select
+    [ngModel]="visitaId()"
+    (ngModelChange)="onVisitaSeleccionada($event)"
+    class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+  >
     <option [ngValue]="null">Selecciona una visita…</option>
     @for (v of visitas(); track v.id) {
       <option [ngValue]="v.id">{{ v.clienteNombre }} · {{ v.usuarioNombre }}</option>
@@ -24,39 +28,43 @@
 </div>
 
 @if (visitaId() && !auditorias().length) {
-  <div class="empty"><b>Sin marcas auditadas</b>Esta visita todavía no tiene marcas auditadas.</div>
+  <div class="py-[26px] px-2.5 text-center text-muted text-[12.5px]">
+    <b class="text-ink block font-display text-sm mb-1">Sin marcas auditadas</b>Esta visita todavía no tiene marcas auditadas.
+  </div>
 }
 
-<div class="grid cols-3">
+<div class="grid gap-3.5 grid-cols-3 max-[1100px]:grid-cols-2">
   @for (a of auditorias(); track a.id) {
-    <div class="card">
-      <p class="panel-title">{{ a.marcaNombre }}</p>
+    <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+      <p class="font-display text-[15px] font-semibold mb-0.5">{{ a.marcaNombre }}</p>
 
-      <div style="display: flex; justify-content: space-between; margin: 10px 0 4px">
-        <span class="mono">Presencia de marca</span><span class="mono">{{ a.presenciaPct }}%</span>
+      <div class="flex justify-between mt-2.5 mb-1">
+        <span class="font-mono text-[11.5px] text-muted">Presencia de marca</span><span class="font-mono text-[11.5px] text-muted">{{ a.presenciaPct }}%</span>
       </div>
-      <div class="progress-track"><div class="progress-fill" [style.width.%]="a.presenciaPct"></div></div>
-
-      <div style="display: flex; justify-content: space-between; margin: 12px 0 4px">
-        <span class="mono">Participación de anaquel</span><span class="mono">{{ a.anaquelPct }}%</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" [style.width.%]="a.anaquelPct" style="background: linear-gradient(90deg, #e0a233, #24a9e1)"></div>
+      <div class="h-1.5 rounded-md bg-panel-alt overflow-hidden border border-line">
+        <div class="h-full rounded-md bg-[linear-gradient(90deg,#5bc2ea,#24a9e1)]" [style.width.%]="a.presenciaPct"></div>
       </div>
 
-      <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px">
-        <span class="badge {{ badgeExhibidor[a.estadoExhibidores] }}">Exhibidor: {{ a.estadoExhibidores }}</span>
-        <span class="badge {{ badgePop[a.estadoPop] }}">POP: {{ a.estadoPop }}</span>
+      <div class="flex justify-between mt-3 mb-1">
+        <span class="font-mono text-[11.5px] text-muted">Participación de anaquel</span><span class="font-mono text-[11.5px] text-muted">{{ a.anaquelPct }}%</span>
+      </div>
+      <div class="h-1.5 rounded-md bg-panel-alt overflow-hidden border border-line">
+        <div class="h-full rounded-md bg-[linear-gradient(90deg,#e0a233,#24a9e1)]" [style.width.%]="a.anaquelPct"></div>
+      </div>
+
+      <div class="flex gap-1.5 flex-wrap mt-3">
+        <span [class]="badgeExhibidor[a.estadoExhibidores]">Exhibidor: {{ a.estadoExhibidores }}</span>
+        <span [class]="badgePop[a.estadoPop]">POP: {{ a.estadoPop }}</span>
       </div>
 
       @if (a.competenciaDetectada) {
-        <p style="margin: 12px 0 0; font-size: 11.5px; color: var(--muted)">
-          Competencia: <span style="color: var(--text)">{{ a.competenciaDetectada }}</span>
+        <p class="text-[11.5px] text-muted mt-3">
+          Competencia: <span class="text-ink">{{ a.competenciaDetectada }}</span>
         </p>
       }
       @if (a.oportunidad) {
-        <p style="margin: 6px 0 0; font-size: 11.5px; color: var(--muted)">
-          Oportunidad: <span style="color: var(--orange)">{{ a.oportunidad }}</span>
+        <p class="text-[11.5px] text-muted mt-1.5">
+          Oportunidad: <span class="text-brand">{{ a.oportunidad }}</span>
         </p>
       }
     </div>

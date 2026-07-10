@@ -1,39 +1,39 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Integración Comercial</h2>
-    <p class="sub">Fase 2 del desarrollo — conexión de la actividad de campo con resultados de venta.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Integración Comercial</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Fase 2 del desarrollo — conexión de la actividad de campo con resultados de venta.</p>
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">Hoja de ruta</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">Hoja de ruta</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
-<div class="phase2-banner">
-  <p class="panel-title" style="font-size: 17px">Módulo en construcción — próxima fase</p>
-  <p class="panel-sub" style="max-width: 520px; margin: 0 auto 16px">
+<div class="border border-dashed border-line rounded-xl p-[22px] text-center bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.02)_0_10px,transparent_10px_20px)]">
+  <p class="font-display font-semibold mb-0.5 text-[17px]">Módulo en construcción — próxima fase</p>
+  <p class="text-[11.5px] text-muted mx-auto max-w-[520px] mb-4">
     Esta fase conectará el módulo de Trade Marketing con el módulo comercial para medir el impacto real de la visita
     sobre la facturación.
   </p>
 </div>
 
-<div class="grid cols-2" style="margin-top: 16px">
-  <div class="card">
-    <p class="panel-title">Alcance previsto</p>
+<div class="grid gap-3.5 grid-cols-2 mt-4">
+  <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+    <p class="font-display text-[15px] font-semibold mb-0.5">Alcance previsto</p>
     @for (item of alcancePrevisto; track item) {
-      <div class="list-row">
-        <div class="lr-main"><p>{{ item }}</p></div>
-        <span class="badge neutral">Fase 2</span>
+      <div class="flex justify-between items-center py-2.5 border-b border-line last:border-b-0 gap-3">
+        <div><p class="m-0 text-[13px] font-semibold">{{ item }}</p></div>
+        <span [class]="badgeNeutral">Fase 2</span>
       </div>
     }
   </div>
-  <div class="card">
-    <p class="panel-title">Vista previa — visita vs. venta (mock)</p>
-    <p class="panel-sub">Ejemplo ilustrativo de la correlación que habilitará esta fase</p>
-    <div class="chart-wrap small"><canvas #chartFase2></canvas></div>
+  <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+    <p class="font-display text-[15px] font-semibold mb-0.5">Vista previa — visita vs. venta (mock)</p>
+    <p class="text-[11.5px] text-muted mb-3">Ejemplo ilustrativo de la correlación que habilitará esta fase</p>
+    <div class="relative h-[170px]"><canvas #chartFase2></canvas></div>
   </div>
 </div>

@@ -1,66 +1,130 @@
-<aside class="sidebar">
-  <div class="brand">
-    <img class="brand-logo" src="vettal-logo.jpg" alt="Vettal Trade" />
-    <p class="brand-tagline">TRADE · ABASTECIENDO EL FUTURO</p>
+<aside class="w-[236px] shrink-0 bg-panel border-r border-line flex flex-col px-3.5 py-5 sticky top-0 h-dvh overflow-y-auto">
+  <div class="px-2 pt-1.5 pb-3.5 border-b border-line mb-2">
+    <img class="w-full max-w-[158px] h-auto block" src="vettal-logo.jpg" alt="Vettal Trade" />
+    <p class="mt-2 text-[9.5px] text-muted font-mono tracking-[0.07em]">TRADE · ABASTECIENDO EL FUTURO</p>
   </div>
 
-  <div class="navgroup">
-    <div class="navgroup-label">Operación</div>
-    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="navitem">
-      <span class="num">00</span> Dashboard Gerencial
+  <div class="mt-1.5">
+    <div class="text-[10px] uppercase tracking-[0.09em] text-muted px-2.5 pt-3.5 pb-1.5 font-mono">Operación</div>
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      [routerLinkActiveOptions]="{ exact: true }"
+      #rla00="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla00.isActive" [class.text-muted]="!rla00.isActive">00</span> Dashboard Gerencial
     </a>
-    <a routerLink="/dashboard/planificacion" routerLinkActive="active" class="navitem">
-      <span class="num">01</span> Planificación de Visitas
+    <a
+      routerLink="/dashboard/planificacion"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla01="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla01.isActive" [class.text-muted]="!rla01.isActive">01</span> Planificación de Visitas
     </a>
-    <a routerLink="/dashboard/visitas" routerLinkActive="active" class="navitem">
-      <span class="num">02</span> Gestión de Visitas
+    <a
+      routerLink="/dashboard/visitas"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla02="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla02.isActive" [class.text-muted]="!rla02.isActive">02</span> Gestión de Visitas
     </a>
-    <a routerLink="/dashboard/evidencia" routerLinkActive="active" class="navitem">
-      <span class="num">03</span> Evidencia Fotográfica
-    </a>
-  </div>
-
-  <div class="navgroup">
-    <div class="navgroup-label">Trade Marketing</div>
-    <a routerLink="/dashboard/auditoria" routerLinkActive="active" class="navitem">
-      <span class="num">04</span> Auditoría de Marca
-    </a>
-    <a routerLink="/dashboard/solicitudes" routerLinkActive="active" class="navitem">
-      <span class="num">05</span> Gestión de Publicidad
-    </a>
-    <a routerLink="/dashboard/pop" routerLinkActive="active" class="navitem">
-      <span class="num">06</span> Control Material POP
-    </a>
-    <a routerLink="/dashboard/mercado" routerLinkActive="active" class="navitem">
-      <span class="num">07</span> Inteligencia de Mercado
-    </a>
-  </div>
-
-  <div class="navgroup">
-    <div class="navgroup-label">Cobertura y control</div>
-    <a routerLink="/dashboard/geo" routerLinkActive="active" class="navitem">
-      <span class="num">08</span> Geolocalización
-    </a>
-    <a routerLink="/dashboard/kpis" routerLinkActive="active" class="navitem">
-      <span class="num">10</span> Indicadores KPI
-    </a>
-    <a routerLink="/dashboard/fase2" routerLinkActive="active" class="navitem">
-      <span class="num">11</span> Integración Comercial
+    <a
+      routerLink="/dashboard/evidencia"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla03="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla03.isActive" [class.text-muted]="!rla03.isActive">03</span> Evidencia Fotográfica
     </a>
   </div>
 
-  <div class="sidebar-foot">
-    <div class="userchip">
-      <div class="avatar">{{ iniciales() }}</div>
+  <div class="mt-1.5">
+    <div class="text-[10px] uppercase tracking-[0.09em] text-muted px-2.5 pt-3.5 pb-1.5 font-mono">Trade Marketing</div>
+    <a
+      routerLink="/dashboard/auditoria"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla04="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla04.isActive" [class.text-muted]="!rla04.isActive">04</span> Auditoría de Marca
+    </a>
+    <a
+      routerLink="/dashboard/solicitudes"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla05="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla05.isActive" [class.text-muted]="!rla05.isActive">05</span> Gestión de Publicidad
+    </a>
+    <a
+      routerLink="/dashboard/pop"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla06="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla06.isActive" [class.text-muted]="!rla06.isActive">06</span> Control Material POP
+    </a>
+    <a
+      routerLink="/dashboard/mercado"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla07="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla07.isActive" [class.text-muted]="!rla07.isActive">07</span> Inteligencia de Mercado
+    </a>
+  </div>
+
+  <div class="mt-1.5">
+    <div class="text-[10px] uppercase tracking-[0.09em] text-muted px-2.5 pt-3.5 pb-1.5 font-mono">Cobertura y control</div>
+    <a
+      routerLink="/dashboard/geo"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla08="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla08.isActive" [class.text-muted]="!rla08.isActive">08</span> Geolocalización
+    </a>
+    <a
+      routerLink="/dashboard/kpis"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla10="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla10.isActive" [class.text-muted]="!rla10.isActive">10</span> Indicadores KPI
+    </a>
+    <a
+      routerLink="/dashboard/fase2"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla11="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla11.isActive" [class.text-muted]="!rla11.isActive">11</span> Integración Comercial
+    </a>
+  </div>
+
+  <div class="mt-auto pt-3.5 px-2.5 pb-1 border-t border-line">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-full bg-panel-alt border border-line flex items-center justify-center text-[11px] font-semibold text-brand-dim shrink-0">
+        {{ iniciales() }}
+      </div>
       <div>
-        <p>{{ usuario()?.nombre }}</p>
-        <span>{{ usuario()?.rol }} · Vettal</span>
+        <p class="m-0 text-xs font-semibold">{{ usuario()?.nombre }}</p>
+        <span class="text-[10.5px] text-muted">{{ usuario()?.rol }} · Vettal</span>
       </div>
     </div>
-    <button type="button" class="signout" (click)="cerrarSesion()">Cerrar sesión</button>
+    <button
+      type="button"
+      class="mt-2.5 text-[11.5px] font-bold text-danger bg-transparent border-none cursor-pointer py-1.5 px-0.5 text-left"
+      (click)="cerrarSesion()"
+    >
+      Cerrar sesión
+    </button>
   </div>
 </aside>
 
-<main class="dash-main">
+<main class="flex-1 min-w-0 pt-[26px] px-[34px] pb-[60px] bg-app-bg text-ink">
   <router-outlet />
 </main>

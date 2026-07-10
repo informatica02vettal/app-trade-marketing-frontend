@@ -1,24 +1,24 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Indicadores KPI</h2>
-    <p class="sub">Cálculo automático a partir de la actividad registrada en el sistema.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Indicadores KPI</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Cálculo automático a partir de la actividad registrada en el sistema.</p>
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">Periodo — {{ kpis()?.fecha || '—' }}</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">Periodo — {{ kpis()?.fecha || '—' }}</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
-<div class="grid cols-3">
+<div class="grid gap-3.5 grid-cols-3 max-[1100px]:grid-cols-2">
   @for (f of filas(); track f.nombre) {
-    <div class="card kpi-card">
-      <p class="kpi-label">{{ f.nombre }}</p>
-      <div class="kpi-val">{{ f.valor }}</div>
-      <p style="margin: 6px 0 0; font-size: 11.5px; color: var(--muted)">{{ f.detalle }}</p>
+    <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+      <p class="text-[11.5px] text-muted uppercase tracking-[0.06em] font-mono">{{ f.nombre }}</p>
+      <div class="font-display text-[28px] font-bold mt-2">{{ f.valor }}</div>
+      <p class="text-[11.5px] text-muted mt-1.5">{{ f.detalle }}</p>
     </div>
   }
 </div>

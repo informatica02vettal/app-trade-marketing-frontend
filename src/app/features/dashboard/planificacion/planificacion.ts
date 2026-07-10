@@ -6,8 +6,10 @@ import { ClienteService } from '../../../core/services/cliente.service';
 import { PlanVisita, TipoVisita } from '../../../core/models/plan-visita.model';
 import { Usuario } from '../../../core/models/usuario.model';
 import { ClienteErp } from '../../../core/models/cliente.model';
+import { BADGE_BAD, BADGE_OK, BADGE_WARN } from '../../../shared/ui/dash/badge-classes';
+import { PILL, PILL_SELECTED } from '../../../shared/ui/dash/field-classes';
 
-const BADGE_CLASE: Record<string, string> = { EJECUTADA: 'ok', PENDIENTE: 'warn', REPROGRAMADA: 'bad' };
+const BADGE_CLASE: Record<string, string> = { EJECUTADA: BADGE_OK, PENDIENTE: BADGE_WARN, REPROGRAMADA: BADGE_BAD };
 
 type ModoBusquedaCliente = 'nombre' | 'id';
 
@@ -48,6 +50,10 @@ export class Planificacion implements OnInit {
 
   readonly badgeClase = BADGE_CLASE;
   readonly rangoSemana = rangoSemana();
+
+  claseModo(modo: ModoBusquedaCliente): string {
+    return modo === this.modoBusquedaCliente() ? `${PILL} ${PILL_SELECTED}` : PILL;
+  }
 
   readonly mercaderistas = signal<Usuario[]>([]);
   readonly plan = signal<PlanVisita[]>([]);

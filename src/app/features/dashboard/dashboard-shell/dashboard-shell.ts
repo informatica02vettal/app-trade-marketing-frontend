@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/auth/auth.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './dashboard-shell.html',
-  styleUrl: './dashboard-shell.css',
+  host: { class: 'flex min-h-dvh' },
 })
 export class DashboardShell {
   private readonly authService = inject(AuthService);

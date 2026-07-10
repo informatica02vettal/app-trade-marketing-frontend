@@ -2,15 +2,16 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SolicitudService } from '../../../core/services/solicitud.service';
 import { EstadoSolicitud, Solicitud } from '../../../core/models/solicitud.model';
+import { BADGE_BAD, BADGE_INFO, BADGE_NEUTRAL, BADGE_OK, BADGE_WARN } from '../../../shared/ui/dash/badge-classes';
 
 const ESTADOS: EstadoSolicitud[] = ['PENDIENTE_APROBACION', 'APROBADO', 'EN_PRODUCCION', 'INSTALADO', 'RECHAZADO'];
 
 const BADGE_CLASE: Record<EstadoSolicitud, string> = {
-  PENDIENTE_APROBACION: 'warn',
-  APROBADO: 'info',
-  EN_PRODUCCION: 'neutral',
-  INSTALADO: 'ok',
-  RECHAZADO: 'bad',
+  PENDIENTE_APROBACION: BADGE_WARN,
+  APROBADO: BADGE_INFO,
+  EN_PRODUCCION: BADGE_NEUTRAL,
+  INSTALADO: BADGE_OK,
+  RECHAZADO: BADGE_BAD,
 };
 
 const SIGUIENTE_ESTADO: Partial<Record<EstadoSolicitud, { estado: EstadoSolicitud; etiqueta: string }>> = {

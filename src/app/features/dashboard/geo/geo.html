@@ -1,44 +1,50 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Geolocalización</h2>
-    <p class="sub">Validación de presencia física, rutas realizadas y cobertura por zona.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Geolocalización</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Validación de presencia física, rutas realizadas y cobertura por zona.</p>
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">Cobertura por zona</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">Cobertura por zona</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
-<div class="two-col">
-  <div class="card">
-    <p class="panel-title">Mapa de cobertura (vista esquemática)</p>
-    <p class="panel-sub">
+<div class="grid gap-3.5 grid-cols-[1.4fr_1fr] max-[1100px]:grid-cols-1">
+  <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+    <p class="font-display text-[15px] font-semibold mb-0.5">Mapa de cobertura (vista esquemática)</p>
+    <p class="text-[11.5px] text-muted mb-3">
       Cada visita ya captura GPS real al hacer check-in; falta exponer esas coordenadas en un mapa real.
     </p>
-    <div class="map-mock"></div>
-    <div class="legend">
-      <span><i style="background: var(--teal)"></i> Cliente visitado</span>
-      <span><i style="background: var(--amber)"></i> Cliente pendiente</span>
+    <div
+      class="relative h-[280px] rounded-[10px] overflow-hidden border border-line bg-[radial-gradient(circle_at_20%_30%,rgba(36,169,225,0.06),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(88,89,91,0.05),transparent_40%),repeating-linear-gradient(0deg,#e8ebec_0,#e8ebec_1px,#f7f8f9_1px,#f7f8f9_34px),repeating-linear-gradient(90deg,#e8ebec_0,#e8ebec_1px,#f7f8f9_1px,#f7f8f9_34px)]"
+    ></div>
+    <div class="flex gap-3.5 mt-2.5 text-[11.5px] text-muted flex-wrap">
+      <span class="inline-flex items-center gap-1.5"><i class="w-2 h-2 rounded-full inline-block bg-teal"></i> Cliente visitado</span>
+      <span class="inline-flex items-center gap-1.5"><i class="w-2 h-2 rounded-full inline-block bg-amber"></i> Cliente pendiente</span>
     </div>
   </div>
-  <div class="card">
-    <p class="panel-title">Cobertura por zona</p>
+  <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+    <p class="font-display text-[15px] font-semibold mb-0.5">Cobertura por zona</p>
     @for (z of coberturaPorRegion(); track z.region) {
-      <div class="list-row">
-        <div class="lr-main">
-          <p>{{ z.region }}</p>
-          <span>{{ z.visitasEjecutadas }} de {{ z.visitasPlanificadas }} visitas cubiertas</span>
+      <div class="flex justify-between items-center py-2.5 border-b border-line last:border-b-0 gap-3">
+        <div>
+          <p class="m-0 text-[13px] font-semibold">{{ z.region }}</p>
+          <span class="text-[11px] text-muted">{{ z.visitasEjecutadas }} de {{ z.visitasPlanificadas }} visitas cubiertas</span>
         </div>
-        <div style="width: 90px">
-          <div class="progress-track"><div class="progress-fill" [style.width.%]="z.cumplimientoPct"></div></div>
+        <div class="w-[90px]">
+          <div class="h-1.5 rounded-md bg-panel-alt overflow-hidden border border-line">
+            <div class="h-full rounded-md bg-[linear-gradient(90deg,#5bc2ea,#24a9e1)]" [style.width.%]="z.cumplimientoPct"></div>
+          </div>
         </div>
       </div>
     } @empty {
-      <div class="empty"><b>Sin datos de cobertura</b>Todavía no hay visitas planificadas por región.</div>
+      <div class="py-[26px] px-2.5 text-center text-muted text-[12.5px]">
+        <b class="text-ink block font-display text-sm mb-1">Sin datos de cobertura</b>Todavía no hay visitas planificadas por región.
+      </div>
     }
   </div>
 </div>

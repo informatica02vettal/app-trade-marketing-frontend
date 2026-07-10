@@ -1,16 +1,24 @@
-<div class="topbar">
+<div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2>Inteligencia de Mercado</h2>
-    <p class="sub">Competencia, nuevos productos, precios y material publicitario detectados en campo.</p>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Inteligencia de Mercado</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Competencia, nuevos productos, precios y material publicitario detectados en campo.</p>
   </div>
-  <div class="topbar-actions">
-    <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event); cargar()">
+  <div class="flex gap-2 items-center">
+    <select
+      [ngModel]="filtroTipo()"
+      (ngModelChange)="filtroTipo.set($event); cargar()"
+      class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none"
+    >
       <option value="">Todos los tipos</option>
       @for (t of tipos; track t) {
         <option [value]="t">{{ t }}</option>
       }
     </select>
-    <select [ngModel]="filtroMarcaId()" (ngModelChange)="filtroMarcaId.set($event); cargar()">
+    <select
+      [ngModel]="filtroMarcaId()"
+      (ngModelChange)="filtroMarcaId.set($event); cargar()"
+      class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none"
+    >
       <option [ngValue]="null">Todas las marcas</option>
       @for (m of marcas(); track m.id) {
         <option [ngValue]="m.id">{{ m.nombre }}</option>
@@ -19,33 +27,35 @@
   </div>
 </div>
 
-<div class="route-divider">
-  <div class="dot"></div>
-  <div class="dash"></div>
-  <div class="label">Feed de campo</div>
-  <div class="dash"></div>
-  <div class="dot end"></div>
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">Feed de campo</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
 </div>
 
 @for (h of hallazgos(); track h.id) {
-  <div class="card" style="margin-bottom: 10px">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px">
+  <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)] mb-2.5">
+    <div class="flex justify-between items-start gap-2.5">
       <div>
-        <span class="badge info">{{ h.tipo }}</span>
-        <p style="margin: 9px 0 3px; font-size: 13.5px; font-weight: 600">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-semibold tracking-[0.02em] bg-teal/[0.16] text-brand-dim">{{ h.tipo }}</span>
+        <p class="text-[13.5px] font-semibold mt-[9px] mb-[3px]">
           {{ h.marcaNombre || 'Mercado' }}
           @if (h.marcaCompetencia) {
-            <span style="color: var(--muted); font-weight: 500">· competencia: {{ h.marcaCompetencia }}</span>
+            <span class="text-muted font-medium">· competencia: {{ h.marcaCompetencia }}</span>
           }
         </p>
-        <p style="margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5">
+        <p class="text-[12.5px] text-muted leading-[1.5] m-0">
           {{ h.detalle || h.observacionTexto || (h.productos.length + ' producto(s) registrado(s)') }}
         </p>
       </div>
-      <span class="mono" style="white-space: nowrap">{{ h.createdAt | date: 'short' }}</span>
+      <span class="font-mono text-[11.5px] text-muted whitespace-nowrap">{{ h.createdAt | date: 'short' }}</span>
     </div>
-    <p style="margin: 10px 0 0; font-size: 11px; color: var(--muted)">Reportado por {{ h.usuarioNombre }}</p>
+    <p class="text-[11px] text-muted mt-2.5">Reportado por {{ h.usuarioNombre }}</p>
   </div>
 } @empty {
-  <div class="empty"><b>Sin hallazgos registrados</b>Todavía no hay inteligencia de mercado para este filtro.</div>
+  <div class="py-[26px] px-2.5 text-center text-muted text-[12.5px]">
+    <b class="text-ink block font-display text-sm mb-1">Sin hallazgos registrados</b>Todavía no hay inteligencia de mercado para este filtro.
+  </div>
 }
