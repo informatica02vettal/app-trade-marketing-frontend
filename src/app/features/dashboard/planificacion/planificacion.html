@@ -4,7 +4,7 @@
     <p class="sub">Planes semanales, mensuales y trimestrales por mercaderista y cliente.</p>
   </div>
   <div class="topbar-actions">
-    <button class="btn primary small" (click)="mostrarFormulario.set(!mostrarFormulario())">
+    <button class="btn primary small" (click)="abrirModal()">
       + Nueva visita planificada
     </button>
   </div>
@@ -18,54 +18,84 @@
   <div class="dot end"></div>
 </div>
 
-@if (mostrarFormulario()) {
-  <div class="card" style="margin-bottom: 14px">
-    <p class="panel-title">Nueva visita planificada</p>
-    <div class="form-grid">
-      <div class="field">
-        <label>Cliente</label>
-        <input [(ngModel)]="nuevo.clienteNombre" placeholder="Nombre del cliente" />
+@if (mostrarModal()) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="topbar">
+        <div>
+          <p class="panel-title">Nueva visita planificada</p>
+        </div>
+        <button type="button" class="modal-close" (click)="cerrarModal()">×</button>
       </div>
-      <div class="field">
-        <label>ID cliente ERP</label>
-        <input [(ngModel)]="nuevo.erpClienteId" placeholder="Opcional" />
-      </div>
-      <div class="field">
-        <label>Mercaderista</label>
-        <select [(ngModel)]="nuevo.usuarioId">
-          <option [ngValue]="null">Sin asignar</option>
-          @for (m of mercaderistas(); track m.id) {
-            <option [ngValue]="m.id">{{ m.nombre }}</option>
+
+      <div class="form-grid">
+        <div class="field full">
+          <label>Cliente</label>
+          <div class="autocomplete">
+            <input
+              [ngModel]="nuevo.clienteNombre"
+              (ngModelChange)="onClienteNombreChange($event)"
+              placeholder="Buscar cliente en el ERP…"
+              autocomplete="off"
+            />
+            @if (resultadosCliente().length) {
+              <div class="autocomplete-results">
+                @for (c of resultadosCliente(); track c.id) {
+                  <button type="button" (click)="seleccionarCliente(c)">{{ c.nombre }}</button>
+                }
+              </div>
+            }
+          </div>
+          @if (clienteSeleccionado(); as c) {
+            <p style="margin: 4px 0 0; font-size: 11px; color: var(--green)">✓ Vinculado al ERP · id {{ c.id }}</p>
+          } @else if (buscandoCliente()) {
+            <p style="margin: 4px 0 0; font-size: 11px; color: var(--muted)">Buscando en el ERP…</p>
+          } @else if (nuevo.clienteNombre) {
+            <p style="margin: 4px 0 0; font-size: 11px; color: var(--muted)">Sin vincular al ERP (cliente nuevo o sin coincidencias)</p>
           }
-        </select>
+        </div>
+
+        <div class="field">
+          <label>Mercaderista</label>
+          <select [(ngModel)]="nuevo.usuarioId">
+            <option [ngValue]="null">Sin asignar</option>
+            @for (m of mercaderistas(); track m.id) {
+              <option [ngValue]="m.id">{{ m.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label>Región</label>
+          <input [(ngModel)]="nuevo.region" placeholder="Región" />
+        </div>
+        <div class="field">
+          <label>Fecha</label>
+          <input type="date" [(ngModel)]="nuevo.fechaProgramada" />
+        </div>
+        <div class="field">
+          <label>Hora</label>
+          <input type="time" [(ngModel)]="nuevo.horaProgramada" />
+        </div>
+        <div class="field full">
+          <label>Objetivo de la visita</label>
+          <input [(ngModel)]="nuevo.objetivo" placeholder="Reposición POP, auditoría de anaquel…" />
+        </div>
+        <div class="field">
+          <label>Tipo</label>
+          <select [(ngModel)]="nuevo.tipoVisita">
+            <option value="PLANIFICADA">Planificada</option>
+            <option value="NO_PLANIFICADA">No planificada</option>
+          </select>
+        </div>
       </div>
-      <div class="field">
-        <label>Región</label>
-        <input [(ngModel)]="nuevo.region" placeholder="Región" />
-      </div>
-      <div class="field">
-        <label>Fecha</label>
-        <input type="date" [(ngModel)]="nuevo.fechaProgramada" />
-      </div>
-      <div class="field">
-        <label>Hora</label>
-        <input type="time" [(ngModel)]="nuevo.horaProgramada" />
-      </div>
-      <div class="field full">
-        <label>Objetivo de la visita</label>
-        <input [(ngModel)]="nuevo.objetivo" placeholder="Reposición POP, auditoría de anaquel…" />
-      </div>
-      <div class="field">
-        <label>Tipo</label>
-        <select [(ngModel)]="nuevo.tipoVisita">
-          <option value="PLANIFICADA">Planificada</option>
-          <option value="NO_PLANIFICADA">No planificada</option>
-        </select>
+
+      <div style="display: flex; gap: 8px; margin-top: 16px">
+        <button class="btn primary small" (click)="crear()" [disabled]="guardando() || !nuevo.clienteNombre || !nuevo.fechaProgramada">
+          Crear
+        </button>
+        <button class="btn small" (click)="cerrarModal()">Cancelar</button>
       </div>
     </div>
-    <button class="btn primary small" style="margin-top: 12px" (click)="crear()" [disabled]="guardando()">
-      Crear
-    </button>
   </div>
 }
 
