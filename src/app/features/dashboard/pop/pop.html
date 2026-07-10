@@ -1,27 +1,47 @@
-<div class="p-6">
-  <h1 class="font-display text-xl font-bold mb-4">Control de material POP</h1>
-
-  <div class="flex flex-col gap-3">
-    @for (i of instalaciones(); track i.id) {
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <div class="flex justify-between items-start mb-2">
-          <div>
-            <p class="font-display font-bold">{{ i.marcaNombre }} · {{ i.categoria }}</p>
-            <p class="text-muted text-[12px]">{{ i.usuarioNombre }} · {{ i.fechaInstalacion }}</p>
-          </div>
-          <span class="rounded-full bg-success-tint text-success text-[11px] font-bold px-2.5 py-1">{{ i.estado }}</span>
-        </div>
-        <ul class="text-[13px]">
-          @for (item of i.items; track item.id) {
-            <li class="border-t border-line py-1.5">{{ item.materialNombre }}</li>
-          }
-        </ul>
-        @if (i.observaciones) {
-          <p class="text-[12.5px] text-muted mt-2">{{ i.observaciones }}</p>
-        }
-      </div>
-    } @empty {
-      <p class="text-muted text-[13px]">Aún no hay material POP instalado registrado.</p>
-    }
+<div class="topbar">
+  <div>
+    <h2>Control de Material POP</h2>
+    <p class="sub">Qué material tiene cada marca, su estado, fecha de instalación y evidencia registrada.</p>
   </div>
+</div>
+
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Inventario instalado</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Marca</th>
+        <th>Material</th>
+        <th>Instalado por</th>
+        <th>Instalación</th>
+        <th>Estado</th>
+        <th>Evidencia</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (f of filas(); track $index) {
+        <tr>
+          <td>{{ f.marcaNombre }}</td>
+          <td>{{ f.materialNombre }}</td>
+          <td>{{ f.usuarioNombre }}</td>
+          <td class="mono">{{ f.fechaInstalacion || '—' }}</td>
+          <td><span class="badge ok">{{ f.estado }}</span></td>
+          <td class="mono">{{ f.fotos }} 📷</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6">
+            <div class="empty"><b>Sin material instalado</b>Aún no hay material POP registrado.</div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
 </div>

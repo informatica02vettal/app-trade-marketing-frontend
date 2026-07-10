@@ -1,14 +1,44 @@
-<div class="p-6">
-  <h1 class="font-display text-xl font-bold mb-1">Geolocalización</h1>
-  <p class="text-muted text-[13px] mb-4 max-w-xl">
-    Validación de presencia física, rutas realizadas y cobertura por zona.
-  </p>
+<div class="topbar">
+  <div>
+    <h2>Geolocalización</h2>
+    <p class="sub">Validación de presencia física, rutas realizadas y cobertura por zona.</p>
+  </div>
+</div>
 
-  <div class="bg-panel border border-line rounded-2xl p-6 text-center max-w-lg">
-    <p class="font-display font-bold mb-2">Mapa de cobertura — próximamente</p>
-    <p class="text-muted text-[13px]">
-      Cada visita ya captura GPS real al hacer check-in. Falta exponer esas coordenadas en un mapa de cobertura por
-      zona.
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Cobertura por zona</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <p class="panel-title">Mapa de cobertura (vista esquemática)</p>
+    <p class="panel-sub">
+      Cada visita ya captura GPS real al hacer check-in; falta exponer esas coordenadas en un mapa real.
     </p>
+    <div class="map-mock"></div>
+    <div class="legend">
+      <span><i style="background: var(--teal)"></i> Cliente visitado</span>
+      <span><i style="background: var(--amber)"></i> Cliente pendiente</span>
+    </div>
+  </div>
+  <div class="card">
+    <p class="panel-title">Cobertura por zona</p>
+    @for (z of coberturaPorRegion(); track z.region) {
+      <div class="list-row">
+        <div class="lr-main">
+          <p>{{ z.region }}</p>
+          <span>{{ z.visitasEjecutadas }} de {{ z.visitasPlanificadas }} visitas cubiertas</span>
+        </div>
+        <div style="width: 90px">
+          <div class="progress-track"><div class="progress-fill" [style.width.%]="z.cumplimientoPct"></div></div>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty"><b>Sin datos de cobertura</b>Todavía no hay visitas planificadas por región.</div>
+    }
   </div>
 </div>

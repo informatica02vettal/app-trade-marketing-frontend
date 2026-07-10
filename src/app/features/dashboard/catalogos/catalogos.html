@@ -1,44 +1,57 @@
-<div class="p-6">
-  <h1 class="font-display text-xl font-bold mb-4">Catálogos</h1>
-
-  <div class="flex gap-2 mb-5 flex-wrap">
-    @for (m of marcas(); track m.id) {
-      <button
-        type="button"
-        (click)="seleccionar(m)"
-        class="rounded-full border px-3 py-1.5 text-[12.5px] font-bold"
-        [class.bg-brand]="marcaSeleccionada()?.id === m.id"
-        [class.text-white]="marcaSeleccionada()?.id === m.id"
-        [class.border-brand]="marcaSeleccionada()?.id === m.id"
-        [class.border-line]="marcaSeleccionada()?.id !== m.id"
-      >
-        {{ m.nombre }}
-      </button>
-    }
+<div class="topbar">
+  <div>
+    <h2>Catálogos</h2>
+    <p class="sub">Marcas propias, competencia y materiales de Trade Marketing / Publicidad disponibles por marca.</p>
   </div>
+</div>
 
-  @if (marcaSeleccionada(); as marca) {
-    <div class="grid md:grid-cols-2 gap-4">
-      <section class="bg-panel border border-line rounded-2xl p-4">
-        <h2 class="font-display font-bold mb-2">Competencia de {{ marca.nombre }}</h2>
-        <div class="flex flex-wrap gap-2">
-          @for (c of competencia(); track c.id) {
-            <span class="rounded-full bg-panel-alt text-[12px] px-2.5 py-1">{{ c.nombre }}</span>
-          }
-        </div>
-      </section>
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Marcas propias</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
 
-      <section class="bg-panel border border-line rounded-2xl p-4">
-        <h2 class="font-display font-bold mb-2">Materiales disponibles</h2>
-        <ul class="text-[13px]">
-          @for (mat of materiales(); track mat.id) {
-            <li class="border-t border-line py-1.5 flex justify-between">
-              <span>{{ mat.nombre }}</span>
-              <span class="text-muted text-[11px] font-mono">{{ mat.categoriaNombre }} · {{ mat.minimoFotos }} foto(s)</span>
-            </li>
-          }
-        </ul>
-      </section>
-    </div>
+<div class="pill-row" style="margin-bottom: 16px">
+  @for (m of marcas(); track m.id) {
+    <div class="pill" [class.selected]="marcaSeleccionada()?.id === m.id" (click)="seleccionar(m)">{{ m.nombre }}</div>
   }
 </div>
+
+@if (marcaSeleccionada(); as marca) {
+  <div class="two-col">
+    <div class="card">
+      <p class="panel-title">Competencia de {{ marca.nombre }}</p>
+      <p class="panel-sub">Catálogo usado en el flujo de Visita para esta marca</p>
+      <div class="pill-row">
+        @for (c of competencia(); track c.id) {
+          <div class="pill">{{ c.nombre }}</div>
+        }
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="panel-title">Materiales disponibles</p>
+      <p class="panel-sub">Filtrados por marca — foto obligatoria según catálogo</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Material</th>
+            <th>Categoría</th>
+            <th>Fotos</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (mat of materiales(); track mat.id) {
+            <tr>
+              <td>{{ mat.nombre }}</td>
+              <td class="mono">{{ mat.categoriaNombre }}</td>
+              <td class="mono">{{ mat.minimoFotos }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

@@ -1,57 +1,59 @@
-<div class="p-6">
-  <h1 class="font-display text-xl font-bold mb-4">Solicitudes de Publicidad / Trade-Marketing</h1>
-
-  <select [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event); cargar()" class="rounded-lg border border-line px-3 py-2 text-[13px] mb-4">
-    <option value="">Todos los estados</option>
-    @for (e of estados; track e) {
-      <option [value]="e">{{ e }}</option>
-    }
-  </select>
-
-  <div class="flex flex-col gap-3">
-    @for (s of solicitudes(); track s.id) {
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <div class="flex justify-between items-start mb-2">
-          <div>
-            <p class="font-display font-bold">{{ s.marcaNombre }} · {{ s.categoria }}</p>
-            <p class="text-muted text-[12px]">{{ s.solicitanteNombre }} · {{ s.createdAt | date: 'short' }}</p>
-          </div>
-          <span class="rounded-full bg-panel-alt text-[11px] font-bold px-2.5 py-1">{{ s.estado }}</span>
-        </div>
-
-        <ul class="text-[13px] mb-3">
-          @for (item of s.items; track item.id) {
-            <li class="border-t border-line py-1.5">
-              {{ item.materialNombre }}
-              @if (item.medidas) {
-                · {{ item.medidas }}
-              }
-              @if (item.ubicacion) {
-                · {{ item.ubicacion }}
-              }
-            </li>
-          }
-        </ul>
-
-        @if (s.observaciones) {
-          <p class="text-[12.5px] text-muted mb-2">{{ s.observaciones }}</p>
-        }
-
-        <div class="flex gap-2 flex-wrap">
-          @for (estado of estados; track estado) {
-            @if (estado !== s.estado) {
-              <button
-                type="button"
-                (click)="cambiarEstado(s, estado)"
-                [disabled]="actualizando() === s.id"
-                class="rounded-lg border border-line text-[12px] px-2.5 py-1.5 disabled:opacity-50"
-              >
-                {{ estado }}
-              </button>
-            }
-          }
-        </div>
-      </div>
-    }
+<div class="topbar">
+  <div>
+    <h2>Gestión de Publicidad</h2>
+    <p class="sub">Solicitudes de avisos, exhibidores y material POP con foto, medidas y ubicación — aprobación de Mercadeo.</p>
   </div>
+  <div class="topbar-actions">
+    <select [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event); cargar()">
+      <option value="">Todos los estados</option>
+      @for (e of estados; track e) {
+        <option [value]="e">{{ e }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Cola de aprobación — Mercadeo</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Marca</th>
+        <th>Materiales</th>
+        <th>Medidas</th>
+        <th>Ubicación</th>
+        <th>Solicitado por</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (s of solicitudes(); track s.id) {
+        <tr>
+          <td>{{ s.marcaNombre }} <span class="mono">· {{ s.categoria }}</span></td>
+          <td>{{ materiales(s) }}</td>
+          <td class="mono">{{ s.items[0]?.medidas || '—' }}</td>
+          <td>{{ s.items[0]?.ubicacion || '—' }}</td>
+          <td>{{ s.solicitanteNombre }}</td>
+          <td><span class="badge {{ badgeClase[s.estado] }}">{{ s.estado }}</span></td>
+          <td>
+            @if (siguienteEstado[s.estado]; as siguiente) {
+              <button class="btn small" [disabled]="actualizando() === s.id" (click)="avanzarEstado(s)">
+                {{ siguiente.etiqueta }}
+              </button>
+            } @else {
+              <span class="mono">—</span>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
 </div>

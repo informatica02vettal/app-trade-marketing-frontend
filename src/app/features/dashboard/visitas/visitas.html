@@ -1,44 +1,47 @@
-<div class="p-6">
-  <h1 class="font-display text-xl font-bold mb-4">Gestión de visitas</h1>
-
-  <div class="bg-panel border border-line rounded-2xl overflow-hidden">
-    <table class="w-full text-[13px]">
-      <thead class="bg-panel-alt text-muted text-[11px] uppercase">
-        <tr>
-          <th class="text-left px-3 py-2">Cliente</th>
-          <th class="text-left px-3 py-2">Mercaderista</th>
-          <th class="text-left px-3 py-2">Región</th>
-          <th class="text-left px-3 py-2">Check-in</th>
-          <th class="text-left px-3 py-2">Check-out</th>
-          <th class="text-left px-3 py-2">Permanencia</th>
-          <th class="text-left px-3 py-2">Fotos</th>
-          <th class="text-left px-3 py-2">Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (v of visitas(); track v.id) {
-          <tr class="border-t border-line">
-            <td class="px-3 py-2">{{ v.clienteNombre }}</td>
-            <td class="px-3 py-2">{{ v.usuarioNombre }}</td>
-            <td class="px-3 py-2">{{ v.region }}</td>
-            <td class="px-3 py-2 font-mono text-[12px]">{{ v.checkinAt | date: 'short' }}</td>
-            <td class="px-3 py-2 font-mono text-[12px]">{{ v.checkoutAt ? (v.checkoutAt | date: 'short') : '—' }}</td>
-            <td class="px-3 py-2 font-mono text-[12px]">{{ v.permanenciaMin ?? '—' }} min</td>
-            <td class="px-3 py-2 font-mono text-[12px]">{{ v.cantidadFotos }}</td>
-            <td class="px-3 py-2">
-              <span
-                class="rounded-full text-[11px] font-bold px-2.5 py-1"
-                [class.bg-success-tint]="v.estado === 'COMPLETADA'"
-                [class.text-success]="v.estado === 'COMPLETADA'"
-                [class.bg-amber-tint]="v.estado === 'EN_CURSO'"
-                [class.text-amber]="v.estado === 'EN_CURSO'"
-              >
-                {{ v.estado }}
-              </span>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+<div class="topbar">
+  <div>
+    <h2>Gestión de Visitas</h2>
+    <p class="sub">Registro de campo: horarios, GPS, permanencia, hallazgos y evidencia por visita.</p>
   </div>
+</div>
+
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Bitácora de visitas</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Mercaderista</th>
+        <th>Ejecutivo ventas</th>
+        <th>Región</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Permanencia</th>
+        <th>Fotos</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (v of visitas(); track v.id) {
+        <tr>
+          <td>{{ v.clienteNombre }}</td>
+          <td>{{ v.usuarioNombre }}</td>
+          <td class="mono">{{ v.ejecutivoVentas }}</td>
+          <td class="mono">{{ v.region }}</td>
+          <td class="mono">{{ v.checkinAt | date: 'short' }}</td>
+          <td class="mono">{{ v.checkoutAt ? (v.checkoutAt | date: 'short') : '—' }}</td>
+          <td class="mono">{{ v.permanenciaMin != null ? v.permanenciaMin + ' min' : '—' }}</td>
+          <td class="mono">{{ v.cantidadFotos }} 📷</td>
+          <td><span class="badge {{ badgeClase[v.estado] || 'neutral' }}">{{ v.estado }}</span></td>
+        </tr>
+      }
+    </tbody>
+  </table>
 </div>

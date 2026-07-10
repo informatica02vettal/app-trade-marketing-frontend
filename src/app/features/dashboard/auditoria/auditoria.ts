@@ -5,6 +5,9 @@ import { VisitaService } from '../../../core/services/visita.service';
 import { AuditoriaMarca } from '../../../core/models/auditoria.model';
 import { Visita } from '../../../core/models/visita.model';
 
+const BADGE_EXHIBIDOR: Record<string, string> = { OPTIMO: 'ok', REGULAR: 'warn', DETERIORADO: 'bad', NO_APLICA: 'neutral' };
+const BADGE_POP: Record<string, string> = { OPTIMO: 'ok', REGULAR: 'warn', FALTANTE: 'bad' };
+
 @Component({
   selector: 'app-auditoria',
   standalone: true,
@@ -14,6 +17,9 @@ import { Visita } from '../../../core/models/visita.model';
 export class Auditoria implements OnInit {
   private readonly auditoriaService = inject(AuditoriaService);
   private readonly visitaService = inject(VisitaService);
+
+  readonly badgeExhibidor = BADGE_EXHIBIDOR;
+  readonly badgePop = BADGE_POP;
 
   readonly visitas = signal<Visita[]>([]);
   readonly visitaId = signal<number | null>(null);

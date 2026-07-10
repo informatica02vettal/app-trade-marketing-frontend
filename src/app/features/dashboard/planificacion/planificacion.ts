@@ -1,9 +1,22 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PlanVisitaService } from '../../../core/services/plan-visita.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { PlanVisita, TipoVisita } from '../../../core/models/plan-visita.model';
 import { Usuario } from '../../../core/models/usuario.model';
+
+const BADGE_CLASE: Record<string, string> = { EJECUTADA: 'ok', PENDIENTE: 'warn', REPROGRAMADA: 'bad' };
+
+function rangoSemana(): string {
+  const hoy = new Date();
+  const lunes = new Date(hoy);
+  const dia = (hoy.getDay() + 6) % 7;
+  lunes.setDate(hoy.getDate() - dia);
+  const domingo = new Date(lunes);
+  domingo.setDate(lunes.getDate() + 6);
+  const fmt = new Intl.DateTimeFormat('es-VE', { day: '2-digit', month: 'short' });
+  return `Semana del ${fmt.format(lunes)} — ${fmt.format(domingo)}`;
+}
 
 @Component({
   selector: 'app-planificacion',
@@ -15,11 +28,19 @@ export class Planificacion implements OnInit {
   private readonly planVisitaService = inject(PlanVisitaService);
   private readonly usuarioService = inject(UsuarioService);
 
+  readonly badgeClase = BADGE_CLASE;
+  readonly rangoSemana = rangoSemana();
+
   readonly mercaderistas = signal<Usuario[]>([]);
   readonly plan = signal<PlanVisita[]>([]);
   readonly filtroUsuarioId = signal<number | null>(null);
   readonly filtroFecha = signal<string>('');
   readonly guardando = signal(false);
+  readonly mostrarFormulario = signal(false);
+
+  readonly ejecutadas = computed(() => this.plan().filter((p) => p.estado === 'EJECUTADA').length);
+  readonly pendientes = computed(() => this.plan().filter((p) => p.estado === 'PENDIENTE').length);
+  readonly reprogramadas = computed(() => this.plan().filter((p) => p.estado === 'REPROGRAMADA').length);
 
   nuevo = {
     clienteNombre: '',
@@ -61,6 +82,7 @@ export class Planificacion implements OnInit {
       .subscribe({
         next: () => {
           this.guardando.set(false);
+          this.mostrarFormulario.set(false);
           this.nuevo = {
             clienteNombre: '',
             erpClienteId: '',
@@ -75,5 +97,9 @@ export class Planificacion implements OnInit {
         },
         error: () => this.guardando.set(false),
       });
+  }
+
+  marcarEjecutada(p: PlanVisita): void {
+    this.planVisitaService.cambiarEstado(p.id, 'EJECUTADA').subscribe(() => this.cargarPlan());
   }
 }

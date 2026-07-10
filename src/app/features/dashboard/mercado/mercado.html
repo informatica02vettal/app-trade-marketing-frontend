@@ -1,41 +1,51 @@
-<div class="p-6">
-  <h1 class="font-display text-xl font-bold mb-4">Inteligencia de mercado</h1>
-
-  <div class="flex gap-2 mb-4">
-    <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event); cargar()" class="rounded-lg border border-line px-3 py-2 text-[13px]">
+<div class="topbar">
+  <div>
+    <h2>Inteligencia de Mercado</h2>
+    <p class="sub">Competencia, nuevos productos, precios y material publicitario detectados en campo.</p>
+  </div>
+  <div class="topbar-actions">
+    <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event); cargar()">
       <option value="">Todos los tipos</option>
       @for (t of tipos; track t) {
         <option [value]="t">{{ t }}</option>
       }
     </select>
-    <select [ngModel]="filtroMarcaId()" (ngModelChange)="filtroMarcaId.set($event); cargar()" class="rounded-lg border border-line px-3 py-2 text-[13px]">
+    <select [ngModel]="filtroMarcaId()" (ngModelChange)="filtroMarcaId.set($event); cargar()">
       <option [ngValue]="null">Todas las marcas</option>
       @for (m of marcas(); track m.id) {
         <option [ngValue]="m.id">{{ m.nombre }}</option>
       }
     </select>
   </div>
-
-  <div class="bg-panel border border-line rounded-2xl overflow-hidden">
-    <table class="w-full text-[13px]">
-      <thead class="bg-panel-alt text-muted text-[11px] uppercase">
-        <tr>
-          <th class="text-left px-3 py-2">Tipo</th>
-          <th class="text-left px-3 py-2">Marca</th>
-          <th class="text-left px-3 py-2">Mercaderista</th>
-          <th class="text-left px-3 py-2">Detalle</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (h of hallazgos(); track h.id) {
-          <tr class="border-t border-line">
-            <td class="px-3 py-2">{{ h.tipo }}</td>
-            <td class="px-3 py-2">{{ h.marcaNombre || '—' }}</td>
-            <td class="px-3 py-2">{{ h.usuarioNombre }}</td>
-            <td class="px-3 py-2">{{ h.observacionTexto || h.detalle || (h.productos.length + ' producto(s)') }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
 </div>
+
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Feed de campo</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+@for (h of hallazgos(); track h.id) {
+  <div class="card" style="margin-bottom: 10px">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px">
+      <div>
+        <span class="badge info">{{ h.tipo }}</span>
+        <p style="margin: 9px 0 3px; font-size: 13.5px; font-weight: 600">
+          {{ h.marcaNombre || 'Mercado' }}
+          @if (h.marcaCompetencia) {
+            <span style="color: var(--muted); font-weight: 500">· competencia: {{ h.marcaCompetencia }}</span>
+          }
+        </p>
+        <p style="margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5">
+          {{ h.detalle || h.observacionTexto || (h.productos.length + ' producto(s) registrado(s)') }}
+        </p>
+      </div>
+      <span class="mono" style="white-space: nowrap">{{ h.createdAt | date: 'short' }}</span>
+    </div>
+    <p style="margin: 10px 0 0; font-size: 11px; color: var(--muted)">Reportado por {{ h.usuarioNombre }}</p>
+  </div>
+} @empty {
+  <div class="empty"><b>Sin hallazgos registrados</b>Todavía no hay inteligencia de mercado para este filtro.</div>
+}

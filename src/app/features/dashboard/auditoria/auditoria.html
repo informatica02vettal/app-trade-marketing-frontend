@@ -1,44 +1,64 @@
-<div class="p-6">
-  <h1 class="font-display text-xl font-bold mb-4">Auditoría de marca</h1>
+<div class="topbar">
+  <div>
+    <h2>Auditoría de Marca</h2>
+    <p class="sub">Presencia de marca, participación de anaquel, estado de exhibidores y POP, y oportunidades detectadas.</p>
+  </div>
+</div>
 
-  <select
-    [ngModel]="visitaId()"
-    (ngModelChange)="onVisitaSeleccionada($event)"
-    class="rounded-lg border border-line px-3 py-2 text-[13px] mb-4"
-  >
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Resultados por visita</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+<div class="field" style="max-width: 340px; margin-bottom: 14px">
+  <label>Visita</label>
+  <select [ngModel]="visitaId()" (ngModelChange)="onVisitaSeleccionada($event)">
     <option [ngValue]="null">Selecciona una visita…</option>
     @for (v of visitas(); track v.id) {
       <option [ngValue]="v.id">{{ v.clienteNombre }} · {{ v.usuarioNombre }}</option>
     }
   </select>
+</div>
 
-  @if (visitaId() && !auditorias().length) {
-    <p class="text-muted text-[13px]">Esta visita todavía no tiene marcas auditadas.</p>
-  }
+@if (visitaId() && !auditorias().length) {
+  <div class="empty"><b>Sin marcas auditadas</b>Esta visita todavía no tiene marcas auditadas.</div>
+}
 
-  <div class="grid md:grid-cols-2 gap-4">
-    @for (a of auditorias(); track a.id) {
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <p class="font-display font-bold mb-2">{{ a.marcaNombre }}</p>
-        <div class="flex justify-between text-[12.5px] py-1 border-b border-line">
-          <span class="text-muted">Presencia de marca</span>
-          <span class="font-mono font-bold">{{ a.presenciaPct }}%</span>
-        </div>
-        <div class="flex justify-between text-[12.5px] py-1 border-b border-line">
-          <span class="text-muted">Participación de anaquel</span>
-          <span class="font-mono font-bold">{{ a.anaquelPct }}%</span>
-        </div>
-        <div class="flex gap-2 mt-2 flex-wrap">
-          <span class="rounded-full bg-panel-alt text-[11px] px-2.5 py-1">Exhibidor: {{ a.estadoExhibidores }}</span>
-          <span class="rounded-full bg-panel-alt text-[11px] px-2.5 py-1">POP: {{ a.estadoPop }}</span>
-        </div>
-        @if (a.competenciaDetectada) {
-          <p class="text-[12px] text-muted mt-2">Competencia: {{ a.competenciaDetectada }}</p>
-        }
-        @if (a.oportunidad) {
-          <p class="text-[12px] text-brand-dim mt-1">Oportunidad: {{ a.oportunidad }}</p>
-        }
+<div class="grid cols-3">
+  @for (a of auditorias(); track a.id) {
+    <div class="card">
+      <p class="panel-title">{{ a.marcaNombre }}</p>
+
+      <div style="display: flex; justify-content: space-between; margin: 10px 0 4px">
+        <span class="mono">Presencia de marca</span><span class="mono">{{ a.presenciaPct }}%</span>
       </div>
-    }
-  </div>
+      <div class="progress-track"><div class="progress-fill" [style.width.%]="a.presenciaPct"></div></div>
+
+      <div style="display: flex; justify-content: space-between; margin: 12px 0 4px">
+        <span class="mono">Participación de anaquel</span><span class="mono">{{ a.anaquelPct }}%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="a.anaquelPct" style="background: linear-gradient(90deg, #e0a233, #24a9e1)"></div>
+      </div>
+
+      <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px">
+        <span class="badge {{ badgeExhibidor[a.estadoExhibidores] }}">Exhibidor: {{ a.estadoExhibidores }}</span>
+        <span class="badge {{ badgePop[a.estadoPop] }}">POP: {{ a.estadoPop }}</span>
+      </div>
+
+      @if (a.competenciaDetectada) {
+        <p style="margin: 12px 0 0; font-size: 11.5px; color: var(--muted)">
+          Competencia: <span style="color: var(--text)">{{ a.competenciaDetectada }}</span>
+        </p>
+      }
+      @if (a.oportunidad) {
+        <p style="margin: 6px 0 0; font-size: 11.5px; color: var(--muted)">
+          Oportunidad: <span style="color: var(--orange)">{{ a.oportunidad }}</span>
+        </p>
+      }
+    </div>
+  }
 </div>

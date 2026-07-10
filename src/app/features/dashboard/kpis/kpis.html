@@ -1,54 +1,104 @@
-<div class="min-h-dvh bg-app-bg p-6">
-  <h1 class="font-display text-2xl font-bold mb-4">Dashboard gerencial</h1>
-
-  @if (kpis(); as k) {
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <p class="text-muted text-[11px] font-mono uppercase">Cumplimiento de visitas</p>
-        <p class="font-display text-2xl font-bold">{{ k.cumplimientoVisitasPct | number: '1.0-1' }}%</p>
-        <p class="text-muted text-[12px]">{{ k.visitasEjecutadas }} / {{ k.visitasPlanificadas }}</p>
-      </div>
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <p class="text-muted text-[11px] font-mono uppercase">Clientes atendidos</p>
-        <p class="font-display text-2xl font-bold">{{ k.clientesAtendidos }}</p>
-      </div>
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <p class="text-muted text-[11px] font-mono uppercase">Presencia de marca</p>
-        <p class="font-display text-2xl font-bold">{{ k.presenciaMarcaPct | number: '1.0-1' }}%</p>
-      </div>
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <p class="text-muted text-[11px] font-mono uppercase">Participación de anaquel</p>
-        <p class="font-display text-2xl font-bold">{{ k.participacionAnaquelPct | number: '1.0-1' }}%</p>
-      </div>
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <p class="text-muted text-[11px] font-mono uppercase">Oportunidades detectadas</p>
-        <p class="font-display text-2xl font-bold">{{ k.oportunidadesDetectadas }}</p>
-      </div>
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <p class="text-muted text-[11px] font-mono uppercase">Solicitudes generadas</p>
-        <p class="font-display text-2xl font-bold">{{ k.solicitudesGeneradas }}</p>
-      </div>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-4 mt-6">
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <h2 class="font-display font-bold mb-2">Cobertura por región</h2>
-        @for (r of k.coberturaPorRegion; track r.region) {
-          <div class="flex justify-between text-[13px] py-1 border-b border-line last:border-0">
-            <span>{{ r.region }}</span>
-            <span class="font-mono">{{ r.visitasEjecutadas }}/{{ r.visitasPlanificadas }} ({{ r.cumplimientoPct | number: '1.0-0' }}%)</span>
-          </div>
-        }
-      </div>
-      <div class="bg-panel border border-line rounded-2xl p-4">
-        <h2 class="font-display font-bold mb-2">Cumplimiento por mercaderista</h2>
-        @for (m of k.cumplimientoPorMercaderista; track m.usuarioId) {
-          <div class="flex justify-between text-[13px] py-1 border-b border-line last:border-0">
-            <span>{{ m.usuarioNombre }}</span>
-            <span class="font-mono">{{ m.visitasEjecutadas }}/{{ m.visitasPlanificadas }} ({{ m.cumplimientoPct | number: '1.0-0' }}%)</span>
-          </div>
-        }
-      </div>
-    </div>
-  }
+<div class="topbar">
+  <div>
+    <h2>Dashboard Gerencial</h2>
+    <p class="sub">Cobertura y ejecución de campo en tiempo real — mercaderistas a nivel nacional.</p>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn ghost small" disabled>{{ kpis()?.fecha || '—' }}</button>
+    <button class="btn primary small" (click)="actualizar()" [disabled]="cargando()">↻ Actualizar</button>
+  </div>
 </div>
+
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Ruta de cobertura — hoy</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+@if (kpis(); as k) {
+  <div class="grid cols-4">
+    <div class="card kpi-card">
+      <div class="kpi-top"><span class="kpi-label">Cumplimiento del plan</span></div>
+      <div class="kpi-val">{{ k.cumplimientoVisitasPct | number: '1.0-0' }}%</div>
+    </div>
+    <div class="card kpi-card">
+      <div class="kpi-top"><span class="kpi-label">Visitas ejecutadas</span></div>
+      <div class="kpi-val">{{ k.visitasEjecutadas }} <span>de {{ k.visitasPlanificadas }} planificadas</span></div>
+    </div>
+    <div class="card kpi-card">
+      <div class="kpi-top"><span class="kpi-label">Clientes atendidos</span></div>
+      <div class="kpi-val">{{ k.clientesAtendidos }}</div>
+    </div>
+    <div class="card kpi-card">
+      <div class="kpi-top"><span class="kpi-label">Oportunidades detectadas</span></div>
+      <div class="kpi-val">{{ k.oportunidadesDetectadas }} <span>sin gestionar</span></div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top: 14px">
+    <div class="card">
+      <p class="panel-title">Visitas planificadas vs. ejecutadas</p>
+      <p class="panel-sub">Periodo actual</p>
+      <div class="chart-wrap"><canvas #chartPlan></canvas></div>
+    </div>
+    <div class="card">
+      <p class="panel-title">Indicadores de marca</p>
+      <p class="panel-sub">Presencia y participación de anaquel — todas las marcas</p>
+      <div class="chart-wrap"><canvas #chartMarca></canvas></div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top: 14px">
+    <div class="card">
+      <p class="panel-title">Actividad por mercaderista</p>
+      <p class="panel-sub">Visitas planificadas vs. ejecutadas</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Mercaderista</th>
+            <th>Visitas</th>
+            <th>Cumpl.</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of k.cumplimientoPorMercaderista; track m.usuarioId) {
+            <tr>
+              <td>{{ m.usuarioNombre }}</td>
+              <td class="mono">{{ m.visitasEjecutadas }}/{{ m.visitasPlanificadas }}</td>
+              <td style="min-width: 90px">
+                <div class="progress-track">
+                  <div class="progress-fill" [style.width.%]="m.cumplimientoPct"></div>
+                </div>
+              </td>
+              <td>
+                <span class="badge {{ estadoCumplimiento(m.cumplimientoPct).clase }}">
+                  {{ estadoCumplimiento(m.cumplimientoPct).texto }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <p class="panel-title">Oportunidades recientes</p>
+      <p class="panel-sub">Detectadas en campo, sin gestionar</p>
+      @if (oportunidades().length) {
+        @for (o of oportunidades(); track o.id) {
+          <div class="list-row">
+            <div class="lr-main">
+              <p>{{ o.marcaNombre || 'Mercado' }}</p>
+              <span>{{ o.usuarioNombre }} · {{ o.observacionTexto || o.detalle }}</span>
+            </div>
+            <span class="badge info">Nuevo</span>
+          </div>
+        }
+      } @else {
+        <div class="empty"><b>Sin oportunidades pendientes</b>Todo gestionado por el momento.</div>
+      }
+    </div>
+  </div>
+}

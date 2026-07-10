@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CatalogoService } from '../../../core/services/catalogo.service';
@@ -15,7 +16,7 @@ const TIPOS: TipoHallazgo[] = [
 @Component({
   selector: 'app-mercado',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './mercado.html',
 })
 export class Mercado implements OnInit {

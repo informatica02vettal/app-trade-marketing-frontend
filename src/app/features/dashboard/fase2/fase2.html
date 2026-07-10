@@ -1,24 +1,39 @@
-<div class="p-6">
-  <h1 class="font-display text-xl font-bold mb-1">Integración Comercial</h1>
-  <p class="text-muted text-[13px] mb-5 max-w-xl">
-    Fase 2 del desarrollo — conexión de la actividad de campo con resultados de venta.
-  </p>
-
-  <div class="bg-brand-tint rounded-2xl p-5 text-center mb-5">
-    <p class="font-display font-bold mb-1">Módulo en construcción — próxima fase</p>
-    <p class="text-muted text-[13px] max-w-md mx-auto">
-      Esta fase conectará el módulo de Trade Marketing con el módulo comercial para medir el impacto real de la
-      visita sobre la facturación.
-    </p>
+<div class="topbar">
+  <div>
+    <h2>Integración Comercial</h2>
+    <p class="sub">Fase 2 del desarrollo — conexión de la actividad de campo con resultados de venta.</p>
   </div>
+</div>
 
-  <div class="bg-panel border border-line rounded-2xl p-4 max-w-xl">
-    <p class="font-display font-bold mb-2">Alcance previsto</p>
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Hoja de ruta</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+<div class="phase2-banner">
+  <p class="panel-title" style="font-size: 17px">Módulo en construcción — próxima fase</p>
+  <p class="panel-sub" style="max-width: 520px; margin: 0 auto 16px">
+    Esta fase conectará el módulo de Trade Marketing con el módulo comercial para medir el impacto real de la visita
+    sobre la facturación.
+  </p>
+</div>
+
+<div class="grid cols-2" style="margin-top: 16px">
+  <div class="card">
+    <p class="panel-title">Alcance previsto</p>
     @for (item of alcancePrevisto; track item) {
-      <div class="flex justify-between items-center border-t border-line py-2 text-[13px] first:border-t-0">
-        <p>{{ item }}</p>
-        <span class="rounded-full bg-panel-alt text-[11px] font-bold px-2.5 py-1 shrink-0 ml-3">Fase 2</span>
+      <div class="list-row">
+        <div class="lr-main"><p>{{ item }}</p></div>
+        <span class="badge neutral">Fase 2</span>
       </div>
     }
+  </div>
+  <div class="card">
+    <p class="panel-title">Vista previa — visita vs. venta (mock)</p>
+    <p class="panel-sub">Ejemplo ilustrativo de la correlación que habilitará esta fase</p>
+    <div class="chart-wrap small"><canvas #chartFase2></canvas></div>
   </div>
 </div>
