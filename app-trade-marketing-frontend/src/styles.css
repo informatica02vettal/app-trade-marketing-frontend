@@ -1,3 +1,38 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --color-brand: #24a9e1;
+  --color-brand-dim: #1b85b4;
+  --color-brand-tint: #eaf6fc;
+  --color-teal: #5bc2ea;
+  --color-amber: #e0a233;
+  --color-amber-tint: #fbf2e3;
+  --color-danger: #de4f4f;
+  --color-danger-tint: #fceded;
+  --color-success: #2fa867;
+  --color-success-tint: #eaf7f0;
+  --color-ink: #33343a;
+  --color-muted: #8a8c8e;
+  --color-app-bg: #f4f5f6;
+  --color-panel: #ffffff;
+  --color-panel-alt: #f0f2f3;
+  --color-line: #e4e6e8;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-app-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

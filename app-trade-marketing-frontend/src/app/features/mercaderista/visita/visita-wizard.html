@@ -1,0 +1,140 @@
+<div class="min-h-dvh sm:py-6 sm:px-3">
+  <div
+    class="w-full max-w-[520px] mx-auto bg-panel min-h-dvh sm:min-h-[calc(100dvh-48px)] sm:rounded-[20px] sm:border sm:border-line sm:shadow-lg flex flex-col"
+  >
+    <header class="px-4 py-3 border-b border-line">
+      <p class="text-muted text-[11px] font-mono uppercase">Visita en curso</p>
+      <h1 class="font-display font-bold text-[15px] truncate">{{ sesion.clienteNombre() }}</h1>
+    </header>
+
+    <div class="flex-1 overflow-y-auto">
+      @switch (paso()) {
+        @case ('evidencia') {
+          <div class="p-4">
+            <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-3">
+              Evidencia general (una sola vez)
+            </p>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <app-photo-picker label="Fachada" [url]="fotoFachada()" (urlChange)="fotoFachada.set($event)" />
+              <app-photo-picker
+                label="Piso de ventas"
+                [url]="fotoPisoVentas()"
+                (urlChange)="fotoPisoVentas.set($event)"
+              />
+            </div>
+            <button
+              type="button"
+              (click)="continuarEvidencia()"
+              [disabled]="!fotoFachada() || !fotoPisoVentas() || guardando()"
+              class="w-full rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </div>
+        }
+
+        @case ('prospecto') {
+          <div class="p-4 flex flex-col gap-3">
+            <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Cliente no registrado</p>
+            <input
+              [(ngModel)]="prospecto.nombre"
+              placeholder="Nombre del negocio"
+              class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+            />
+            <input
+              [(ngModel)]="prospecto.rif"
+              placeholder="RIF"
+              class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+            />
+            <input
+              [(ngModel)]="prospecto.whatsapp"
+              placeholder="WhatsApp de atención"
+              class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+            />
+            <input
+              [(ngModel)]="prospecto.telefono"
+              placeholder="Teléfono (opcional)"
+              class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+            />
+            <input
+              [(ngModel)]="prospecto.marcasCompetencia"
+              placeholder="Marcas de la competencia detectadas"
+              class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+            />
+            <div class="grid grid-cols-2 gap-3">
+              <app-photo-picker
+                label="Foto de fachada"
+                [url]="prospectoFotoFachada()"
+                (urlChange)="prospectoFotoFachada.set($event)"
+              />
+              <app-photo-picker
+                label="Foto del interior"
+                [url]="prospectoFotoInterior()"
+                (urlChange)="prospectoFotoInterior.set($event)"
+              />
+            </div>
+            <button
+              type="button"
+              (click)="guardarProspecto()"
+              [disabled]="guardando()"
+              class="w-full rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+            >
+              Guardar y finalizar visita
+            </button>
+          </div>
+        }
+
+        @case ('marcas') {
+          <div class="p-4">
+            <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-3">
+              Marcas auditadas en esta visita
+            </p>
+            <div class="grid grid-cols-2 gap-2 mb-6">
+              @for (marca of marcas(); track marca.id) {
+                <button
+                  type="button"
+                  (click)="abrirMarca(marca)"
+                  class="relative rounded-xl border px-3 py-3 text-left font-display font-bold text-[13.5px]"
+                  [class.border-success]="sesion.estaMarcaCompletada(marca.id)"
+                  [class.bg-success-tint]="sesion.estaMarcaCompletada(marca.id)"
+                  [class.border-line]="!sesion.estaMarcaCompletada(marca.id)"
+                >
+                  {{ marca.nombre }}
+                  @if (sesion.estaMarcaCompletada(marca.id)) {
+                    <span class="absolute top-1.5 right-2 text-success text-[13px]">✓</span>
+                  }
+                </button>
+              }
+            </div>
+
+            <button
+              type="button"
+              (click)="finalizarVisita()"
+              [disabled]="!sesion.tieneAlMenosUnaMarcaCompletada() || guardando()"
+              class="w-full rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+            >
+              Finalizar visita
+            </button>
+            @if (!sesion.tieneAlMenosUnaMarcaCompletada()) {
+              <p class="text-muted text-[11.5px] text-center mt-2">
+                Completa al menos una marca para poder finalizar la visita.
+              </p>
+            }
+          </div>
+        }
+
+        @case ('marca-detalle') {
+          @if (marcaSeleccionada(); as marca) {
+            <app-marca-detalle
+              [visitaId]="sesion.visitaId()!"
+              [marcaId]="marca.id"
+              [marcaNombre]="marca.nombre"
+              (completada)="onMarcaCompletada()"
+              (cancelar)="onMarcaCancelada()"
+            />
+          }
+        }
+      }
+    </div>
+  </div>
+</div>

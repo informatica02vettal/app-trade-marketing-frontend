@@ -1,0 +1,35 @@
+<div class="min-h-dvh flex">
+  <aside class="w-56 shrink-0 bg-panel border-r border-line p-4 hidden md:flex flex-col">
+    <p class="font-display font-bold text-[15px] mb-1">Vettal Trade</p>
+    <p class="text-muted text-[11px] mb-6">{{ usuario()?.nombre }}</p>
+
+    <nav class="flex flex-col gap-1 text-[13px] font-medium">
+      <a routerLink="/dashboard" routerLinkActive="bg-brand-tint text-brand-dim" [routerLinkActiveOptions]="{ exact: true }" class="rounded-lg px-3 py-2 text-ink">
+        00 · Dashboard gerencial
+      </a>
+      <a routerLink="/dashboard/planificacion" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
+        01 · Planificación de visitas
+      </a>
+      <a routerLink="/dashboard/visitas" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
+        02 · Gestión de visitas
+      </a>
+      <a routerLink="/dashboard/solicitudes" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
+        05 · Solicitudes
+      </a>
+      <a routerLink="/dashboard/mercado" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
+        07 · Inteligencia de mercado
+      </a>
+      <a routerLink="/dashboard/catalogos" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
+        09 · Catálogos
+      </a>
+    </nav>
+
+    <button type="button" (click)="cerrarSesion()" class="mt-auto text-danger text-[12.5px] font-bold text-left px-3 py-2">
+      Cerrar sesión
+    </button>
+  </aside>
+
+  <main class="flex-1 min-w-0 bg-app-bg">
+    <router-outlet />
+  </main>
+</div>

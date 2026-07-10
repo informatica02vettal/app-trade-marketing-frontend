@@ -1,0 +1,108 @@
+<div class="p-4">
+  <header class="mb-4">
+    <p class="text-muted text-[12px]">Hola,</p>
+    <h1 class="font-display text-lg font-bold">{{ usuario()?.nombre }}</h1>
+  </header>
+
+  <section class="bg-brand-tint rounded-2xl p-4 mb-5">
+    <p class="font-mono text-[10.5px] uppercase tracking-wide text-brand-dim mb-1">Cumplimiento de hoy</p>
+    <div class="flex items-end justify-between">
+      <p class="font-display text-2xl font-bold">{{ ejecutadas() }} / {{ planificadas() }}</p>
+      <p class="font-mono font-bold text-brand-dim">{{ cumplimientoPct() }}%</p>
+    </div>
+    <div class="h-2 rounded-full bg-white/60 mt-2 overflow-hidden">
+      <div class="h-full bg-brand" [style.width.%]="cumplimientoPct()"></div>
+    </div>
+  </section>
+
+  <section class="mb-5">
+    <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Visita no planificada</p>
+    <input
+      type="text"
+      placeholder="Buscar cliente por nombre…"
+      [(ngModel)]="busqueda"
+      (ngModelChange)="buscarCliente()"
+      (focus)="mostrarBusqueda.set(true)"
+      class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px] outline-none focus:border-brand"
+    />
+    @if (mostrarBusqueda() && resultadosBusqueda().length) {
+      <div class="mt-2 border border-line rounded-xl overflow-hidden">
+        @for (cliente of resultadosBusqueda(); track cliente.id) {
+          <button
+            type="button"
+            (click)="iniciarVisitaCliente(cliente)"
+            [disabled]="iniciandoVisita()"
+            class="w-full text-left px-3 py-2.5 text-[13px] border-b border-line last:border-0 hover:bg-panel-alt"
+          >
+            {{ cliente.nombre }}
+          </button>
+        }
+      </div>
+    }
+
+    <button
+      type="button"
+      (click)="mostrarProspecto.set(true)"
+      class="mt-3 w-full rounded-[11px] border border-dashed border-brand text-brand-dim font-bold text-[13px] py-2.5"
+    >
+      + Cliente no registrado
+    </button>
+
+    @if (mostrarProspecto()) {
+      <div class="mt-2 bg-amber-tint rounded-xl p-3 text-[12.5px]">
+        <p class="mb-2">
+          Se registrará la ubicación (GPS) al iniciar la visita y luego se te pedirán los datos del nuevo cliente
+          (nombre, RIF, WhatsApp y fotos) — no se volverá a pedir la ubicación.
+        </p>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="iniciarClienteProspecto()"
+            [disabled]="iniciandoVisita()"
+            class="flex-1 rounded-lg bg-brand text-white font-bold py-2 disabled:opacity-60"
+          >
+            Iniciar
+          </button>
+          <button type="button" (click)="mostrarProspecto.set(false)" class="flex-1 rounded-lg border border-line py-2">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section>
+    <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Plan de hoy</p>
+
+    @if (cargandoPlan()) {
+      <p class="text-muted text-[13px]">Cargando…</p>
+    } @else if (!plan().length) {
+      <p class="text-muted text-[13px]">No tienes visitas planificadas para hoy.</p>
+    } @else {
+      <div class="flex flex-col gap-2">
+        @for (p of plan(); track p.id) {
+          <div class="border border-line rounded-xl p-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-display font-bold text-[14px] truncate">{{ p.clienteNombre }}</p>
+              <p class="text-muted text-[12px] truncate">{{ p.objetivo || 'Sin objetivo definido' }}</p>
+            </div>
+            @if (p.estado === 'PENDIENTE') {
+              <button
+                type="button"
+                (click)="iniciarVisitaPlanificada(p)"
+                [disabled]="iniciandoVisita()"
+                class="shrink-0 rounded-lg bg-brand text-white text-[12.5px] font-bold px-3 py-2 disabled:opacity-60"
+              >
+                Iniciar
+              </button>
+            } @else {
+              <span class="shrink-0 rounded-full bg-success-tint text-success text-[11px] font-bold px-2.5 py-1">
+                {{ p.estado }}
+              </span>
+            }
+          </div>
+        }
+      </div>
+    }
+  </section>
+</div>

@@ -1,0 +1,71 @@
+<div class="p-6">
+  <h1 class="font-display text-xl font-bold mb-4">Planificación de visitas</h1>
+
+  <section class="bg-panel border border-line rounded-2xl p-4 mb-6 max-w-2xl">
+    <h2 class="font-display font-bold mb-3">Nueva visita planificada</h2>
+    <div class="grid grid-cols-2 gap-3">
+      <input [(ngModel)]="nuevo.clienteNombre" placeholder="Nombre del cliente" class="rounded-lg border border-line px-3 py-2 text-[13px]" />
+      <input [(ngModel)]="nuevo.erpClienteId" placeholder="ID cliente ERP (opcional)" class="rounded-lg border border-line px-3 py-2 text-[13px]" />
+      <select [(ngModel)]="nuevo.usuarioId" class="rounded-lg border border-line px-3 py-2 text-[13px]">
+        <option [ngValue]="null">Sin asignar</option>
+        @for (m of mercaderistas(); track m.id) {
+          <option [ngValue]="m.id">{{ m.nombre }}</option>
+        }
+      </select>
+      <input [(ngModel)]="nuevo.region" placeholder="Región" class="rounded-lg border border-line px-3 py-2 text-[13px]" />
+      <input type="date" [(ngModel)]="nuevo.fechaProgramada" class="rounded-lg border border-line px-3 py-2 text-[13px]" />
+      <input type="time" [(ngModel)]="nuevo.horaProgramada" class="rounded-lg border border-line px-3 py-2 text-[13px]" />
+      <input [(ngModel)]="nuevo.objetivo" placeholder="Objetivo de la visita" class="col-span-2 rounded-lg border border-line px-3 py-2 text-[13px]" />
+      <select [(ngModel)]="nuevo.tipoVisita" class="rounded-lg border border-line px-3 py-2 text-[13px]">
+        <option value="PLANIFICADA">Planificada</option>
+        <option value="NO_PLANIFICADA">No planificada</option>
+      </select>
+    </div>
+    <button
+      type="button"
+      (click)="crear()"
+      [disabled]="guardando()"
+      class="mt-3 rounded-lg bg-brand text-white font-bold text-[13px] px-4 py-2 disabled:opacity-50"
+    >
+      Crear
+    </button>
+  </section>
+
+  <section>
+    <h2 class="font-display font-bold mb-3">Plan actual</h2>
+    <div class="flex gap-2 mb-3">
+      <select [ngModel]="filtroUsuarioId()" (ngModelChange)="filtroUsuarioId.set($event); cargarPlan()" class="rounded-lg border border-line px-3 py-2 text-[13px]">
+        <option [ngValue]="null">Todos los mercaderistas</option>
+        @for (m of mercaderistas(); track m.id) {
+          <option [ngValue]="m.id">{{ m.nombre }}</option>
+        }
+      </select>
+      <input type="date" [ngModel]="filtroFecha()" (ngModelChange)="filtroFecha.set($event); cargarPlan()" class="rounded-lg border border-line px-3 py-2 text-[13px]" />
+    </div>
+
+    <div class="bg-panel border border-line rounded-2xl overflow-hidden">
+      <table class="w-full text-[13px]">
+        <thead class="bg-panel-alt text-muted text-[11px] uppercase">
+          <tr>
+            <th class="text-left px-3 py-2">Cliente</th>
+            <th class="text-left px-3 py-2">Mercaderista</th>
+            <th class="text-left px-3 py-2">Fecha</th>
+            <th class="text-left px-3 py-2">Objetivo</th>
+            <th class="text-left px-3 py-2">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of plan(); track p.id) {
+            <tr class="border-t border-line">
+              <td class="px-3 py-2">{{ p.clienteNombre }}</td>
+              <td class="px-3 py-2">{{ p.usuarioNombre }}</td>
+              <td class="px-3 py-2">{{ p.fechaProgramada }} {{ p.horaProgramada }}</td>
+              <td class="px-3 py-2">{{ p.objetivo }}</td>
+              <td class="px-3 py-2">{{ p.estado }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

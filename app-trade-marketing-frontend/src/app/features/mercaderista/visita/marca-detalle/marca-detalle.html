@@ -1,0 +1,436 @@
+<div class="p-4">
+  <div class="flex items-center justify-between mb-3">
+    <button type="button" (click)="anterior()" class="text-muted text-[13px]">← Atrás</button>
+    <h2 class="font-display font-bold text-[15px]">{{ marcaNombre() }}</h2>
+    <span class="text-[11px] text-muted font-mono">{{ subPaso() }}</span>
+  </div>
+
+  @switch (subPaso()) {
+    @case ('estado') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Checklist de presencia</p>
+
+        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
+          Exhibidor propio presente
+          <input
+            type="checkbox"
+            [checked]="exhibidorMarca()"
+            (change)="onExhibidorMarcaChange($any($event.target).checked)"
+          />
+        </label>
+        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
+          Producto en el exhibidor
+          <input
+            type="checkbox"
+            [disabled]="!exhibidorMarca()"
+            [checked]="productoExhibidor()"
+            (change)="productoExhibidor.set($any($event.target).checked)"
+          />
+        </label>
+        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
+          Producto en piso de ventas / anaquel
+          <input
+            type="checkbox"
+            [checked]="productoAnaquel()"
+            (change)="productoAnaquel.set($any($event.target).checked)"
+          />
+        </label>
+        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
+          Aviso de fachada
+          <input
+            type="checkbox"
+            [checked]="avisoFachada()"
+            (change)="avisoFachada.set($any($event.target).checked)"
+          />
+        </label>
+        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
+          Aviso de pared / rompetráfico
+          <input type="checkbox" [checked]="avisoPared()" (change)="avisoPared.set($any($event.target).checked)" />
+        </label>
+        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
+          Banderines
+          <input type="checkbox" [checked]="banderines()" (change)="banderines.set($any($event.target).checked)" />
+        </label>
+        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
+          Rotulado / stickers
+          <input type="checkbox" [checked]="rotulado()" (change)="rotulado.set($any($event.target).checked)" />
+        </label>
+        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
+          Empleados con ropa de marca
+          <input
+            type="checkbox"
+            [checked]="empleadosUniforme()"
+            (change)="empleadosUniforme.set($any($event.target).checked)"
+          />
+        </label>
+
+        <div class="bg-brand-tint rounded-xl p-3 text-center">
+          <p class="text-[11px] font-mono uppercase text-brand-dim">Presencia calculada</p>
+          <p class="font-display text-xl font-bold">{{ presenciaPct() }}%</p>
+        </div>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Participación de anaquel</p>
+        <div class="flex gap-2">
+          <input
+            type="number"
+            min="0"
+            placeholder="Frentes propios"
+            [ngModel]="frentesVettal()"
+            (ngModelChange)="frentesVettal.set($event)"
+            class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+          />
+          <input
+            type="number"
+            min="0"
+            placeholder="Frentes totales"
+            [ngModel]="frentesTotales()"
+            (ngModelChange)="frentesTotales.set($event)"
+            class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+          />
+        </div>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Estado del exhibidor</p>
+        <select
+          [ngModel]="estadoExhibidores()"
+          (ngModelChange)="estadoExhibidores.set($event)"
+          [disabled]="!exhibidorMarca()"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        >
+          <option value="OPTIMO">Óptimo</option>
+          <option value="REGULAR">Regular</option>
+          <option value="DETERIORADO">Requiere mantenimiento</option>
+          <option value="NO_APLICA">No aplica</option>
+        </select>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Estado de material POP</p>
+        <select
+          [ngModel]="estadoPop()"
+          (ngModelChange)="estadoPop.set($event)"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        >
+          <option value="OPTIMO">Óptimo</option>
+          <option value="REGULAR">Regular</option>
+          <option value="FALTANTE">Faltante</option>
+        </select>
+      </div>
+    }
+
+    @case ('competencia') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Competencia detectada</p>
+        <div class="flex flex-wrap gap-2">
+          @for (c of competenciaCatalogo(); track c.id) {
+            <button
+              type="button"
+              (click)="toggleCompetencia(c.nombre)"
+              class="rounded-full border px-3 py-1.5 text-[12.5px]"
+              [class.bg-brand]="competenciaSeleccionada().has(c.nombre)"
+              [class.text-white]="competenciaSeleccionada().has(c.nombre)"
+              [class.border-brand]="competenciaSeleccionada().has(c.nombre)"
+              [class.border-line]="!competenciaSeleccionada().has(c.nombre)"
+            >
+              {{ c.nombre }}
+            </button>
+          }
+        </div>
+
+        <div class="flex gap-2 mt-2">
+          <input
+            [(ngModel)]="competenciaPersonalizada"
+            placeholder="+ Nueva marca"
+            class="flex-1 rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+          />
+          <button type="button" (click)="agregarCompetenciaPersonalizada()" class="rounded-[11px] border border-line px-3 text-[13px]">
+            Agregar
+          </button>
+        </div>
+      </div>
+    }
+
+    @case ('fotos') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Fotos de la marca</p>
+        <div class="grid grid-cols-3 gap-3">
+          <app-photo-picker label="Exhibidor" [url]="fotos().EXHIBIDOR" (urlChange)="setFoto('EXHIBIDOR', $event)" />
+          <app-photo-picker label="Producto" [url]="fotos().PRODUCTO" (urlChange)="setFoto('PRODUCTO', $event)" />
+          <app-photo-picker label="Competencia" [url]="fotos().COMPETENCIA" (urlChange)="setFoto('COMPETENCIA', $event)" />
+          <app-photo-picker label="Material POP" [url]="fotos().MATERIAL_POP" (urlChange)="setFoto('MATERIAL_POP', $event)" />
+          <app-photo-picker label="Antes" [url]="fotos().ANTES" (urlChange)="setFoto('ANTES', $event)" />
+          <app-photo-picker label="Después" [url]="fotos().DESPUES" (urlChange)="setFoto('DESPUES', $event)" />
+        </div>
+      </div>
+    }
+
+    @case ('observaciones') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Observaciones</p>
+        <textarea
+          [(ngModel)]="observaciones"
+          rows="3"
+          placeholder="Observaciones generales de esta marca…"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        ></textarea>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Oportunidad comercial</p>
+        <textarea
+          [(ngModel)]="oportunidad"
+          rows="3"
+          placeholder="Oportunidad detectada (reposición, ampliación de anaquel, etc.)"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        ></textarea>
+      </div>
+    }
+
+    @case ('mercado') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">
+          Inteligencia de mercado de esta marca (opcional)
+        </p>
+
+        <select
+          [ngModel]="mercadoTipo()"
+          (ngModelChange)="mercadoTipo.set($event)"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        >
+          <option value="">Selecciona un tipo de hallazgo…</option>
+          <option value="PRECIO_COMPETENCIA">Precio de competencia</option>
+          <option value="NUEVO_PRODUCTO">Nuevo producto detectado</option>
+          <option value="MATERIAL_PUBLICITARIO_COMPETENCIA">Material publicitario de competencia</option>
+          <option value="OBSERVACION_MERCADO">Observación de mercado</option>
+        </select>
+
+        @if (mercadoTipo() === 'PRECIO_COMPETENCIA' || mercadoTipo() === 'NUEVO_PRODUCTO') {
+          @for (p of mercadoProductos(); track $index) {
+            <div class="border border-line rounded-xl p-2 flex flex-col gap-2">
+              <input
+                [ngModel]="p.marca"
+                (ngModelChange)="actualizarProductoMercado($index, 'marca', $event)"
+                placeholder="Marca de competencia"
+                class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+              />
+              <input
+                [ngModel]="p.modelo"
+                (ngModelChange)="actualizarProductoMercado($index, 'modelo', $event)"
+                placeholder="Modelo"
+                class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+              />
+              <input
+                type="number"
+                [ngModel]="p.precio"
+                (ngModelChange)="actualizarProductoMercado($index, 'precio', $event)"
+                placeholder="Precio"
+                class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+              />
+              <app-photo-picker
+                label="Foto"
+                [url]="p.fotoUrl"
+                (urlChange)="actualizarProductoMercado($index, 'fotoUrl', $event)"
+              />
+              <button type="button" (click)="quitarProductoMercado($index)" class="text-danger text-[12px] self-start">
+                Quitar
+              </button>
+            </div>
+          }
+          <button type="button" (click)="agregarProductoMercado()" class="rounded-lg border border-dashed border-line py-2 text-[12.5px]">
+            + Agregar producto
+          </button>
+        }
+
+        @if (mercadoTipo() === 'MATERIAL_PUBLICITARIO_COMPETENCIA') {
+          @for (m of mercadoMateriales(); track $index) {
+            <div class="border border-line rounded-xl p-2 flex flex-col gap-2">
+              <input
+                [ngModel]="m.marca"
+                (ngModelChange)="actualizarMaterialMercado($index, 'marca', $event)"
+                placeholder="Marca de competencia"
+                class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+              />
+              <input
+                [ngModel]="m.material"
+                (ngModelChange)="actualizarMaterialMercado($index, 'material', $event)"
+                placeholder="Material publicitario"
+                class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+              />
+              <app-photo-picker
+                label="Foto"
+                [url]="m.fotoUrl"
+                (urlChange)="actualizarMaterialMercado($index, 'fotoUrl', $event)"
+              />
+              <button type="button" (click)="quitarMaterialMercado($index)" class="text-danger text-[12px] self-start">
+                Quitar
+              </button>
+            </div>
+          }
+          <button type="button" (click)="agregarMaterialMercado()" class="rounded-lg border border-dashed border-line py-2 text-[12.5px]">
+            + Agregar material
+          </button>
+        }
+
+        @if (mercadoTipo() === 'OBSERVACION_MERCADO') {
+          <textarea
+            [(ngModel)]="mercadoObservacion"
+            rows="3"
+            placeholder="Describe la observación de mercado…"
+            class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+          ></textarea>
+        }
+
+        @if (mercadoTipo()) {
+          <textarea
+            [(ngModel)]="mercadoDetalle"
+            rows="2"
+            placeholder="Detalle adicional (opcional)"
+            class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+          ></textarea>
+          <button
+            type="button"
+            (click)="guardarHallazgoMercado()"
+            [disabled]="guardandoMercado()"
+            class="rounded-[11px] bg-brand-dim text-white font-bold text-[13px] py-2.5 disabled:opacity-50"
+          >
+            Agregar hallazgo
+          </button>
+        }
+
+        @if (mercadoGuardados().length) {
+          <div class="mt-2">
+            <p class="text-muted text-[11px] font-mono uppercase mb-1">Hallazgos agregados</p>
+            @for (h of mercadoGuardados(); track h.id) {
+              <p class="text-[12.5px] border-b border-line py-1">{{ h.tipo }}</p>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @case ('solicitudes') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">
+          Solicitudes relacionadas con esta marca (opcional)
+        </p>
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="onCategoriaSolicitudChange('TRADE_MARKETING')"
+            class="flex-1 rounded-[11px] border py-2 text-[12.5px] font-bold"
+            [class.bg-brand]="solicitudCategoria() === 'TRADE_MARKETING'"
+            [class.text-white]="solicitudCategoria() === 'TRADE_MARKETING'"
+            [class.border-line]="solicitudCategoria() !== 'TRADE_MARKETING'"
+          >
+            Trade-Marketing
+          </button>
+          <button
+            type="button"
+            (click)="onCategoriaSolicitudChange('PUBLICIDAD')"
+            class="flex-1 rounded-[11px] border py-2 text-[12.5px] font-bold"
+            [class.bg-brand]="solicitudCategoria() === 'PUBLICIDAD'"
+            [class.text-white]="solicitudCategoria() === 'PUBLICIDAD'"
+            [class.border-line]="solicitudCategoria() !== 'PUBLICIDAD'"
+          >
+            Publicidad
+          </button>
+        </div>
+
+        @if (solicitudCategoria()) {
+          @for (categoria of categoriasMaterial(); track categoria.id) {
+            <p class="text-muted text-[11px] font-mono uppercase mt-1">{{ categoria.nombre }}</p>
+            <div class="flex flex-wrap gap-2">
+              @for (material of materialesDisponibles(); track material.id) {
+                @if (material.categoriaId === categoria.id) {
+                  <button
+                    type="button"
+                    (click)="toggleMaterial(material)"
+                    class="rounded-full border px-3 py-1.5 text-[12.5px]"
+                    [class.bg-brand]="estaMaterialSeleccionado(material)"
+                    [class.text-white]="estaMaterialSeleccionado(material)"
+                    [class.border-brand]="estaMaterialSeleccionado(material)"
+                    [class.border-line]="!estaMaterialSeleccionado(material)"
+                  >
+                    {{ material.nombre }}
+                  </button>
+                }
+              }
+            </div>
+          }
+
+          @for (sel of materialesSeleccionados(); track sel.material.id) {
+            <div class="border border-line rounded-xl p-2 flex flex-col gap-2">
+              <p class="font-bold text-[13px]">{{ sel.material.nombre }}</p>
+              @if (sel.material.requiereMedidas) {
+                <input
+                  [ngModel]="sel.medidas"
+                  (ngModelChange)="actualizarMaterialSeleccionado(sel.material.id, 'medidas', $event)"
+                  placeholder="Medidas (cm)"
+                  class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+                />
+              }
+              @if (sel.material.requiereUbicacion) {
+                <input
+                  [ngModel]="sel.ubicacion"
+                  (ngModelChange)="actualizarMaterialSeleccionado(sel.material.id, 'ubicacion', $event)"
+                  placeholder="Ubicación en el punto"
+                  class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+                />
+              }
+              @if (sel.fotos.length) {
+                <div class="grid grid-cols-3 gap-2">
+                  @for (foto of sel.fotos; track $index) {
+                    <app-photo-picker
+                      label="Foto"
+                      [url]="foto"
+                      (urlChange)="setFotoMaterial(sel.material.id, $index, $event)"
+                    />
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (materialesSeleccionados().length) {
+            <textarea
+              [(ngModel)]="solicitudObservaciones"
+              rows="2"
+              placeholder="Observaciones de la solicitud (opcional)"
+              class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+            ></textarea>
+            <button
+              type="button"
+              (click)="enviarSolicitud()"
+              [disabled]="!puedeEnviarSolicitud() || guardandoSolicitud()"
+              class="rounded-[11px] bg-brand-dim text-white font-bold text-[13px] py-2.5 disabled:opacity-50"
+            >
+              Enviar solicitud
+            </button>
+          }
+        }
+
+        @if (solicitudesGuardadas().length) {
+          <div class="mt-2">
+            <p class="text-muted text-[11px] font-mono uppercase mb-1">Solicitudes enviadas</p>
+            @for (s of solicitudesGuardadas(); track s.id) {
+              <p class="text-[12.5px] border-b border-line py-1">{{ s.categoria }} · {{ s.items.length }} ítem(s)</p>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <div class="flex gap-2 mt-5">
+    @if (subPaso() !== 'solicitudes') {
+      <button type="button" (click)="siguiente()" class="flex-1 rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3">
+        Siguiente
+      </button>
+    } @else {
+      <button
+        type="button"
+        (click)="guardarMarca()"
+        [disabled]="guardando()"
+        class="flex-1 rounded-[11px] bg-success text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+      >
+        {{ guardando() ? 'Guardando…' : 'Guardar marca' }}
+      </button>
+    }
+  </div>
+</div>

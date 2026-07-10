@@ -1,0 +1,31 @@
+<div class="flex flex-col items-center gap-1">
+  <label
+    class="w-full aspect-square rounded-xl border border-dashed border-line bg-panel-alt flex items-center justify-center overflow-hidden relative cursor-pointer"
+  >
+    @if (urlAbsoluta(); as src) {
+      <img [src]="src" [alt]="label()" class="w-full h-full object-cover" />
+      <button
+        type="button"
+        (click)="quitar(); $event.preventDefault()"
+        class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-[11px] flex items-center justify-center"
+      >
+        ×
+      </button>
+    } @else if (subiendo()) {
+      <span class="text-muted text-[11px]">Subiendo…</span>
+    } @else {
+      <span class="text-muted text-2xl">📷</span>
+    }
+    <input
+      type="file"
+      accept="image/*"
+      capture="environment"
+      class="hidden"
+      (change)="onFileSelected($event)"
+    />
+  </label>
+  <p class="text-[10.5px] text-muted text-center truncate w-full">{{ label() }}</p>
+  @if (error()) {
+    <p class="text-danger text-[10px]">{{ error() }}</p>
+  }
+</div>
