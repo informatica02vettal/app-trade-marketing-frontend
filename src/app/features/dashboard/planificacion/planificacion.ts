@@ -7,7 +7,6 @@ import { PlanVisita, TipoVisita } from '../../../core/models/plan-visita.model';
 import { Usuario } from '../../../core/models/usuario.model';
 import { ClienteErp } from '../../../core/models/cliente.model';
 import { BADGE_BAD, BADGE_OK, BADGE_WARN } from '../../../shared/ui/dash/badge-classes';
-import { PILL, PILL_SELECTED } from '../../../shared/ui/dash/field-classes';
 
 const BADGE_CLASE: Record<string, string> = { EJECUTADA: BADGE_OK, PENDIENTE: BADGE_WARN, REPROGRAMADA: BADGE_BAD };
 
@@ -50,10 +49,6 @@ export class Planificacion implements OnInit {
 
   readonly badgeClase = BADGE_CLASE;
   readonly rangoSemana = rangoSemana();
-
-  claseModo(modo: ModoBusquedaCliente): string {
-    return modo === this.modoBusquedaCliente() ? `${PILL} ${PILL_SELECTED}` : PILL;
-  }
 
   readonly mercaderistas = signal<Usuario[]>([]);
   readonly plan = signal<PlanVisita[]>([]);
@@ -111,9 +106,10 @@ export class Planificacion implements OnInit {
   }
 
   // ---- Cliente ----
-  cambiarModoBusquedaCliente(modo: ModoBusquedaCliente): void {
-    if (this.modoBusquedaCliente() === modo) return;
-    this.modoBusquedaCliente.set(modo);
+  cambiarModoBusquedaCliente(modo: string): void {
+    const modoTipado = modo as ModoBusquedaCliente;
+    if (this.modoBusquedaCliente() === modoTipado) return;
+    this.modoBusquedaCliente.set(modoTipado);
     this.limpiarBusquedaCliente();
   }
 
