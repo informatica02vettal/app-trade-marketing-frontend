@@ -1,0 +1,24 @@
+<div class="topbar">
+  <div>
+    <h2>Indicadores KPI</h2>
+    <p class="sub">Cálculo automático a partir de la actividad registrada en el sistema.</p>
+  </div>
+</div>
+
+<div class="route-divider">
+  <div class="dot"></div>
+  <div class="dash"></div>
+  <div class="label">Periodo — {{ kpis()?.fecha || '—' }}</div>
+  <div class="dash"></div>
+  <div class="dot end"></div>
+</div>
+
+<div class="grid cols-3">
+  @for (f of filas(); track f.nombre) {
+    <div class="card kpi-card">
+      <p class="kpi-label">{{ f.nombre }}</p>
+      <div class="kpi-val">{{ f.valor }}</div>
+      <p style="margin: 6px 0 0; font-size: 11.5px; color: var(--muted)">{{ f.detalle }}</p>
+    </div>
+  }
+</div>
