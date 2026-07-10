@@ -1,0 +1,140 @@
+/* Réplica exacta del sidebar de frontend-dashboard/vettal-trade.html
+   (mismos valores de color, tipografía y medidas que la maqueta). */
+:host {
+  --panel: #ffffff;
+  --panel-alt: #eff1f2;
+  --panel-hover: #e6e9eb;
+  --orange: #24a9e1;
+  --orange-dim: #1b85b4;
+  --text: #3a3b3d;
+  --muted: #8a8c8e;
+  --border: #dfe2e4;
+
+  display: flex;
+  min-height: 100dvh;
+}
+
+.sidebar {
+  width: 236px;
+  flex: none;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow-y: auto;
+}
+
+.brand {
+  padding: 6px 8px 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.brand-logo {
+  width: 100%;
+  max-width: 158px;
+  height: auto;
+  display: block;
+}
+.brand-tagline {
+  margin: 8px 0 0;
+  font-size: 9.5px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.07em;
+}
+
+.navgroup {
+  margin-top: 6px;
+}
+.navgroup-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  padding: 14px 10px 6px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.navitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+  transition: background 0.12s, color 0.12s;
+  text-decoration: none;
+}
+.navitem:hover {
+  background: var(--panel-hover);
+  color: var(--text);
+}
+.navitem.active {
+  background: var(--panel-alt);
+  color: var(--text);
+  border-color: var(--border);
+}
+.navitem.active .num {
+  color: var(--orange);
+}
+.num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: var(--muted);
+  width: 16px;
+  flex: none;
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  padding: 14px 10px 4px;
+  border-top: 1px solid var(--border);
+}
+.userchip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--orange-dim);
+  flex: none;
+}
+.userchip div p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.userchip div span {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.signout {
+  margin-top: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #de4f4f;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 2px;
+  text-align: left;
+}

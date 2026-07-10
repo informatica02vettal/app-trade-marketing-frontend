@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -7,12 +7,23 @@ import { AuthService } from '../../../core/auth/auth.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './dashboard-shell.html',
+  styleUrl: './dashboard-shell.css',
 })
 export class DashboardShell {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   readonly usuario = this.authService.usuarioActual;
+
+  readonly iniciales = computed(() => {
+    const nombre = this.usuario()?.nombre ?? '';
+    return nombre
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((palabra) => palabra.charAt(0).toUpperCase())
+      .join('');
+  });
 
   cerrarSesion(): void {
     this.authService.logout();

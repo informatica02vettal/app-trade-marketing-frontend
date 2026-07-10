@@ -1,35 +1,66 @@
-<div class="min-h-dvh flex">
-  <aside class="w-56 shrink-0 bg-panel border-r border-line p-4 hidden md:flex flex-col">
-    <p class="font-display font-bold text-[15px] mb-1">Vettal Trade</p>
-    <p class="text-muted text-[11px] mb-6">{{ usuario()?.nombre }}</p>
+<aside class="sidebar">
+  <div class="brand">
+    <img class="brand-logo" src="vettal-logo.jpg" alt="Vettal Trade" />
+    <p class="brand-tagline">TRADE · ABASTECIENDO EL FUTURO</p>
+  </div>
 
-    <nav class="flex flex-col gap-1 text-[13px] font-medium">
-      <a routerLink="/dashboard" routerLinkActive="bg-brand-tint text-brand-dim" [routerLinkActiveOptions]="{ exact: true }" class="rounded-lg px-3 py-2 text-ink">
-        00 · Dashboard gerencial
-      </a>
-      <a routerLink="/dashboard/planificacion" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
-        01 · Planificación de visitas
-      </a>
-      <a routerLink="/dashboard/visitas" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
-        02 · Gestión de visitas
-      </a>
-      <a routerLink="/dashboard/solicitudes" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
-        05 · Solicitudes
-      </a>
-      <a routerLink="/dashboard/mercado" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
-        07 · Inteligencia de mercado
-      </a>
-      <a routerLink="/dashboard/catalogos" routerLinkActive="bg-brand-tint text-brand-dim" class="rounded-lg px-3 py-2 text-ink">
-        09 · Catálogos
-      </a>
-    </nav>
+  <div class="navgroup">
+    <div class="navgroup-label">Operación</div>
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="navitem">
+      <span class="num">00</span> Dashboard Gerencial
+    </a>
+    <a routerLink="/dashboard/planificacion" routerLinkActive="active" class="navitem">
+      <span class="num">01</span> Planificación de Visitas
+    </a>
+    <a routerLink="/dashboard/visitas" routerLinkActive="active" class="navitem">
+      <span class="num">02</span> Gestión de Visitas
+    </a>
+    <a routerLink="/dashboard/evidencia" routerLinkActive="active" class="navitem">
+      <span class="num">03</span> Evidencia Fotográfica
+    </a>
+  </div>
 
-    <button type="button" (click)="cerrarSesion()" class="mt-auto text-danger text-[12.5px] font-bold text-left px-3 py-2">
-      Cerrar sesión
-    </button>
-  </aside>
+  <div class="navgroup">
+    <div class="navgroup-label">Trade Marketing</div>
+    <a routerLink="/dashboard/auditoria" routerLinkActive="active" class="navitem">
+      <span class="num">04</span> Auditoría de Marca
+    </a>
+    <a routerLink="/dashboard/solicitudes" routerLinkActive="active" class="navitem">
+      <span class="num">05</span> Gestión de Publicidad
+    </a>
+    <a routerLink="/dashboard/pop" routerLinkActive="active" class="navitem">
+      <span class="num">06</span> Control Material POP
+    </a>
+    <a routerLink="/dashboard/mercado" routerLinkActive="active" class="navitem">
+      <span class="num">07</span> Inteligencia de Mercado
+    </a>
+  </div>
 
-  <main class="flex-1 min-w-0 bg-app-bg">
-    <router-outlet />
-  </main>
-</div>
+  <div class="navgroup">
+    <div class="navgroup-label">Cobertura y control</div>
+    <a routerLink="/dashboard/geo" routerLinkActive="active" class="navitem">
+      <span class="num">08</span> Geolocalización
+    </a>
+    <a routerLink="/dashboard/kpis" routerLinkActive="active" class="navitem">
+      <span class="num">10</span> Indicadores KPI
+    </a>
+    <a routerLink="/dashboard/fase2" routerLinkActive="active" class="navitem">
+      <span class="num">11</span> Integración Comercial
+    </a>
+  </div>
+
+  <div class="sidebar-foot">
+    <div class="userchip">
+      <div class="avatar">{{ iniciales() }}</div>
+      <div>
+        <p>{{ usuario()?.nombre }}</p>
+        <span>{{ usuario()?.rol }} · Vettal</span>
+      </div>
+    </div>
+    <button type="button" class="signout" (click)="cerrarSesion()">Cerrar sesión</button>
+  </div>
+</aside>
+
+<main class="flex-1 min-w-0 bg-app-bg">
+  <router-outlet />
+</main>

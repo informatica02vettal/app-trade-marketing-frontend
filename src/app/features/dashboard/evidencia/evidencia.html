@@ -1,0 +1,30 @@
+<div class="p-6">
+  <h1 class="font-display text-xl font-bold mb-1">Evidencia fotográfica</h1>
+  <p class="text-muted text-[13px] mb-4 max-w-xl">
+    Fotos capturadas por visita (fachada, piso de ventas y por cada marca auditada). La galería completa se toma desde
+    la app móvil del mercaderista; aquí se muestra el conteo por visita.
+  </p>
+
+  <div class="bg-panel border border-line rounded-2xl overflow-hidden">
+    <table class="w-full text-[13px]">
+      <thead class="bg-panel-alt text-muted text-[11px] uppercase">
+        <tr>
+          <th class="text-left px-3 py-2">Cliente</th>
+          <th class="text-left px-3 py-2">Mercaderista</th>
+          <th class="text-left px-3 py-2">Fecha</th>
+          <th class="text-left px-3 py-2">Fotos capturadas</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (v of visitas(); track v.id) {
+          <tr class="border-t border-line">
+            <td class="px-3 py-2">{{ v.clienteNombre }}</td>
+            <td class="px-3 py-2">{{ v.usuarioNombre }}</td>
+            <td class="px-3 py-2 font-mono text-[12px]">{{ v.checkinAt | date: 'short' }}</td>
+            <td class="px-3 py-2 font-mono font-bold">{{ v.cantidadFotos }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,44 @@
+<div class="p-6">
+  <h1 class="font-display text-xl font-bold mb-4">Auditoría de marca</h1>
+
+  <select
+    [ngModel]="visitaId()"
+    (ngModelChange)="onVisitaSeleccionada($event)"
+    class="rounded-lg border border-line px-3 py-2 text-[13px] mb-4"
+  >
+    <option [ngValue]="null">Selecciona una visita…</option>
+    @for (v of visitas(); track v.id) {
+      <option [ngValue]="v.id">{{ v.clienteNombre }} · {{ v.usuarioNombre }}</option>
+    }
+  </select>
+
+  @if (visitaId() && !auditorias().length) {
+    <p class="text-muted text-[13px]">Esta visita todavía no tiene marcas auditadas.</p>
+  }
+
+  <div class="grid md:grid-cols-2 gap-4">
+    @for (a of auditorias(); track a.id) {
+      <div class="bg-panel border border-line rounded-2xl p-4">
+        <p class="font-display font-bold mb-2">{{ a.marcaNombre }}</p>
+        <div class="flex justify-between text-[12.5px] py-1 border-b border-line">
+          <span class="text-muted">Presencia de marca</span>
+          <span class="font-mono font-bold">{{ a.presenciaPct }}%</span>
+        </div>
+        <div class="flex justify-between text-[12.5px] py-1 border-b border-line">
+          <span class="text-muted">Participación de anaquel</span>
+          <span class="font-mono font-bold">{{ a.anaquelPct }}%</span>
+        </div>
+        <div class="flex gap-2 mt-2 flex-wrap">
+          <span class="rounded-full bg-panel-alt text-[11px] px-2.5 py-1">Exhibidor: {{ a.estadoExhibidores }}</span>
+          <span class="rounded-full bg-panel-alt text-[11px] px-2.5 py-1">POP: {{ a.estadoPop }}</span>
+        </div>
+        @if (a.competenciaDetectada) {
+          <p class="text-[12px] text-muted mt-2">Competencia: {{ a.competenciaDetectada }}</p>
+        }
+        @if (a.oportunidad) {
+          <p class="text-[12px] text-brand-dim mt-1">Oportunidad: {{ a.oportunidad }}</p>
+        }
+      </div>
+    }
+  </div>
+</div>
