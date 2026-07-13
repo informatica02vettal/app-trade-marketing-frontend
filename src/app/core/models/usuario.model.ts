@@ -10,6 +10,16 @@ export interface Usuario {
   activo: boolean;
 }
 
+export interface UsuarioRequest {
+  nombre: string;
+  email: string;
+  password?: string;
+  region?: string;
+  ejecutivoAsociado?: string;
+  rol: RolUsuario;
+  activo?: boolean;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;

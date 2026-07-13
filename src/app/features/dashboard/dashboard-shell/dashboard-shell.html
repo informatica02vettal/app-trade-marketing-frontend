@@ -105,6 +105,26 @@
     </a>
   </div>
 
+  <div class="mt-1.5">
+    <div class="text-[10px] uppercase tracking-[0.09em] text-muted px-2.5 pt-3.5 pb-1.5 font-mono">Administración</div>
+    <a
+      routerLink="/dashboard/clientes"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla12="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla12.isActive" [class.text-muted]="!rla12.isActive">12</span> Clientes
+    </a>
+    <a
+      routerLink="/dashboard/mercaderistas"
+      routerLinkActive="bg-panel-alt text-ink border-line"
+      #rla13="routerLinkActive"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-muted text-[13.5px] font-medium mb-0.5 border border-transparent transition-colors no-underline hover:bg-panel-hover hover:text-ink"
+    >
+      <span class="font-mono text-[10.5px] w-4 shrink-0" [class.text-brand]="rla13.isActive" [class.text-muted]="!rla13.isActive">13</span> Mercaderistas
+    </a>
+  </div>
+
   <div class="mt-auto pt-3.5 px-2.5 pb-1 border-t border-line">
     <div class="flex items-center gap-2.5">
       <div class="w-7 h-7 rounded-full bg-panel-alt border border-line flex items-center justify-center text-[11px] font-semibold text-brand-dim shrink-0">

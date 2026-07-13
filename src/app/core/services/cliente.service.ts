@@ -3,7 +3,13 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
-import { AsignacionCliente, AsignacionClienteRequest, ClienteErp } from '../models/cliente.model';
+import {
+  AsignacionCliente,
+  AsignacionClienteRequest,
+  ClienteErp,
+  ClienteLocal,
+  SincronizacionResultado,
+} from '../models/cliente.model';
 
 const CLIENTES_URL = `${environment.apiBaseUrl}/clientes`;
 const ASIGNACIONES_URL = `${environment.apiBaseUrl}/asignaciones`;
@@ -40,5 +46,15 @@ export class ClienteService {
 
   eliminarAsignacion(id: number): Observable<void> {
     return this.http.delete<ApiResponse<void>>(`${ASIGNACIONES_URL}/${id}`).pipe(map(() => undefined));
+  }
+
+  listarLocales(): Observable<ClienteLocal[]> {
+    return this.http.get<ApiResponse<ClienteLocal[]>>(`${CLIENTES_URL}/locales`).pipe(map((res) => res.data));
+  }
+
+  sincronizar(): Observable<SincronizacionResultado> {
+    return this.http
+      .post<ApiResponse<SincronizacionResultado>>(`${CLIENTES_URL}/sincronizar`, {})
+      .pipe(map((res) => res.data));
   }
 }

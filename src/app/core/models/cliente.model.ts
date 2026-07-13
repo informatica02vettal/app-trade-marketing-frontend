@@ -21,3 +21,25 @@ export interface AsignacionClienteRequest {
   usuarioId: number;
   region?: string;
 }
+
+export interface ClienteLocal {
+  codigoCliente: string;
+  rif: string | null;
+  nombreFiscal: string | null;
+  nombreComercial: string | null;
+  direccionFiscal: string | null;
+  telefonoPrincipal: string | null;
+  celular: string | null;
+  email: string | null;
+  estado: string | null;
+  ciudad: string | null;
+  municipio: string | null;
+  fechaCreacionErp: string | null;
+  sincronizadoEn: string;
+}
+
+export interface SincronizacionResultado {
+  clientesSincronizados: number;
+  sucursalesSincronizadas: number;
+  sincronizadoEn: string;
+}

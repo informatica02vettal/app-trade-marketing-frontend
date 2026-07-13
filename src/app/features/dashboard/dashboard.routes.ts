@@ -20,6 +20,11 @@ export const DASHBOARD_ROUTES: Routes = [
       { path: 'kpis', loadComponent: () => import('./indicadores/indicadores').then((m) => m.Indicadores) },
       { path: 'fase2', loadComponent: () => import('./fase2/fase2').then((m) => m.Fase2) },
       { path: 'catalogos', loadComponent: () => import('./catalogos/catalogos').then((m) => m.Catalogos) },
+      { path: 'clientes', loadComponent: () => import('./clientes/clientes').then((m) => m.Clientes) },
+      {
+        path: 'mercaderistas',
+        loadComponent: () => import('./mercaderistas/mercaderistas').then((m) => m.Mercaderistas),
+      },
     ],
   },
 ];

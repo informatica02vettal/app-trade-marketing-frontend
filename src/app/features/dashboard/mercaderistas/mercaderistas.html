@@ -1,0 +1,207 @@
+<div class="flex justify-between items-start flex-wrap gap-3.5">
+  <div>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Mercaderistas</h2>
+    <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Alta de mercaderistas con acceso a la app y asignación de clientes por mercaderista.</p>
+  </div>
+  <div class="flex gap-2 items-center">
+    <button
+      class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
+      (click)="abrirModalNuevo()"
+    >
+      + Nuevo mercaderista
+    </button>
+  </div>
+</div>
+
+@if (error(); as mensaje) {
+  <div class="mt-3 flex items-center gap-1.5 rounded-lg border border-danger/30 bg-danger/[0.08] px-3 py-2 text-[12px] text-danger">
+    {{ mensaje }}
+  </div>
+}
+
+<!-- Modal: nuevo mercaderista -->
+@if (mostrarModalNuevo()) {
+  <div class="fixed inset-0 bg-[rgba(20,24,28,0.45)] flex items-center justify-center p-5 z-[100]" (click)="cerrarModalNuevo()">
+    <div
+      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[520px] max-h-[calc(100vh-40px)] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex justify-between items-start flex-wrap gap-3.5 mb-1">
+        <p class="font-display text-[15px] font-semibold mb-0.5">Nuevo mercaderista</p>
+        <button type="button" class="bg-transparent border-none cursor-pointer text-muted text-xl leading-none p-1 hover:text-ink" (click)="cerrarModalNuevo()">×</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5 col-span-2">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Nombre</label>
+          <input [(ngModel)]="nuevo.nombre" placeholder="Nombre completo" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+        </div>
+        <div class="flex flex-col gap-1.5 col-span-2">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Correo</label>
+          <input type="email" [(ngModel)]="nuevo.email" placeholder="correo@vettal.com.ve" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+        </div>
+        <div class="flex flex-col gap-1.5 col-span-2">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Contraseña</label>
+          <input type="password" [(ngModel)]="nuevo.password" placeholder="Mínimo 8 caracteres" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Región</label>
+          <input [(ngModel)]="nuevo.region" placeholder="Región" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Ejecutivo asociado</label>
+          <input [(ngModel)]="nuevo.ejecutivoAsociado" placeholder="Ejecutivo" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-4">
+        <button
+          class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
+          (click)="crear()"
+          [disabled]="guardando() || !nuevo.nombre || !nuevo.email || !nuevo.password"
+        >
+          Crear
+        </button>
+        <button
+          class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
+          (click)="cerrarModalNuevo()"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: asignación de clientes -->
+@if (mostrarModalAsignar()) {
+  <div class="fixed inset-0 bg-[rgba(20,24,28,0.45)] flex items-center justify-center p-5 z-[100]" (click)="cerrarModalAsignar()">
+    <div
+      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[520px] max-h-[calc(100vh-40px)] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex justify-between items-start flex-wrap gap-3.5 mb-1">
+        <p class="font-display text-[15px] font-semibold mb-0.5">Clientes asignados · {{ mercaderistaSeleccionado()?.nombre }}</p>
+        <button type="button" class="bg-transparent border-none cursor-pointer text-muted text-xl leading-none p-1 hover:text-ink" (click)="cerrarModalAsignar()">×</button>
+      </div>
+
+      <div class="flex flex-col gap-1.5 relative mb-3.5">
+        <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Agregar cliente</label>
+        <input
+          [ngModel]="busquedaCliente()"
+          (ngModelChange)="onBusquedaClienteChange($event)"
+          placeholder="Buscar cliente por nombre…"
+          autocomplete="off"
+          class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+        />
+        @if (resultadosCliente().length) {
+          <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-panel border border-line rounded-lg shadow-[0_10px_24px_rgba(20,30,40,0.12)] max-h-[200px] overflow-y-auto z-10">
+            @for (c of resultadosCliente(); track c.id) {
+              <button
+                type="button"
+                (click)="asignarCliente(c)"
+                class="block w-full text-left px-2.5 py-2 text-[13px] bg-transparent border-none border-b border-line last:border-b-0 cursor-pointer text-ink hover:bg-panel-alt"
+              >
+                {{ c.nombre }} <span class="font-mono text-[11.5px] text-muted">· {{ c.id }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <table class="w-full border-collapse text-[12.5px]">
+        <thead>
+          <tr>
+            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Cliente</th>
+            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Región</th>
+            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of asignaciones(); track a.id) {
+            <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
+              <td class="px-2.5 py-2.5 align-middle">{{ a.clienteNombre }} <span class="font-mono text-[11px] text-muted">· {{ a.erpClienteId }}</span></td>
+              <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ a.region || '—' }}</td>
+              <td class="px-2.5 py-2.5 align-middle">
+                <button type="button" class="text-danger text-[11.5px] font-semibold bg-transparent border-none cursor-pointer hover:underline" (click)="quitarAsignacion(a)">
+                  Quitar
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="px-2.5 py-4 text-center text-muted text-[12.5px]">Sin clientes asignados todavía.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<div class="flex items-center gap-1.5 mt-[18px] mb-3.5">
+  <div class="w-[7px] h-[7px] rounded-full bg-teal shrink-0 shadow-[0_0_0_3px_rgba(91,194,234,0.18)]"></div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="font-mono text-[11px] tracking-[0.08em] text-muted uppercase whitespace-nowrap">{{ mercaderistas().length }} mercaderistas</div>
+  <div class="flex-1 h-0 border-t-[1.5px] border-dashed border-line"></div>
+  <div class="w-[7px] h-[7px] rounded-full bg-brand shrink-0 shadow-[0_0_0_3px_rgba(36,169,225,0.18)]"></div>
+</div>
+
+<div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
+  <table class="w-full border-collapse text-[12.5px]">
+    <thead>
+      <tr>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Nombre</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Correo</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Región</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Ejecutivo asociado</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (m of mercaderistas(); track m.id) {
+        <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
+          <td class="px-2.5 py-2.5 align-middle">{{ m.nombre }}</td>
+          <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ m.email }}</td>
+          <td class="px-2.5 py-2.5 align-middle">{{ m.region || '—' }}</td>
+          <td class="px-2.5 py-2.5 align-middle">{{ m.ejecutivoAsociado || '—' }}</td>
+          <td class="px-2.5 py-2.5 align-middle">
+            @if (m.activo) {
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-semibold tracking-[0.02em] bg-success/[0.13] text-success">ACTIVO</span>
+            } @else {
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-semibold tracking-[0.02em] bg-danger/[0.13] text-danger">INACTIVO</span>
+            }
+          </td>
+          <td class="px-2.5 py-2.5 align-middle whitespace-nowrap">
+            <button
+              class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover mr-1.5"
+              (click)="abrirAsignaciones(m)"
+            >
+              Gestionar clientes
+            </button>
+            @if (m.activo) {
+              <button type="button" class="text-danger text-[11.5px] font-semibold bg-transparent border-none cursor-pointer hover:underline" (click)="desactivar(m)">
+                Desactivar
+              </button>
+            } @else {
+              <button type="button" class="text-success text-[11.5px] font-semibold bg-transparent border-none cursor-pointer hover:underline" (click)="reactivar(m)">
+                Reactivar
+              </button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6" class="px-2.5 py-6 text-center text-muted text-[12.5px]">
+            @if (cargando()) {
+              Cargando mercaderistas…
+            } @else {
+              Sin mercaderistas registrados todavía.
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
