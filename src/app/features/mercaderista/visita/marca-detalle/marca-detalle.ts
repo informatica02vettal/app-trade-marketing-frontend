@@ -136,6 +136,13 @@ export class MarcaDetalle implements OnInit {
     }
   }
 
+  claseBotonSiNo(valorActual: boolean, esBotonSi: boolean): string {
+    const base = 'rounded-lg border px-3.5 py-1.5 text-[12px] font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed';
+    const activo = esBotonSi ? valorActual : !valorActual;
+    if (!activo) return `${base} bg-panel-alt border-line text-muted`;
+    return esBotonSi ? `${base} bg-success-tint border-success text-success` : `${base} bg-danger-tint border-danger text-danger`;
+  }
+
   onExhibidorMarcaChange(valor: boolean): void {
     this.exhibidorMarca.set(valor);
     if (!valor) {

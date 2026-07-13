@@ -89,20 +89,20 @@
             <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-3">
               Marcas auditadas en esta visita
             </p>
-            <div class="grid grid-cols-2 gap-2 mb-6">
+            <div class="flex flex-wrap gap-[7px] mb-6">
               @for (marca of marcas(); track marca.id) {
                 <button
                   type="button"
                   (click)="abrirMarca(marca)"
-                  class="relative rounded-xl border px-3 py-3 text-left font-display font-bold text-[13.5px]"
-                  [class.border-success]="sesion.estaMarcaCompletada(marca.id)"
+                  class="inline-flex items-center bg-panel-alt border border-line rounded-full px-3 py-[7px] text-[12px] font-semibold text-muted cursor-pointer"
                   [class.bg-success-tint]="sesion.estaMarcaCompletada(marca.id)"
-                  [class.border-line]="!sesion.estaMarcaCompletada(marca.id)"
+                  [class.border-success]="sesion.estaMarcaCompletada(marca.id)"
+                  [class.text-success]="sesion.estaMarcaCompletada(marca.id)"
                 >
-                  {{ marca.nombre }}
                   @if (sesion.estaMarcaCompletada(marca.id)) {
-                    <span class="absolute top-1.5 right-2 text-success text-[13px]">✓</span>
+                    ✓
                   }
+                  {{ marca.nombre }}
                 </button>
               }
             </div>

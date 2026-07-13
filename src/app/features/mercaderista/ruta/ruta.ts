@@ -55,6 +55,8 @@ export class Ruta implements OnInit {
     return total > 0 ? Math.round((this.ejecutadas() / total) * 100) : 0;
   });
 
+  readonly fechaHoyLabel = new Intl.DateTimeFormat('es-VE', { day: '2-digit', month: 'short' }).format(new Date());
+
   ngOnInit(): void {
     this.cargarPlanDelDia();
   }

@@ -1,6 +1,6 @@
 export type EstadoExhibidor = 'OPTIMO' | 'REGULAR' | 'DETERIORADO' | 'NO_APLICA';
 
-export type EstadoPop = 'OPTIMO' | 'REGULAR' | 'FALTANTE';
+export type EstadoPop = 'OPTIMO' | 'REGULAR' | 'FALTANTE' | 'NO_APLICA';
 
 export interface AuditoriaMarca {
   id: number;

@@ -1,22 +1,24 @@
-<div class="p-4">
-  <header class="mb-4">
-    <p class="text-muted text-[12px]">Hola,</p>
-    <h1 class="font-display text-lg font-bold">{{ usuario()?.nombre }}</h1>
-  </header>
-
-  <section class="bg-brand-tint rounded-2xl p-4 mb-5">
-    <p class="font-mono text-[10.5px] uppercase tracking-wide text-brand-dim mb-1">Cumplimiento de hoy</p>
-    <div class="flex items-end justify-between">
-      <p class="font-display text-2xl font-bold">{{ ejecutadas() }} / {{ planificadas() }}</p>
-      <p class="font-mono font-bold text-brand-dim">{{ cumplimientoPct() }}%</p>
+<div class="p-4 pb-[90px]">
+  <div class="bg-panel border border-line rounded-[14px] px-4 py-[15px] shadow-[0_1px_2px_rgba(30,40,50,0.04)]">
+    <div class="flex justify-between items-center">
+      <p class="m-0 text-[12.5px] font-bold">Ruta de hoy</p>
+      <p class="m-0 font-mono text-[10.5px] text-muted">{{ fechaHoyLabel }}</p>
     </div>
-    <div class="h-2 rounded-full bg-white/60 mt-2 overflow-hidden">
-      <div class="h-full bg-brand" [style.width.%]="cumplimientoPct()"></div>
+    <div class="flex justify-between items-center mt-2 mb-1.5">
+      <p class="m-0 text-[11px] text-muted">Cumplimiento del día</p>
+      <p class="m-0 text-[11px] text-muted">{{ ejecutadas() }}/{{ planificadas() }}</p>
     </div>
-  </section>
+    <div class="h-[7px] rounded-md bg-panel-alt overflow-hidden">
+      <div
+        class="h-full rounded-md transition-[width] duration-300 bg-[linear-gradient(90deg,var(--color-teal),var(--color-brand))]"
+        [style.width.%]="cumplimientoPct()"
+      ></div>
+    </div>
+  </div>
 
-  <section class="mb-5">
-    <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Visita no planificada</p>
+  <p class="font-mono text-[10.5px] uppercase tracking-[0.07em] text-muted mt-[18px] mb-2">Visita no planificada</p>
+
+  <div class="bg-panel border border-line rounded-[14px] px-4 py-[15px] shadow-[0_1px_2px_rgba(30,40,50,0.04)]">
     <input
       type="text"
       placeholder="Buscar cliente por nombre…"
@@ -69,40 +71,45 @@
         </div>
       </div>
     }
-  </section>
+  </div>
 
-  <section>
-    <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Plan de hoy</p>
+  <p class="font-mono text-[10.5px] uppercase tracking-[0.07em] text-muted mt-[18px] mb-2">Clientes asignados</p>
 
-    @if (cargandoPlan()) {
-      <p class="text-muted text-[13px]">Cargando…</p>
-    } @else if (!plan().length) {
-      <p class="text-muted text-[13px]">No tienes visitas planificadas para hoy.</p>
-    } @else {
-      <div class="flex flex-col gap-2">
-        @for (p of plan(); track p.id) {
-          <div class="border border-line rounded-xl p-3 flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <p class="font-display font-bold text-[14px] truncate">{{ p.clienteNombre }}</p>
-              <p class="text-muted text-[12px] truncate">{{ p.objetivo || 'Sin objetivo definido' }}</p>
-            </div>
-            @if (p.estado === 'PENDIENTE') {
-              <button
-                type="button"
-                (click)="iniciarVisitaPlanificada(p)"
-                [disabled]="iniciandoVisita()"
-                class="shrink-0 rounded-lg bg-brand text-white text-[12.5px] font-bold px-3 py-2 disabled:opacity-60"
-              >
-                Iniciar
-              </button>
-            } @else {
-              <span class="shrink-0 rounded-full bg-success-tint text-success text-[11px] font-bold px-2.5 py-1">
-                {{ p.estado }}
-              </span>
-            }
-          </div>
+  @if (cargandoPlan()) {
+    <p class="text-muted text-[13px]">Cargando…</p>
+  } @else if (!plan().length) {
+    <div class="text-center text-muted text-[12.5px] py-[34px] px-3.5">
+      <b class="block font-display text-[15px] text-ink mb-1">Sin visitas para hoy</b>
+      No tienes clientes planificados en tu ruta de hoy.
+    </div>
+  } @else {
+    @for (p of plan(); track p.id) {
+      <div class="bg-panel border border-line rounded-[14px] px-4 py-[15px] shadow-[0_1px_2px_rgba(30,40,50,0.04)] mb-[11px]">
+        <div class="flex justify-between items-start gap-2.5">
+          <h3 class="m-0 text-[14px] font-bold font-display truncate">{{ p.clienteNombre }}</h3>
+          @if (p.estado === 'PENDIENTE') {
+            <span class="inline-flex items-center px-[9px] py-[3px] rounded-full text-[10px] font-bold gap-1 bg-amber-tint text-amber shrink-0">Pendiente</span>
+          } @else {
+            <span class="inline-flex items-center px-[9px] py-[3px] rounded-full text-[10px] font-bold gap-1 bg-success-tint text-success shrink-0">{{ p.estado }}</span>
+          }
+        </div>
+        <p class="mt-[3px] mb-0 text-[11.5px] text-muted">{{ p.region }} · {{ p.horaProgramada }}</p>
+        @if (p.objetivo) {
+          <p class="mt-[9px] mb-0 text-[12px] bg-panel-alt px-2.5 py-2 rounded-lg">{{ p.objetivo }}</p>
         }
+        <div class="mt-[11px]">
+          @if (p.estado === 'PENDIENTE') {
+            <button
+              type="button"
+              (click)="iniciarVisitaPlanificada(p)"
+              [disabled]="iniciandoVisita()"
+              class="w-full rounded-[11px] border border-brand bg-brand px-4 py-2 text-[12px] font-bold text-white disabled:opacity-60"
+            >
+              Iniciar visita
+            </button>
+          }
+        </div>
       </div>
     }
-  </section>
+  }
 </div>

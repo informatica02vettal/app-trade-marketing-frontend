@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-mobile-shell',
@@ -7,4 +8,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './mobile-shell.html',
 })
-export class MobileShell {}
+export class MobileShell {
+  private readonly authService = inject(AuthService);
+
+  readonly usuario = this.authService.usuarioActual;
+}

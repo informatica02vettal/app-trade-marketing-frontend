@@ -1,33 +1,68 @@
-<div class="p-4">
-  <div class="text-center mb-6">
+<div class="p-4 pb-[90px]">
+  <div class="bg-panel border border-line rounded-[14px] shadow-[0_1px_2px_rgba(30,40,50,0.04)] text-center px-4 py-[22px]">
     <div
-      class="w-14 h-14 rounded-full bg-brand-tint text-brand-dim flex items-center justify-center mx-auto mb-2 font-display font-bold text-lg"
+      class="w-[58px] h-[58px] rounded-full bg-brand-tint text-brand-dim flex items-center justify-center mx-auto mb-2.5 font-display font-bold text-[19px]"
     >
-      {{ usuario()?.nombre?.charAt(0) }}
+      {{ iniciales() }}
     </div>
-    <p class="font-display font-bold text-[15px]">{{ usuario()?.nombre }}</p>
-    <p class="text-muted text-[12px]">{{ usuario()?.region }} · {{ usuario()?.ejecutivoAsociado }}</p>
+    <p class="m-0 font-display font-bold text-[15px]">{{ usuario()?.nombre }}</p>
+    <p class="mt-[3px] mb-0 text-[11.5px] text-muted">Mercaderista · Zona {{ usuario()?.region }}</p>
   </div>
 
-  <div class="border border-line rounded-xl overflow-hidden mb-6">
-    <div class="flex justify-between px-3 py-2.5 border-b border-line">
-      <p class="text-[13px]">Visitas completadas</p>
-      <span class="font-mono font-bold">{{ visitasCompletadas() }}</span>
+  <p class="font-mono text-[10.5px] uppercase tracking-[0.07em] text-muted mt-[18px] mb-2">Cumplimiento semanal</p>
+  <div class="bg-panel border border-line rounded-[14px] px-4 py-[15px] shadow-[0_1px_2px_rgba(30,40,50,0.04)]">
+    <div class="flex items-center gap-4">
+      <div class="w-[84px] h-[84px] rounded-full flex items-center justify-center shrink-0" [style.background]="ringStyle()">
+        <div class="w-16 h-16 rounded-full bg-panel flex flex-col items-center justify-center">
+          <b class="font-display text-[17px]">{{ cumplimientoSemanalPct() }}%</b>
+          <span class="text-[9px] text-muted">cumplim.</span>
+        </div>
+      </div>
+      <div class="flex-1">
+        <div class="flex justify-between items-center py-[11px] border-b border-line">
+          <p class="m-0 text-[12.5px] font-bold">Visitas ejecutadas</p>
+          <span class="font-mono font-bold text-[12.5px]">{{ visitasEjecutadasSemana() }} / {{ visitasPlanificadasSemana() }}</span>
+        </div>
+        <div class="flex justify-between items-center py-[11px] border-b border-line">
+          <p class="m-0 text-[12.5px] font-bold">Fotos capturadas</p>
+          <span class="font-mono font-bold text-[12.5px]">{{ fotosCapturadas() }}</span>
+        </div>
+        <div class="flex justify-between items-center py-[11px]">
+          <p class="m-0 text-[12.5px] font-bold">Hallazgos reportados</p>
+          <span class="font-mono font-bold text-[12.5px]">{{ hallazgosReportados() }}</span>
+        </div>
+      </div>
     </div>
-    <div class="flex justify-between px-3 py-2.5 border-b border-line">
-      <p class="text-[13px]">Fotos capturadas</p>
-      <span class="font-mono font-bold">{{ fotosCapturadas() }}</span>
+  </div>
+
+  <p class="font-mono text-[10.5px] uppercase tracking-[0.07em] text-muted mt-[18px] mb-2">Cuenta</p>
+  <div class="bg-panel border border-line rounded-[14px] px-4 py-[15px] shadow-[0_1px_2px_rgba(30,40,50,0.04)]">
+    <div class="flex justify-between items-center py-[11px] border-b border-line">
+      <p class="m-0 text-[12.5px] font-bold">Zona asignada</p>
+      <span class="text-[11.5px] text-muted">{{ usuario()?.region }}</span>
     </div>
-    <div class="flex justify-between px-3 py-2.5">
-      <p class="text-[13px]">Hallazgos de mercado reportados</p>
-      <span class="font-mono font-bold">{{ hallazgosReportados() }}</span>
+    <div class="flex justify-between items-center py-[11px] border-b border-line">
+      <p class="m-0 text-[12.5px] font-bold">Ejecutivo de ventas</p>
+      <span class="text-[11.5px] text-muted">{{ usuario()?.ejecutivoAsociado }}</span>
+    </div>
+    <div class="flex justify-between items-center py-[11px]">
+      <p class="m-0 text-[12.5px] font-bold">Última sincronización</p>
+      <span class="text-[11.5px] text-muted">{{ ultimaSincronizacion() }}</span>
     </div>
   </div>
 
   <button
     type="button"
+    (click)="sincronizarAhora()"
+    [disabled]="sincronizando()"
+    class="w-full rounded-[11px] border border-line bg-transparent px-4 py-3 text-[13.5px] font-bold text-ink mt-3.5 disabled:opacity-60"
+  >
+    ↻ Sincronizar ahora con Vettal Trade
+  </button>
+  <button
+    type="button"
     (click)="cerrarSesion()"
-    class="w-full rounded-[11px] border border-danger text-danger font-bold text-[13.5px] py-3"
+    class="w-full rounded-[11px] border border-danger-tint bg-danger-tint px-4 py-3 text-[13.5px] font-bold text-danger mt-2.5"
   >
     Cerrar sesión
   </button>

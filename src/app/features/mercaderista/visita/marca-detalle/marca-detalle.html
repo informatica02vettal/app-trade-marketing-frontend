@@ -10,59 +10,62 @@
       <div class="flex flex-col gap-3">
         <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Checklist de presencia</p>
 
-        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
-          Exhibidor propio presente
-          <input
-            type="checkbox"
-            [checked]="exhibidorMarca()"
-            (change)="onExhibidorMarcaChange($any($event.target).checked)"
-          />
-        </label>
-        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
-          Producto en el exhibidor
-          <input
-            type="checkbox"
-            [disabled]="!exhibidorMarca()"
-            [checked]="productoExhibidor()"
-            (change)="productoExhibidor.set($any($event.target).checked)"
-          />
-        </label>
-        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
-          Producto en piso de ventas / anaquel
-          <input
-            type="checkbox"
-            [checked]="productoAnaquel()"
-            (change)="productoAnaquel.set($any($event.target).checked)"
-          />
-        </label>
-        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
-          Aviso de fachada
-          <input
-            type="checkbox"
-            [checked]="avisoFachada()"
-            (change)="avisoFachada.set($any($event.target).checked)"
-          />
-        </label>
-        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
-          Aviso de pared / rompetráfico
-          <input type="checkbox" [checked]="avisoPared()" (change)="avisoPared.set($any($event.target).checked)" />
-        </label>
-        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
-          Banderines
-          <input type="checkbox" [checked]="banderines()" (change)="banderines.set($any($event.target).checked)" />
-        </label>
-        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
-          Rotulado / stickers
-          <input type="checkbox" [checked]="rotulado()" (change)="rotulado.set($any($event.target).checked)" />
-        </label>
-        <label class="flex items-center justify-between text-[13px] py-1.5 border-b border-line">
-          Empleados con ropa de marca
-          <input
-            type="checkbox"
-            [checked]="empleadosUniforme()"
-            (change)="empleadosUniforme.set($any($event.target).checked)"
-          />
-        </label>
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>Exhibidor propio presente</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" (click)="onExhibidorMarcaChange(true)" [class]="claseBotonSiNo(exhibidorMarca(), true)">Sí</button>
+            <button type="button" (click)="onExhibidorMarcaChange(false)" [class]="claseBotonSiNo(exhibidorMarca(), false)">No</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>Producto en el exhibidor</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" [disabled]="!exhibidorMarca()" (click)="productoExhibidor.set(true)" [class]="claseBotonSiNo(productoExhibidor(), true)">Sí</button>
+            <button type="button" [disabled]="!exhibidorMarca()" (click)="productoExhibidor.set(false)" [class]="claseBotonSiNo(productoExhibidor(), false)">No</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>Producto en piso de ventas / anaquel</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" (click)="productoAnaquel.set(true)" [class]="claseBotonSiNo(productoAnaquel(), true)">Sí</button>
+            <button type="button" (click)="productoAnaquel.set(false)" [class]="claseBotonSiNo(productoAnaquel(), false)">No</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>Aviso de fachada</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" (click)="avisoFachada.set(true)" [class]="claseBotonSiNo(avisoFachada(), true)">Sí</button>
+            <button type="button" (click)="avisoFachada.set(false)" [class]="claseBotonSiNo(avisoFachada(), false)">No</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>Aviso de pared / rompetráfico</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" (click)="avisoPared.set(true)" [class]="claseBotonSiNo(avisoPared(), true)">Sí</button>
+            <button type="button" (click)="avisoPared.set(false)" [class]="claseBotonSiNo(avisoPared(), false)">No</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>Banderines</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" (click)="banderines.set(true)" [class]="claseBotonSiNo(banderines(), true)">Sí</button>
+            <button type="button" (click)="banderines.set(false)" [class]="claseBotonSiNo(banderines(), false)">No</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>Rotulado / stickers</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" (click)="rotulado.set(true)" [class]="claseBotonSiNo(rotulado(), true)">Sí</button>
+            <button type="button" (click)="rotulado.set(false)" [class]="claseBotonSiNo(rotulado(), false)">No</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>Empleados con ropa de marca</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" (click)="empleadosUniforme.set(true)" [class]="claseBotonSiNo(empleadosUniforme(), true)">Sí</button>
+            <button type="button" (click)="empleadosUniforme.set(false)" [class]="claseBotonSiNo(empleadosUniforme(), false)">No</button>
+          </div>
+        </div>
 
         <div class="bg-brand-tint rounded-xl p-3 text-center">
           <p class="text-[11px] font-mono uppercase text-brand-dim">Presencia calculada</p>
@@ -111,6 +114,7 @@
           <option value="OPTIMO">Óptimo</option>
           <option value="REGULAR">Regular</option>
           <option value="FALTANTE">Faltante</option>
+          <option value="NO_APLICA">No Aplica</option>
         </select>
       </div>
     }
@@ -123,10 +127,12 @@
             <button
               type="button"
               (click)="toggleCompetencia(c.nombre)"
-              class="rounded-full border px-3 py-1.5 text-[12.5px]"
-              [class.bg-brand]="competenciaSeleccionada().has(c.nombre)"
-              [class.text-white]="competenciaSeleccionada().has(c.nombre)"
+              class="rounded-full border px-3 py-1.5 text-[12.5px] font-semibold"
+              [class.bg-brand-tint]="competenciaSeleccionada().has(c.nombre)"
+              [class.text-brand-dim]="competenciaSeleccionada().has(c.nombre)"
               [class.border-brand]="competenciaSeleccionada().has(c.nombre)"
+              [class.bg-panel-alt]="!competenciaSeleccionada().has(c.nombre)"
+              [class.text-muted]="!competenciaSeleccionada().has(c.nombre)"
               [class.border-line]="!competenciaSeleccionada().has(c.nombre)"
             >
               {{ c.nombre }}
@@ -314,8 +320,11 @@
             type="button"
             (click)="onCategoriaSolicitudChange('TRADE_MARKETING')"
             class="flex-1 rounded-[11px] border py-2 text-[12.5px] font-bold"
-            [class.bg-brand]="solicitudCategoria() === 'TRADE_MARKETING'"
-            [class.text-white]="solicitudCategoria() === 'TRADE_MARKETING'"
+            [class.bg-brand-tint]="solicitudCategoria() === 'TRADE_MARKETING'"
+            [class.text-brand-dim]="solicitudCategoria() === 'TRADE_MARKETING'"
+            [class.border-brand]="solicitudCategoria() === 'TRADE_MARKETING'"
+            [class.bg-panel-alt]="solicitudCategoria() !== 'TRADE_MARKETING'"
+            [class.text-muted]="solicitudCategoria() !== 'TRADE_MARKETING'"
             [class.border-line]="solicitudCategoria() !== 'TRADE_MARKETING'"
           >
             Trade-Marketing
@@ -324,8 +333,11 @@
             type="button"
             (click)="onCategoriaSolicitudChange('PUBLICIDAD')"
             class="flex-1 rounded-[11px] border py-2 text-[12.5px] font-bold"
-            [class.bg-brand]="solicitudCategoria() === 'PUBLICIDAD'"
-            [class.text-white]="solicitudCategoria() === 'PUBLICIDAD'"
+            [class.bg-brand-tint]="solicitudCategoria() === 'PUBLICIDAD'"
+            [class.text-brand-dim]="solicitudCategoria() === 'PUBLICIDAD'"
+            [class.border-brand]="solicitudCategoria() === 'PUBLICIDAD'"
+            [class.bg-panel-alt]="solicitudCategoria() !== 'PUBLICIDAD'"
+            [class.text-muted]="solicitudCategoria() !== 'PUBLICIDAD'"
             [class.border-line]="solicitudCategoria() !== 'PUBLICIDAD'"
           >
             Publicidad
@@ -341,10 +353,12 @@
                   <button
                     type="button"
                     (click)="toggleMaterial(material)"
-                    class="rounded-full border px-3 py-1.5 text-[12.5px]"
-                    [class.bg-brand]="estaMaterialSeleccionado(material)"
-                    [class.text-white]="estaMaterialSeleccionado(material)"
+                    class="rounded-full border px-3 py-1.5 text-[12.5px] font-semibold"
+                    [class.bg-brand-tint]="estaMaterialSeleccionado(material)"
+                    [class.text-brand-dim]="estaMaterialSeleccionado(material)"
                     [class.border-brand]="estaMaterialSeleccionado(material)"
+                    [class.bg-panel-alt]="!estaMaterialSeleccionado(material)"
+                    [class.text-muted]="!estaMaterialSeleccionado(material)"
                     [class.border-line]="!estaMaterialSeleccionado(material)"
                   >
                     {{ material.nombre }}

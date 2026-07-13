@@ -1,39 +1,47 @@
-<div class="p-4">
-  <h1 class="font-display text-lg font-bold mb-4">Banco de imágenes</h1>
+<div class="p-4 pb-[90px]">
+  <p class="font-mono text-[10.5px] uppercase tracking-[0.07em] text-muted mt-0 mb-2">Planogramas de exhibidores</p>
+  <p class="m-0 mb-3 text-[11.5px] text-muted">
+    Referencia de cómo debe quedar cada exhibidor lleno. Contenido de solo lectura, cargado por Mercadeo desde el corporativo.
+  </p>
+  @if (!planogramas().length) {
+    <p class="text-muted text-[13px] mb-[22px]">Aún no hay planogramas cargados.</p>
+  } @else {
+    <div class="grid grid-cols-2 gap-2.5 mb-[22px]">
+      @for (p of planogramas(); track p.id) {
+        <div class="bg-panel-alt border border-line rounded-[10px] overflow-hidden">
+          <img [src]="p.imagenUrl" [alt]="p.nombre" class="w-full aspect-[4/3] object-cover" />
+          <p class="px-2.5 pt-2 pb-0.5 text-[11.5px] font-bold truncate">{{ p.nombre }}</p>
+        </div>
+      }
+    </div>
+  }
 
-  <section class="mb-6">
-    <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Planogramas de exhibidores</p>
-    @if (!planogramas().length) {
-      <p class="text-muted text-[13px]">Aún no hay planogramas cargados.</p>
-    } @else {
-      <div class="grid grid-cols-2 gap-2">
-        @for (p of planogramas(); track p.id) {
-          <div class="border border-line rounded-xl overflow-hidden">
-            <img [src]="p.imagenUrl" [alt]="p.nombre" class="w-full h-28 object-cover bg-panel-alt" />
-            <p class="text-[11px] px-2 py-1.5 truncate">{{ p.nombre }}</p>
+  <p class="font-mono text-[10.5px] uppercase tracking-[0.07em] text-muted mt-[18px] mb-2">Artes de marca</p>
+  <p class="m-0 mb-3 text-[11.5px] text-muted">Imágenes y videos listos para descargar y compartir con tus clientes.</p>
+  @if (!artesMarca().length) {
+    <p class="text-muted text-[13px]">Aún no hay artes cargadas.</p>
+  } @else {
+    <div class="grid grid-cols-2 gap-2.5">
+      @for (a of artesMarca(); track a.id) {
+        <div class="bg-panel-alt border border-line rounded-[10px] overflow-hidden">
+          @if (a.tipoArchivo === 'IMAGEN') {
+            <img [src]="a.archivoUrl" [alt]="a.nombre" class="w-full aspect-[4/3] object-cover" />
+          } @else {
+            <div class="w-full aspect-[4/3] flex items-center justify-center text-2xl">📄</div>
+          }
+          <p class="px-2.5 pt-2 pb-0.5 text-[11.5px] font-bold truncate">{{ a.marca }} · {{ a.nombre }}</p>
+          <div class="px-2.5 pt-2 pb-2.5">
+            <a
+              [href]="a.archivoUrl"
+              download
+              target="_blank"
+              class="w-full inline-flex items-center justify-center rounded-[11px] border border-line bg-transparent px-3 py-2 text-[12px] font-bold text-ink no-underline"
+            >
+              Descargar / Compartir
+            </a>
           </div>
-        }
-      </div>
-    }
-  </section>
-
-  <section>
-    <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Artes de marca</p>
-    @if (!artesMarca().length) {
-      <p class="text-muted text-[13px]">Aún no hay artes cargadas.</p>
-    } @else {
-      <div class="grid grid-cols-2 gap-2">
-        @for (a of artesMarca(); track a.id) {
-          <div class="border border-line rounded-xl overflow-hidden">
-            @if (a.tipoArchivo === 'IMAGEN') {
-              <img [src]="a.archivoUrl" [alt]="a.nombre" class="w-full h-28 object-cover bg-panel-alt" />
-            } @else {
-              <div class="w-full h-28 bg-panel-alt flex items-center justify-center text-2xl">📄</div>
-            }
-            <p class="text-[11px] px-2 py-1.5 truncate">{{ a.marca }} · {{ a.nombre }}</p>
-          </div>
-        }
-      </div>
-    }
-  </section>
+        </div>
+      }
+    </div>
+  }
 </div>
