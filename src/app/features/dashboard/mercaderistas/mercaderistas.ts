@@ -30,13 +30,14 @@ export class Mercaderistas implements OnInit {
   readonly usuarioEditando = signal<Usuario | null>(null);
   formulario: UsuarioRequest = formularioVacio();
 
-  readonly guardarDeshabilitado = computed(
-    () =>
+  guardarDeshabilitado(): boolean {
+    return (
       this.guardando() ||
       !this.formulario.nombre ||
       !this.formulario.email ||
-      (!this.usuarioEditando() && !this.formulario.password),
-  );
+      (!this.usuarioEditando() && !this.formulario.password)
+    );
+  }
 
   // ---- Asignación de clientes ----
   readonly mostrarModalAsignar = signal(false);

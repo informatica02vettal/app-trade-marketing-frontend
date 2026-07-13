@@ -1,0 +1,19 @@
+<div class="fixed top-4 left-1/2 -translate-x-1/2 z-[1000] flex flex-col gap-2 w-[calc(100%-2rem)] max-w-[400px] px-2 pointer-events-none">
+  @for (t of toastService.toasts(); track t.id) {
+    <div
+      class="pointer-events-auto rounded-xl border px-3.5 py-3 text-[13px] font-medium shadow-[0_10px_24px_rgba(20,30,40,0.14)] flex items-start gap-2.5"
+      [class.bg-danger-tint]="t.tipo === 'error'"
+      [class.border-danger]="t.tipo === 'error'"
+      [class.text-danger]="t.tipo === 'error'"
+      [class.bg-success-tint]="t.tipo === 'success'"
+      [class.border-success]="t.tipo === 'success'"
+      [class.text-success]="t.tipo === 'success'"
+      [class.bg-brand-tint]="t.tipo === 'info'"
+      [class.border-brand]="t.tipo === 'info'"
+      [class.text-brand-dim]="t.tipo === 'info'"
+    >
+      <span class="flex-1">{{ t.mensaje }}</span>
+      <button type="button" (click)="toastService.cerrar(t.id)" class="shrink-0 opacity-70 hover:opacity-100 leading-none text-lg">×</button>
+    </div>
+  }
+</div>
