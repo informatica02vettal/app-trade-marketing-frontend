@@ -36,3 +36,8 @@ export interface PlanVisitaRequest {
   comentario?: string;
   tipoVisita?: TipoVisita;
 }
+
+export interface PlanVisitaReprogramarRequest {
+  fechaProgramada: string;
+  horaProgramada: string;
+}

@@ -50,6 +50,14 @@ export class Planificacion implements OnInit {
   readonly filtroEstado = signal<EstadoPlanVisita | ''>('');
   readonly guardando = signal(false);
   readonly mostrarModal = signal(false);
+  readonly verificandoDuplicado = signal(false);
+  readonly mostrarModalDuplicado = signal(false);
+
+  // ---- Reprogramar visita desde el listado ----
+  readonly mostrarModalReprogramar = signal(false);
+  readonly visitaReprogramando = signal<PlanVisita | null>(null);
+  readonly guardandoReprogramacion = signal(false);
+  reprogramarForm = { fecha: '', hora: '' };
 
   // ---- Cliente: acotado a los clientes asignados al mercaderista elegido ----
   readonly clientesAsignados = signal<AsignacionCliente[]>([]);
@@ -215,6 +223,16 @@ export class Planificacion implements OnInit {
     this.sucursalesCliente.set([]);
   }
 
+  // ---- Tipo de visita ----
+  onTipoVisitaChange(valor: TipoVisita): void {
+    this.nuevo.tipoVisita = valor;
+    if (valor === 'NO_PLANIFICADA') {
+      this.nuevo.objetivoTipoId = null;
+      this.nuevo.objetivoSubtipoId = null;
+      this.subtiposDisponibles.set([]);
+    }
+  }
+
   // ---- Objetivo de la visita ----
   onObjetivoTipoChange(tipoId: number | null): void {
     this.nuevo.objetivoTipoId = tipoId;
@@ -222,8 +240,46 @@ export class Planificacion implements OnInit {
     this.subtiposDisponibles.set(tipoId ? this.objetivoSubtipos().filter((s) => s.tipoId === tipoId) : []);
   }
 
+  formularioValido(): boolean {
+    return !!this.nuevo.usuarioId && !!this.nuevo.clienteNombre && !!this.nuevo.fechaProgramada && !!this.nuevo.horaProgramada;
+  }
+
+  intentarCrear(): void {
+    if (!this.formularioValido()) return;
+
+    this.verificandoDuplicado.set(true);
+    this.planVisitaService.listar(undefined, this.nuevo.fechaProgramada, this.nuevo.fechaProgramada).subscribe({
+      next: (existentes) => {
+        this.verificandoDuplicado.set(false);
+        const yaExiste = existentes.some((p) =>
+          this.nuevo.erpClienteId
+            ? p.erpClienteId === this.nuevo.erpClienteId
+            : p.clienteNombre.trim().toLowerCase() === this.nuevo.clienteNombre.trim().toLowerCase(),
+        );
+        if (yaExiste) {
+          this.mostrarModalDuplicado.set(true);
+        } else {
+          this.crear();
+        }
+      },
+      error: () => {
+        this.verificandoDuplicado.set(false);
+        this.crear();
+      },
+    });
+  }
+
+  confirmarDuplicadoYCrear(): void {
+    this.mostrarModalDuplicado.set(false);
+    this.crear();
+  }
+
+  cancelarDuplicado(): void {
+    this.mostrarModalDuplicado.set(false);
+  }
+
   crear(): void {
-    if (!this.nuevo.usuarioId || !this.nuevo.clienteNombre || !this.nuevo.fechaProgramada) return;
+    if (!this.formularioValido()) return;
 
     this.guardando.set(true);
     this.planVisitaService
@@ -234,7 +290,7 @@ export class Planificacion implements OnInit {
         usuarioId: this.nuevo.usuarioId ?? undefined,
         region: this.nuevo.region || undefined,
         fechaProgramada: this.nuevo.fechaProgramada,
-        horaProgramada: this.nuevo.horaProgramada || undefined,
+        horaProgramada: this.nuevo.horaProgramada,
         objetivoTipoId: this.nuevo.objetivoTipoId ?? undefined,
         objetivoSubtipoId: this.nuevo.objetivoSubtipoId ?? undefined,
         comentario: this.nuevo.comentario || undefined,
@@ -247,6 +303,34 @@ export class Planificacion implements OnInit {
           this.cargarPlan();
         },
         error: () => this.guardando.set(false),
+      });
+  }
+
+  // ---- Reprogramar ----
+  abrirReprogramar(p: PlanVisita): void {
+    this.visitaReprogramando.set(p);
+    this.reprogramarForm = { fecha: p.fechaProgramada, hora: p.horaProgramada ?? '' };
+    this.mostrarModalReprogramar.set(true);
+  }
+
+  cerrarReprogramar(): void {
+    this.mostrarModalReprogramar.set(false);
+  }
+
+  guardarReprogramacion(): void {
+    const visita = this.visitaReprogramando();
+    if (!visita || !this.reprogramarForm.fecha || !this.reprogramarForm.hora) return;
+
+    this.guardandoReprogramacion.set(true);
+    this.planVisitaService
+      .reprogramar(visita.id, { fechaProgramada: this.reprogramarForm.fecha, horaProgramada: this.reprogramarForm.hora })
+      .subscribe({
+        next: () => {
+          this.guardandoReprogramacion.set(false);
+          this.mostrarModalReprogramar.set(false);
+          this.cargarPlan();
+        },
+        error: () => this.guardandoReprogramacion.set(false),
       });
   }
 }

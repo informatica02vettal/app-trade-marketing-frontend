@@ -1,6 +1,6 @@
 <div class="flex justify-between items-start flex-wrap gap-3.5">
   <div>
-    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Planificación de Visitas</h2>
+    <h2 class="font-display text-[22px] mb-1 tracking-[-0.01em]">Gestión de Visitas</h2>
     <p class="text-muted text-[13px] max-w-[560px] leading-[1.5]">Planes semanales, mensuales y trimestrales por mercaderista y cliente.</p>
   </div>
   <div class="flex gap-2 items-center">
@@ -8,7 +8,7 @@
       class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
       (click)="abrirModal()"
     >
-      + Nueva visita planificada
+      + Nueva visita
     </button>
   </div>
 </div>
@@ -29,7 +29,7 @@
     >
       <div class="flex justify-between items-start flex-wrap gap-3.5 mb-1">
         <div>
-          <p class="font-display text-[15px] font-semibold mb-0.5">Nueva visita planificada</p>
+          <p class="font-display text-[15px] font-semibold mb-0.5">Nueva visita</p>
         </div>
         <button type="button" class="bg-transparent border-none cursor-pointer text-muted text-xl leading-none p-1 hover:text-ink" (click)="cerrarModal()">×</button>
       </div>
@@ -129,36 +129,38 @@
           <input type="date" [(ngModel)]="nuevo.fechaProgramada" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Hora</label>
-          <input type="time" [(ngModel)]="nuevo.horaProgramada" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Hora *</label>
+          <input type="time" required [(ngModel)]="nuevo.horaProgramada" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Objetivo de la visita</label>
-          <select [ngModel]="nuevo.objetivoTipoId" (ngModelChange)="onObjetivoTipoChange($event)" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
-            <option [ngValue]="null">Selecciona…</option>
-            @for (t of objetivoTipos(); track t.id) {
-              <option [ngValue]="t.id">{{ t.nombre }}</option>
-            }
-          </select>
-        </div>
-        @if (subtiposDisponibles().length) {
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Detalle</label>
-            <select [(ngModel)]="nuevo.objetivoSubtipoId" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
-              <option [ngValue]="null">Selecciona…</option>
-              @for (s of subtiposDisponibles(); track s.id) {
-                <option [ngValue]="s.id">{{ s.nombre }}</option>
-              }
-            </select>
-          </div>
-        }
         <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Tipo</label>
-          <select [(ngModel)]="nuevo.tipoVisita" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
+          <select [ngModel]="nuevo.tipoVisita" (ngModelChange)="onTipoVisitaChange($event)" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
             <option value="PLANIFICADA">Planificada</option>
             <option value="NO_PLANIFICADA">No planificada</option>
           </select>
         </div>
+        @if (nuevo.tipoVisita === 'PLANIFICADA') {
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Objetivo de la visita</label>
+            <select [ngModel]="nuevo.objetivoTipoId" (ngModelChange)="onObjetivoTipoChange($event)" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
+              <option [ngValue]="null">Selecciona…</option>
+              @for (t of objetivoTipos(); track t.id) {
+                <option [ngValue]="t.id">{{ t.nombre }}</option>
+              }
+            </select>
+          </div>
+          @if (subtiposDisponibles().length) {
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Detalle</label>
+              <select [(ngModel)]="nuevo.objetivoSubtipoId" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
+                <option [ngValue]="null">Selecciona…</option>
+                @for (s of subtiposDisponibles(); track s.id) {
+                  <option [ngValue]="s.id">{{ s.nombre }}</option>
+                }
+              </select>
+            </div>
+          }
+        }
         <div class="flex flex-col gap-1.5 col-span-2">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Comentario</label>
           <textarea
@@ -173,14 +175,85 @@
       <div class="flex gap-2 mt-4">
         <button
           class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
-          (click)="crear()"
-          [disabled]="guardando() || !nuevo.usuarioId || !nuevo.clienteNombre || !nuevo.fechaProgramada"
+          (click)="intentarCrear()"
+          [disabled]="guardando() || verificandoDuplicado() || !formularioValido()"
         >
-          Crear
+          {{ verificandoDuplicado() ? 'Verificando…' : 'Crear' }}
         </button>
         <button
           class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
           (click)="cerrarModal()"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (mostrarModalDuplicado()) {
+  <div class="fixed inset-0 bg-[rgba(20,24,28,0.45)] flex items-center justify-center p-5 z-[110]" (click)="cancelarDuplicado()">
+    <div
+      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[420px]"
+      (click)="$event.stopPropagation()"
+    >
+      <p class="font-display text-[15px] font-semibold mb-1.5">⚠ Posible visita duplicada</p>
+      <p class="text-[13px] text-muted leading-[1.5] mb-4">
+        Ya existe una visita registrada para <b class="text-ink">{{ nuevo.clienteNombre }}</b> el
+        <b class="text-ink">{{ nuevo.fechaProgramada }}</b>. ¿Deseas registrarla de todas formas?
+      </p>
+      <div class="flex gap-2">
+        <button
+          class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
+          (click)="confirmarDuplicadoYCrear()"
+          [disabled]="guardando()"
+        >
+          Registrar de todas formas
+        </button>
+        <button
+          class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
+          (click)="cancelarDuplicado()"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (mostrarModalReprogramar()) {
+  <div class="fixed inset-0 bg-[rgba(20,24,28,0.45)] flex items-center justify-center p-5 z-[100]" (click)="cerrarReprogramar()">
+    <div
+      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[420px]"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex justify-between items-start flex-wrap gap-3.5 mb-3">
+        <p class="font-display text-[15px] font-semibold mb-0.5">Reprogramar visita · {{ visitaReprogramando()?.clienteNombre }}</p>
+        <button type="button" class="bg-transparent border-none cursor-pointer text-muted text-xl leading-none p-1 hover:text-ink" (click)="cerrarReprogramar()">×</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Nueva fecha</label>
+          <input type="date" [(ngModel)]="reprogramarForm.fecha" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Nueva hora</label>
+          <input type="time" [(ngModel)]="reprogramarForm.hora" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-4">
+        <button
+          class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
+          (click)="guardarReprogramacion()"
+          [disabled]="guardandoReprogramacion() || !reprogramarForm.fecha || !reprogramarForm.hora"
+        >
+          Guardar
+        </button>
+        <button
+          class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
+          (click)="cerrarReprogramar()"
         >
           Cancelar
         </button>
@@ -252,6 +325,7 @@
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Fecha / hora</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Objetivo de visita</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
       </tr>
     </thead>
     <tbody>
@@ -263,6 +337,17 @@
           <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ p.fechaProgramada }} {{ p.horaProgramada }}</td>
           <td class="px-2.5 py-2.5 align-middle">{{ p.objetivo }}</td>
           <td class="px-2.5 py-2.5 align-middle"><span [class]="badgeClase[p.estado]">{{ p.estado }}</span></td>
+          <td class="px-2.5 py-2.5 align-middle">
+            @if (p.estado !== 'EJECUTADA') {
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
+                (click)="abrirReprogramar(p)"
+              >
+                Reprogramar
+              </button>
+            }
+          </td>
         </tr>
       }
     </tbody>

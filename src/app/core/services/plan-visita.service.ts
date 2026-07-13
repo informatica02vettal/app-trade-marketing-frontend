@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
-import { EstadoPlanVisita, PlanVisita, PlanVisitaRequest } from '../models/plan-visita.model';
+import { EstadoPlanVisita, PlanVisita, PlanVisitaReprogramarRequest, PlanVisitaRequest } from '../models/plan-visita.model';
 
 const BASE_URL = `${environment.apiBaseUrl}/plan-visitas`;
 
@@ -26,5 +26,11 @@ export class PlanVisitaService {
 
   cambiarEstado(id: number, estado: EstadoPlanVisita): Observable<void> {
     return this.http.patch<ApiResponse<void>>(`${BASE_URL}/${id}/estado`, { estado }).pipe(map(() => undefined));
+  }
+
+  reprogramar(id: number, request: PlanVisitaReprogramarRequest): Observable<PlanVisita> {
+    return this.http
+      .patch<ApiResponse<PlanVisita>>(`${BASE_URL}/${id}/reprogramar`, request)
+      .pipe(map((res) => res.data));
   }
 }
