@@ -11,10 +11,12 @@ const BASE_URL = `${environment.apiBaseUrl}/plan-visitas`;
 export class PlanVisitaService {
   constructor(private readonly http: HttpClient) {}
 
-  listar(usuarioId?: number, fecha?: string): Observable<PlanVisita[]> {
+  listar(usuarioId?: number, fechaDesde?: string, fechaHasta?: string, estado?: EstadoPlanVisita): Observable<PlanVisita[]> {
     const params: Record<string, string | number> = {};
     if (usuarioId) params['usuarioId'] = usuarioId;
-    if (fecha) params['fecha'] = fecha;
+    if (fechaDesde) params['fechaDesde'] = fechaDesde;
+    if (fechaHasta) params['fechaHasta'] = fechaHasta;
+    if (estado) params['estado'] = estado;
     return this.http.get<ApiResponse<PlanVisita[]>>(BASE_URL, { params }).pipe(map((res) => res.data));
   }
 

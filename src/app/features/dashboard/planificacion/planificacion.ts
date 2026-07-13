@@ -4,47 +4,13 @@ import { PlanVisitaService } from '../../../core/services/plan-visita.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { ObjetivoVisitaService } from '../../../core/services/objetivo-visita.service';
-import { PlanVisita, TipoVisita } from '../../../core/models/plan-visita.model';
+import { EstadoPlanVisita, PlanVisita, TipoVisita } from '../../../core/models/plan-visita.model';
 import { Usuario } from '../../../core/models/usuario.model';
 import { AsignacionCliente, SucursalLocal } from '../../../core/models/cliente.model';
 import { ObjetivoVisitaSubtipo, ObjetivoVisitaTipo } from '../../../core/models/objetivo-visita.model';
 import { BADGE_BAD, BADGE_OK, BADGE_WARN } from '../../../shared/ui/dash/badge-classes';
 
 const BADGE_CLASE: Record<string, string> = { EJECUTADA: BADGE_OK, PENDIENTE: BADGE_WARN, REPROGRAMADA: BADGE_BAD };
-
-function lunesSemanaActual(): Date {
-  const hoy = new Date();
-  const lunes = new Date(hoy);
-  const dia = (hoy.getDay() + 6) % 7;
-  lunes.setDate(hoy.getDate() - dia);
-  lunes.setHours(0, 0, 0, 0);
-  return lunes;
-}
-
-function formatearFecha(fecha: Date): string {
-  const anio = fecha.getFullYear();
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-  const dia = String(fecha.getDate()).padStart(2, '0');
-  return `${anio}-${mes}-${dia}`;
-}
-
-function rangoSemana(): string {
-  const lunes = lunesSemanaActual();
-  const domingo = new Date(lunes);
-  domingo.setDate(lunes.getDate() + 6);
-  const fmt = new Intl.DateTimeFormat('es-VE', { day: '2-digit', month: 'short' });
-  return `Semana del ${fmt.format(lunes)} — ${fmt.format(domingo)}`;
-}
-
-function diasSemanaActual(): { label: string; valor: string }[] {
-  const lunes = lunesSemanaActual();
-  const nombres = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-  return nombres.map((label, i) => {
-    const fecha = new Date(lunes);
-    fecha.setDate(lunes.getDate() + i);
-    return { label, valor: formatearFecha(fecha) };
-  });
-}
 
 function nuevoFormulario() {
   return {
@@ -57,6 +23,7 @@ function nuevoFormulario() {
     horaProgramada: '',
     objetivoTipoId: null as number | null,
     objetivoSubtipoId: null as number | null,
+    comentario: '',
     tipoVisita: 'PLANIFICADA' as TipoVisita,
   };
 }
@@ -74,13 +41,13 @@ export class Planificacion implements OnInit {
   private readonly objetivoVisitaService = inject(ObjetivoVisitaService);
 
   readonly badgeClase = BADGE_CLASE;
-  readonly rangoSemana = rangoSemana();
-  readonly diasSemana = diasSemanaActual();
 
   readonly mercaderistas = signal<Usuario[]>([]);
   readonly plan = signal<PlanVisita[]>([]);
   readonly filtroUsuarioId = signal<number | null>(null);
-  readonly filtroFecha = signal<string>('');
+  readonly filtroFechaDesde = signal<string>('');
+  readonly filtroFechaHasta = signal<string>('');
+  readonly filtroEstado = signal<EstadoPlanVisita | ''>('');
   readonly guardando = signal(false);
   readonly mostrarModal = signal(false);
 
@@ -88,6 +55,7 @@ export class Planificacion implements OnInit {
   readonly clientesAsignados = signal<AsignacionCliente[]>([]);
   readonly cargandoClientesAsignados = signal(false);
   readonly busquedaCliente = signal('');
+  readonly mostrarSugerenciasCliente = signal(false);
   readonly clienteSeleccionado = signal<AsignacionCliente | null>(null);
 
   readonly clientesAsignadosFiltrados = computed(() => {
@@ -129,7 +97,12 @@ export class Planificacion implements OnInit {
 
   cargarPlan(): void {
     this.planVisitaService
-      .listar(this.filtroUsuarioId() ?? undefined, this.filtroFecha() || undefined)
+      .listar(
+        this.filtroUsuarioId() ?? undefined,
+        this.filtroFechaDesde() || undefined,
+        this.filtroFechaHasta() || undefined,
+        this.filtroEstado() || undefined,
+      )
       .subscribe((plan) => this.plan.set(plan));
   }
 
@@ -138,8 +111,18 @@ export class Planificacion implements OnInit {
     this.cargarPlan();
   }
 
-  onFiltroFechaChange(valor: string): void {
-    this.filtroFecha.set(valor);
+  onFiltroFechaDesdeChange(valor: string): void {
+    this.filtroFechaDesde.set(valor);
+    this.cargarPlan();
+  }
+
+  onFiltroFechaHastaChange(valor: string): void {
+    this.filtroFechaHasta.set(valor);
+    this.cargarPlan();
+  }
+
+  onFiltroEstadoChange(valor: string): void {
+    this.filtroEstado.set(valor as EstadoPlanVisita | '');
     this.cargarPlan();
   }
 
@@ -189,11 +172,16 @@ export class Planificacion implements OnInit {
   // ---- Cliente ----
   onBusquedaClienteChange(valor: string): void {
     this.busquedaCliente.set(valor);
+    this.mostrarSugerenciasCliente.set(true);
     this.clienteSeleccionado.set(null);
     this.nuevo.erpClienteId = '';
     this.nuevo.clienteNombre = '';
     this.nuevo.sucursalId = null;
     this.sucursalesCliente.set([]);
+  }
+
+  ocultarSugerenciasCliente(): void {
+    setTimeout(() => this.mostrarSugerenciasCliente.set(false), 150);
   }
 
   seleccionarCliente(asignacion: AsignacionCliente): void {
@@ -202,6 +190,7 @@ export class Planificacion implements OnInit {
     this.nuevo.erpClienteId = asignacion.erpClienteId;
     this.nuevo.region = asignacion.region ?? '';
     this.busquedaCliente.set(asignacion.clienteNombre ?? '');
+    this.mostrarSugerenciasCliente.set(false);
 
     this.nuevo.sucursalId = null;
     this.sucursalesCliente.set([]);
@@ -217,6 +206,7 @@ export class Planificacion implements OnInit {
 
   limpiarCliente(): void {
     this.busquedaCliente.set('');
+    this.mostrarSugerenciasCliente.set(false);
     this.clientesAsignados.set([]);
     this.clienteSeleccionado.set(null);
     this.nuevo.clienteNombre = '';
@@ -247,6 +237,7 @@ export class Planificacion implements OnInit {
         horaProgramada: this.nuevo.horaProgramada || undefined,
         objetivoTipoId: this.nuevo.objetivoTipoId ?? undefined,
         objetivoSubtipoId: this.nuevo.objetivoSubtipoId ?? undefined,
+        comentario: this.nuevo.comentario || undefined,
         tipoVisita: this.nuevo.tipoVisita,
       })
       .subscribe({
@@ -257,9 +248,5 @@ export class Planificacion implements OnInit {
         },
         error: () => this.guardando.set(false),
       });
-  }
-
-  marcarEjecutada(p: PlanVisita): void {
-    this.planVisitaService.cambiarEstado(p.id, 'EJECUTADA').subscribe(() => this.cargarPlan());
   }
 }

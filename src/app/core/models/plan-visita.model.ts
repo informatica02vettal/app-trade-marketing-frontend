@@ -18,6 +18,7 @@ export interface PlanVisita {
   objetivoTipoNombre: string | null;
   objetivoSubtipoId: number | null;
   objetivoSubtipoNombre: string | null;
+  comentario: string | null;
   tipoVisita: TipoVisita;
   estado: EstadoPlanVisita;
 }
@@ -32,5 +33,6 @@ export interface PlanVisitaRequest {
   horaProgramada?: string;
   objetivoTipoId?: number;
   objetivoSubtipoId?: number;
+  comentario?: string;
   tipoVisita?: TipoVisita;
 }
