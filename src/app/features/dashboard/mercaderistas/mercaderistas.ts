@@ -1,11 +1,11 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { Usuario, UsuarioRequest } from '../../../core/models/usuario.model';
-import { AsignacionCliente, ClienteErp } from '../../../core/models/cliente.model';
+import { AsignacionCliente, ClienteLocal, SucursalLocal } from '../../../core/models/cliente.model';
 
-function nuevoFormulario(): UsuarioRequest {
+function formularioVacio(): UsuarioRequest {
   return { nombre: '', email: '', password: '', region: '', ejecutivoAsociado: '', rol: 'MERCADERISTA' };
 }
 
@@ -20,22 +20,47 @@ export class Mercaderistas implements OnInit {
   private readonly clienteService = inject(ClienteService);
 
   readonly mercaderistas = signal<Usuario[]>([]);
+  readonly clientesLocales = signal<ClienteLocal[]>([]);
   readonly cargando = signal(false);
   readonly guardando = signal(false);
   readonly error = signal<string | null>(null);
 
-  readonly mostrarModalNuevo = signal(false);
-  nuevo = nuevoFormulario();
+  // ---- Alta / edición de mercaderista (mismo modal para ambos) ----
+  readonly mostrarModalForm = signal(false);
+  readonly usuarioEditando = signal<Usuario | null>(null);
+  formulario: UsuarioRequest = formularioVacio();
 
+  readonly guardarDeshabilitado = computed(
+    () =>
+      this.guardando() ||
+      !this.formulario.nombre ||
+      !this.formulario.email ||
+      (!this.usuarioEditando() && !this.formulario.password),
+  );
+
+  // ---- Asignación de clientes ----
   readonly mostrarModalAsignar = signal(false);
   readonly mercaderistaSeleccionado = signal<Usuario | null>(null);
   readonly asignaciones = signal<AsignacionCliente[]>([]);
+  readonly sedesPorCliente = signal<Record<string, SucursalLocal[]>>({});
   readonly busquedaCliente = signal('');
-  readonly resultadosCliente = signal<ClienteErp[]>([]);
-  readonly buscandoCliente = signal(false);
+
+  readonly resultadosCliente = computed(() => {
+    const termino = this.busquedaCliente().trim().toLowerCase();
+    if (termino.length < 2) return [];
+    return this.clientesLocales()
+      .filter(
+        (c) =>
+          c.codigoCliente.toLowerCase().includes(termino) ||
+          (c.nombreComercial ?? '').toLowerCase().includes(termino) ||
+          (c.nombreFiscal ?? '').toLowerCase().includes(termino),
+      )
+      .slice(0, 20);
+  });
 
   ngOnInit(): void {
     this.cargar();
+    this.clienteService.listarLocales().subscribe((clientes) => this.clientesLocales.set(clientes));
   }
 
   cargar(): void {
@@ -49,30 +74,57 @@ export class Mercaderistas implements OnInit {
     });
   }
 
-  // ---- Alta de mercaderista ----
+  // ---- Alta / edición ----
   abrirModalNuevo(): void {
-    this.nuevo = nuevoFormulario();
+    this.usuarioEditando.set(null);
+    this.formulario = formularioVacio();
     this.error.set(null);
-    this.mostrarModalNuevo.set(true);
+    this.mostrarModalForm.set(true);
   }
 
-  cerrarModalNuevo(): void {
-    this.mostrarModalNuevo.set(false);
+  abrirModalEditar(m: Usuario): void {
+    this.usuarioEditando.set(m);
+    this.formulario = {
+      nombre: m.nombre,
+      email: m.email,
+      password: '',
+      region: m.region ?? '',
+      ejecutivoAsociado: m.ejecutivoAsociado ?? '',
+      rol: m.rol,
+      activo: m.activo,
+    };
+    this.error.set(null);
+    this.mostrarModalForm.set(true);
   }
 
-  crear(): void {
-    if (!this.nuevo.nombre || !this.nuevo.email || !this.nuevo.password) return;
+  cerrarModalForm(): void {
+    this.mostrarModalForm.set(false);
+  }
+
+  guardar(): void {
+    if (this.guardarDeshabilitado()) return;
+
+    const editando = this.usuarioEditando();
+    const payload: UsuarioRequest = {
+      nombre: this.formulario.nombre,
+      email: this.formulario.email,
+      region: this.formulario.region || undefined,
+      ejecutivoAsociado: this.formulario.ejecutivoAsociado || undefined,
+      rol: this.formulario.rol,
+    };
+    if (this.formulario.password) payload.password = this.formulario.password;
 
     this.guardando.set(true);
     this.error.set(null);
-    this.usuarioService.crear(this.nuevo).subscribe({
+    const request$ = editando ? this.usuarioService.actualizar(editando.id, payload) : this.usuarioService.crear(payload);
+    request$.subscribe({
       next: () => {
         this.guardando.set(false);
-        this.mostrarModalNuevo.set(false);
+        this.mostrarModalForm.set(false);
         this.cargar();
       },
       error: (err) => {
-        this.error.set(err?.error?.message || 'No fue posible crear el mercaderista');
+        this.error.set(err?.error?.message || 'No fue posible guardar el mercaderista');
         this.guardando.set(false);
       },
     });
@@ -99,7 +151,6 @@ export class Mercaderistas implements OnInit {
   abrirAsignaciones(m: Usuario): void {
     this.mercaderistaSeleccionado.set(m);
     this.busquedaCliente.set('');
-    this.resultadosCliente.set([]);
     this.cargarAsignaciones(m.id);
     this.mostrarModalAsignar.set(true);
   }
@@ -109,37 +160,31 @@ export class Mercaderistas implements OnInit {
   }
 
   cargarAsignaciones(usuarioId: number): void {
-    this.clienteService.listarAsignaciones(usuarioId).subscribe((asignaciones) => this.asignaciones.set(asignaciones));
-  }
-
-  onBusquedaClienteChange(valor: string): void {
-    this.busquedaCliente.set(valor);
-    const termino = valor.trim();
-    if (termino.length < 2) {
-      this.resultadosCliente.set([]);
-      return;
-    }
-
-    this.buscandoCliente.set(true);
-    this.clienteService.buscar(termino).subscribe({
-      next: (resultados) => {
-        this.resultadosCliente.set(resultados);
-        this.buscandoCliente.set(false);
-      },
-      error: () => this.buscandoCliente.set(false),
+    this.clienteService.listarAsignaciones(usuarioId).subscribe((asignaciones) => {
+      this.asignaciones.set(asignaciones);
+      this.sedesPorCliente.set({});
+      asignaciones.forEach((a) => {
+        this.clienteService.listarSucursalesLocales(a.erpClienteId).subscribe((sedes) => {
+          this.sedesPorCliente.update((mapa) => ({ ...mapa, [a.erpClienteId]: sedes }));
+        });
+      });
     });
   }
 
-  asignarCliente(cliente: ClienteErp): void {
+  asignarCliente(cliente: ClienteLocal): void {
     const mercaderista = this.mercaderistaSeleccionado();
     if (!mercaderista) return;
 
     this.clienteService
-      .crearAsignacion({ erpClienteId: cliente.id, clienteNombre: cliente.nombre, usuarioId: mercaderista.id })
+      .crearAsignacion({
+        erpClienteId: cliente.codigoCliente,
+        clienteNombre: cliente.nombreComercial ?? cliente.nombreFiscal ?? cliente.codigoCliente,
+        usuarioId: mercaderista.id,
+        region: cliente.estado ?? undefined,
+      })
       .subscribe({
         next: () => {
           this.busquedaCliente.set('');
-          this.resultadosCliente.set([]);
           this.cargarAsignaciones(mercaderista.id);
           this.cargar();
         },

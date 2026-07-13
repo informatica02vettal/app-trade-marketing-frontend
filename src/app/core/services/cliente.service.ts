@@ -9,6 +9,7 @@ import {
   ClienteErp,
   ClienteLocal,
   SincronizacionResultado,
+  SucursalLocal,
 } from '../models/cliente.model';
 
 const CLIENTES_URL = `${environment.apiBaseUrl}/clientes`;
@@ -55,6 +56,12 @@ export class ClienteService {
   sincronizar(): Observable<SincronizacionResultado> {
     return this.http
       .post<ApiResponse<SincronizacionResultado>>(`${CLIENTES_URL}/sincronizar`, {})
+      .pipe(map((res) => res.data));
+  }
+
+  listarSucursalesLocales(codigoCliente: string): Observable<SucursalLocal[]> {
+    return this.http
+      .get<ApiResponse<SucursalLocal[]>>(`${CLIENTES_URL}/locales/${codigoCliente}/sucursales`)
       .pipe(map((res) => res.data));
   }
 }

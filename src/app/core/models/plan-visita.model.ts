@@ -5,6 +5,8 @@ export type EstadoPlanVisita = 'PENDIENTE' | 'EJECUTADA' | 'REPROGRAMADA';
 export interface PlanVisita {
   id: number;
   erpClienteId: string | null;
+  sucursalId: number | null;
+  sucursalNombre: string | null;
   clienteNombre: string;
   usuarioId: number | null;
   usuarioNombre: string | null;
@@ -12,17 +14,23 @@ export interface PlanVisita {
   fechaProgramada: string;
   horaProgramada: string | null;
   objetivo: string | null;
+  objetivoTipoId: number | null;
+  objetivoTipoNombre: string | null;
+  objetivoSubtipoId: number | null;
+  objetivoSubtipoNombre: string | null;
   tipoVisita: TipoVisita;
   estado: EstadoPlanVisita;
 }
 
 export interface PlanVisitaRequest {
   erpClienteId?: string;
+  sucursalId?: number;
   clienteNombre: string;
   usuarioId?: number;
   region?: string;
   fechaProgramada: string;
   horaProgramada?: string;
-  objetivo?: string;
+  objetivoTipoId?: number;
+  objetivoSubtipoId?: number;
   tipoVisita?: TipoVisita;
 }

@@ -43,3 +43,15 @@ export interface SincronizacionResultado {
   sucursalesSincronizadas: number;
   sincronizadoEn: string;
 }
+
+export interface SucursalLocal {
+  id: number;
+  erpId: number;
+  codigoCliente: string;
+  idVendedor: string | null;
+  nombreSucursal: string | null;
+  direccionSucursal: string | null;
+  estado: string | null;
+  ciudad: string | null;
+  sincronizadoEn: string;
+}

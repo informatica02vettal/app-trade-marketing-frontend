@@ -25,6 +25,10 @@ export const DASHBOARD_ROUTES: Routes = [
         path: 'mercaderistas',
         loadComponent: () => import('./mercaderistas/mercaderistas').then((m) => m.Mercaderistas),
       },
+      {
+        path: 'objetivos-visita',
+        loadComponent: () => import('./objetivos-visita/objetivos-visita').then((m) => m.ObjetivosVisita),
+      },
     ],
   },
 ];

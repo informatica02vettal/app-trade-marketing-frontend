@@ -36,60 +36,6 @@
 
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5 col-span-2">
-          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Cliente</label>
-          <div class="relative">
-            <div class="flex items-stretch rounded-[7px] border border-line bg-panel-alt overflow-hidden focus-within:border-teal">
-              <select
-                [ngModel]="modoBusquedaCliente()"
-                (ngModelChange)="cambiarModoBusquedaCliente($event)"
-                class="bg-transparent border-none text-ink text-[11px] font-semibold uppercase tracking-[0.03em] pl-2.5 pr-1 py-2 outline-none cursor-pointer shrink-0"
-              >
-                <option value="nombre">Nombre</option>
-                <option value="id">ID</option>
-              </select>
-              <div class="w-px my-1.5 bg-line"></div>
-              <input
-                [ngModel]="busquedaCliente()"
-                (ngModelChange)="onBusquedaClienteChange($event)"
-                [placeholder]="modoBusquedaCliente() === 'id' ? 'Buscar por ID de cliente ERP…' : 'Buscar cliente por nombre…'"
-                autocomplete="off"
-                class="flex-1 min-w-0 bg-transparent text-ink px-2.5 py-2 text-[13px] outline-none"
-              />
-              @if (busquedaCliente()) {
-                <button
-                  type="button"
-                  (click)="limpiarBusquedaCliente()"
-                  class="px-2.5 text-muted hover:text-ink shrink-0"
-                  aria-label="Limpiar búsqueda"
-                >
-                  ×
-                </button>
-              }
-            </div>
-            @if (resultadosCliente().length) {
-              <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-panel border border-line rounded-lg shadow-[0_10px_24px_rgba(20,30,40,0.12)] max-h-[200px] overflow-y-auto z-10">
-                @for (c of resultadosCliente(); track c.id) {
-                  <button
-                    type="button"
-                    (click)="seleccionarCliente(c)"
-                    class="block w-full text-left px-2.5 py-2 text-[13px] bg-transparent border-none border-b border-line last:border-b-0 cursor-pointer text-ink hover:bg-panel-alt"
-                  >
-                    {{ c.nombre }} <span class="font-mono text-[11.5px] text-muted">· {{ c.id }}</span>
-                  </button>
-                }
-              </div>
-            }
-          </div>
-          @if (clienteSeleccionado(); as c) {
-            <p class="mt-1 text-[11px] text-success">✓ Vinculado al ERP · id {{ c.id }}</p>
-          } @else if (buscandoCliente()) {
-            <p class="mt-1 text-[11px] text-muted">Buscando en el ERP…</p>
-          } @else if (nuevo.clienteNombre) {
-            <p class="mt-1 text-[11px] text-muted">Sin vincular al ERP (cliente nuevo o sin coincidencias)</p>
-          }
-        </div>
-
-        <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Mercaderista</label>
           <div class="relative">
             <input
@@ -97,7 +43,7 @@
               (ngModelChange)="onBusquedaMercaderistaChange($event)"
               (focus)="mostrarSugerenciasMercaderista.set(true)"
               (blur)="ocultarSugerenciasMercaderista()"
-              placeholder="Escribe el nombre…"
+              placeholder="Escribe el nombre del mercaderista…"
               autocomplete="off"
               class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal w-full"
             />
@@ -116,9 +62,60 @@
             }
           </div>
         </div>
+
+        <div class="flex flex-col gap-1.5 col-span-2">
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Cliente</label>
+          <div class="relative">
+            <input
+              [ngModel]="busquedaCliente()"
+              (ngModelChange)="onBusquedaClienteChange($event)"
+              [disabled]="!nuevo.usuarioId"
+              [placeholder]="!nuevo.usuarioId ? 'Selecciona primero un mercaderista…' : 'Buscar entre los clientes asignados…'"
+              autocomplete="off"
+              class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            @if (nuevo.usuarioId && clientesAsignadosFiltrados().length) {
+              <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-panel border border-line rounded-lg shadow-[0_10px_24px_rgba(20,30,40,0.12)] max-h-[200px] overflow-y-auto z-10">
+                @for (c of clientesAsignadosFiltrados(); track c.id) {
+                  <button
+                    type="button"
+                    (click)="seleccionarCliente(c)"
+                    class="block w-full text-left px-2.5 py-2 text-[13px] bg-transparent border-none border-b border-line last:border-b-0 cursor-pointer text-ink hover:bg-panel-alt"
+                  >
+                    {{ c.clienteNombre }} <span class="font-mono text-[11.5px] text-muted">· {{ c.erpClienteId }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          @if (clienteSeleccionado(); as c) {
+            <p class="mt-1 text-[11px] text-success">✓ Cliente asignado a este mercaderista</p>
+          } @else if (cargandoClientesAsignados()) {
+            <p class="mt-1 text-[11px] text-muted">Cargando clientes asignados…</p>
+          } @else if (nuevo.usuarioId && !clientesAsignados().length) {
+            <p class="mt-1 text-[11px] text-muted">Este mercaderista no tiene clientes asignados todavía.</p>
+          }
+        </div>
+
+        @if (cargandoSucursales() || sucursalesCliente().length) {
+          <div class="flex flex-col gap-1.5 col-span-2">
+            <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Sucursal</label>
+            @if (cargandoSucursales()) {
+              <p class="text-[11px] text-muted">Buscando sucursales del cliente…</p>
+            } @else {
+              <select [(ngModel)]="nuevo.sucursalId" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
+                <option [ngValue]="null">Sin sucursal específica</option>
+                @for (s of sucursalesCliente(); track s.id) {
+                  <option [ngValue]="s.id">{{ s.nombreSucursal || 'Sede sin nombre' }} · {{ s.ciudad || '—' }}</option>
+                }
+              </select>
+            }
+          </div>
+        }
+
         <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Región</label>
-          <input [(ngModel)]="nuevo.region" placeholder="Región" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Estado</label>
+          <input [(ngModel)]="nuevo.region" placeholder="Estado" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Fecha</label>
@@ -128,10 +125,26 @@
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Hora</label>
           <input type="time" [(ngModel)]="nuevo.horaProgramada" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
-        <div class="flex flex-col gap-1.5 col-span-2">
+        <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Objetivo de la visita</label>
-          <input [(ngModel)]="nuevo.objetivo" placeholder="Reposición POP, auditoría de anaquel…" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+          <select [ngModel]="nuevo.objetivoTipoId" (ngModelChange)="onObjetivoTipoChange($event)" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
+            <option [ngValue]="null">Selecciona…</option>
+            @for (t of objetivoTipos(); track t.id) {
+              <option [ngValue]="t.id">{{ t.nombre }}</option>
+            }
+          </select>
         </div>
+        @if (subtiposDisponibles().length) {
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Detalle</label>
+            <select [(ngModel)]="nuevo.objetivoSubtipoId" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
+              <option [ngValue]="null">Selecciona…</option>
+              @for (s of subtiposDisponibles(); track s.id) {
+                <option [ngValue]="s.id">{{ s.nombre }}</option>
+              }
+            </select>
+          </div>
+        }
         <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Tipo</label>
           <select [(ngModel)]="nuevo.tipoVisita" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
@@ -145,7 +158,7 @@
         <button
           class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
           (click)="crear()"
-          [disabled]="guardando() || !nuevo.clienteNombre || !nuevo.fechaProgramada"
+          [disabled]="guardando() || !nuevo.usuarioId || !nuevo.clienteNombre || !nuevo.fechaProgramada"
         >
           Crear
         </button>
@@ -159,6 +172,29 @@
     </div>
   </div>
 }
+
+<div class="flex items-center gap-2.5 flex-wrap mb-3.5">
+  <select
+    [ngModel]="filtroUsuarioId()"
+    (ngModelChange)="onFiltroUsuarioChange($event)"
+    class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+  >
+    <option [ngValue]="null">Todos los mercaderistas</option>
+    @for (m of mercaderistas(); track m.id) {
+      <option [ngValue]="m.id">{{ m.nombre }}</option>
+    }
+  </select>
+  <select
+    [ngModel]="filtroFecha()"
+    (ngModelChange)="onFiltroFechaChange($event)"
+    class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+  >
+    <option value="">Todos los días</option>
+    @for (d of diasSemana; track d.valor) {
+      <option [value]="d.valor">{{ d.label }}</option>
+    }
+  </select>
+</div>
 
 <div class="grid gap-3.5 grid-cols-3 max-[1100px]:grid-cols-2">
   <div class="bg-panel border border-line rounded-[10px] py-4 px-[18px] shadow-[0_1px_2px_rgba(31,41,51,0.04)]">
