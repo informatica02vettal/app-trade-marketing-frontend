@@ -11,19 +11,16 @@ import { ClienteErp } from '../../../core/models/cliente.model';
 import { PlanVisita } from '../../../core/models/plan-visita.model';
 import { ProductoResumen } from '../../../core/models/producto.model';
 import { Visita, VisitaCheckinRequest } from '../../../core/models/visita.model';
+import { obtenerGps } from '../../../core/utils/gps.util';
 
-function obtenerGps(): Promise<{ lat: number; lng: number } | null> {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve(null);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => resolve(null),
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  });
+// Date.toISOString() convierte a UTC, no a la hora local del dispositivo:
+// pasadas las 8pm (Venezuela, UTC-4) ya cae en el día siguiente y "hoy"
+// termina siendo mañana, dejando fuera del plan las visitas del día real.
+function fechaLocalISO(fecha: Date): string {
+  const anio = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
 }
 
 @Component({
@@ -68,8 +65,8 @@ export class Ruta implements OnInit {
     const usuario = this.usuario();
     if (!usuario) return;
     this.cargandoPlan.set(true);
-    const hoy = new Date().toISOString().slice(0, 10);
-    this.planVisitaService.listar(usuario.id, hoy).subscribe({
+    const hoy = fechaLocalISO(new Date());
+    this.planVisitaService.listar(usuario.id, hoy, hoy).subscribe({
       next: (plan) => {
         this.plan.set(plan);
         this.cargandoPlan.set(false);

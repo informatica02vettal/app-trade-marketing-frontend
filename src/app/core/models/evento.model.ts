@@ -25,6 +25,8 @@ export interface EventoVisitaRequest {
   objetivoParticipacion?: string;
   participacionVettal?: ParticipacionVettal;
   cantidadAsistentesEstimada?: number;
+  gpsLat?: number;
+  gpsLng?: number;
   leads?: EventoLead[];
   videosEntrevistaUrls?: string[];
 }

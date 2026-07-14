@@ -4,6 +4,7 @@ import { EventoService } from '../../../../core/services/evento.service';
 import { VisitaService } from '../../../../core/services/visita.service';
 import { VisitaSessionService } from '../../../../core/session/visita-session.service';
 import { EventoLead, MotivoEvento, ParticipacionVettal } from '../../../../core/models/evento.model';
+import { obtenerGps } from '../../../../core/utils/gps.util';
 import { PhotoPicker } from '../../../../shared/ui/photo-picker/photo-picker';
 import { VideoPicker } from '../../../../shared/ui/video-picker/video-picker';
 import { CompetidoresLista } from '../competidores/competidores-lista';
@@ -60,11 +61,20 @@ export class EventoVisita implements OnInit {
     CIERRE: [null],
   });
 
+  // GPS propio del evento: se captura al entrar (no reutiliza el del
+  // check-in de la visita) porque una feria/expo puede quedar en un lugar
+  // distinto al del cliente registrado.
+  readonly gpsLat = signal<number | null>(null);
+  readonly gpsLng = signal<number | null>(null);
+  readonly capturandoGps = signal(true);
+
   get esEventoGrande(): boolean {
     return this.sesion.esEventoGrande();
   }
 
   ngOnInit(): void {
+    this.capturarGps();
+
     // Las fotos/videos ya subidos quedan asociados a la visita en el backend;
     // se recuperan aquí para no perderlos si el componente se vuelve a crear.
     this.visitaService.listarFotos(this.visitaId()).subscribe((fotos) => {
@@ -77,6 +87,15 @@ export class EventoVisita implements OnInit {
 
       const videos = fotos.filter((f) => f.categoria === 'ENTREVISTA').map((f) => f.url);
       this.videosEntrevista.set(videos.length ? videos : [null]);
+    });
+  }
+
+  capturarGps(): void {
+    this.capturandoGps.set(true);
+    obtenerGps().then((coords) => {
+      this.gpsLat.set(coords?.lat ?? null);
+      this.gpsLng.set(coords?.lng ?? null);
+      this.capturandoGps.set(false);
     });
   }
 
@@ -163,6 +182,8 @@ export class EventoVisita implements OnInit {
         horaInicio: this.horaInicio || undefined,
         horaFin: this.horaFin || undefined,
         cantidadAsistentesEstimada: this.cantidadAsistentesEstimada ?? undefined,
+        gpsLat: this.gpsLat() ?? undefined,
+        gpsLng: this.gpsLng() ?? undefined,
         leads: leads.length ? leads : undefined,
         videosEntrevistaUrls: videos.length ? videos : undefined,
       })
