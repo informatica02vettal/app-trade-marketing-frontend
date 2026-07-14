@@ -1,0 +1,200 @@
+<div class="p-4">
+  @switch (subPaso()) {
+    @case ('motivo') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Motivo del evento</p>
+        <select
+          [(ngModel)]="motivo"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        >
+          <option value="" disabled>Selecciona el motivo…</option>
+          @for (m of motivos; track m.valor) {
+            <option [value]="m.valor">{{ m.label }}</option>
+          }
+        </select>
+
+        @if (motivo === 'OTRO') {
+          <input
+            [(ngModel)]="motivoOtroDetalle"
+            placeholder="Especifica el motivo"
+            class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+          />
+        }
+
+        <button
+          type="button"
+          (click)="confirmarMotivo()"
+          [disabled]="!motivo || guardando()"
+          class="w-full rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+        >
+          {{ guardando() ? 'Guardando…' : 'Siguiente' }}
+        </button>
+      </div>
+    }
+
+    @case ('detalle') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Datos del evento</p>
+        <input [(ngModel)]="nombreEvento" placeholder="Nombre del evento" class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]" />
+        <div class="flex gap-2">
+          <input [(ngModel)]="ciudad" placeholder="Ciudad" class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]" />
+          <input [(ngModel)]="estado" placeholder="Estado" class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]" />
+        </div>
+        <input [(ngModel)]="lugarRealizacion" placeholder="Lugar de realización" class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]" />
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Fecha y hora</p>
+        <input type="date" [(ngModel)]="fechaEvento" class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]" />
+        <div class="flex gap-2">
+          <input type="time" [(ngModel)]="horaInicio" placeholder="Hora de inicio" class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]" />
+          <input type="time" [(ngModel)]="horaFin" placeholder="Hora de finalización" class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]" />
+        </div>
+
+        <input [(ngModel)]="organizador" placeholder="Organizador del evento" class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]" />
+        <textarea
+          [(ngModel)]="objetivoParticipacion"
+          rows="2"
+          placeholder="Objetivo de la participación"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        ></textarea>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">¿Vettal participa como?</p>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="participacionVettal = 'EXPOSITOR'"
+            class="flex-1 rounded-[11px] border py-2 text-[12.5px] font-bold"
+            [class.bg-brand-tint]="participacionVettal === 'EXPOSITOR'"
+            [class.text-brand-dim]="participacionVettal === 'EXPOSITOR'"
+            [class.border-brand]="participacionVettal === 'EXPOSITOR'"
+            [class.bg-panel-alt]="participacionVettal !== 'EXPOSITOR'"
+            [class.text-muted]="participacionVettal !== 'EXPOSITOR'"
+            [class.border-line]="participacionVettal !== 'EXPOSITOR'"
+          >
+            Expositor
+          </button>
+          <button
+            type="button"
+            (click)="participacionVettal = 'VISITANTE'"
+            class="flex-1 rounded-[11px] border py-2 text-[12.5px] font-bold"
+            [class.bg-brand-tint]="participacionVettal === 'VISITANTE'"
+            [class.text-brand-dim]="participacionVettal === 'VISITANTE'"
+            [class.border-brand]="participacionVettal === 'VISITANTE'"
+            [class.bg-panel-alt]="participacionVettal !== 'VISITANTE'"
+            [class.text-muted]="participacionVettal !== 'VISITANTE'"
+            [class.border-line]="participacionVettal !== 'VISITANTE'"
+          >
+            Visitante
+          </button>
+        </div>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Cantidad estimada de asistentes</p>
+        <input
+          type="number"
+          min="0"
+          [(ngModel)]="cantidadAsistentesEstimada"
+          placeholder="Cantidad de asistentes"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        />
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Fotografías de montaje</p>
+        <div class="grid grid-cols-3 gap-2">
+          @for (foto of fotosPorCategoria().MONTAJE; track $index) {
+            <app-photo-picker label="Montaje" [url]="foto" (urlChange)="setFotoCategoria('MONTAJE', $index, $event)" />
+          }
+        </div>
+        <button type="button" (click)="agregarSlotFoto('MONTAJE')" class="text-brand-dim text-[12px] font-bold self-start">+ Agregar foto</button>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Fotografías de desarrollo</p>
+        <div class="grid grid-cols-3 gap-2">
+          @for (foto of fotosPorCategoria().DESARROLLO; track $index) {
+            <app-photo-picker label="Desarrollo" [url]="foto" (urlChange)="setFotoCategoria('DESARROLLO', $index, $event)" />
+          }
+        </div>
+        <button type="button" (click)="agregarSlotFoto('DESARROLLO')" class="text-brand-dim text-[12px] font-bold self-start">+ Agregar foto</button>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Fotografías de cierre</p>
+        <div class="grid grid-cols-3 gap-2">
+          @for (foto of fotosPorCategoria().CIERRE; track $index) {
+            <app-photo-picker label="Cierre" [url]="foto" (urlChange)="setFotoCategoria('CIERRE', $index, $event)" />
+          }
+        </div>
+        <button type="button" (click)="agregarSlotFoto('CIERRE')" class="text-brand-dim text-[12px] font-bold self-start">+ Agregar foto</button>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Entrevistas cortas (video) a asistentes</p>
+        <div class="grid grid-cols-3 gap-2">
+          @for (video of videosEntrevista(); track $index) {
+            <app-video-picker label="Entrevista" [url]="video" (urlChange)="setVideoEntrevista($index, $event)" />
+          }
+        </div>
+        <button type="button" (click)="agregarSlotVideo()" class="text-brand-dim text-[12px] font-bold self-start">+ Agregar video</button>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Leads generados</p>
+        @for (lead of leads(); track $index) {
+          <div class="border border-line rounded-xl p-2 flex flex-col gap-2">
+            <input
+              [ngModel]="lead.nombre"
+              (ngModelChange)="actualizarLead($index, 'nombre', $event)"
+              placeholder="Nombre *"
+              class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+            />
+            <input
+              [ngModel]="lead.empresa"
+              (ngModelChange)="actualizarLead($index, 'empresa', $event)"
+              placeholder="Empresa"
+              class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+            />
+            <input
+              [ngModel]="lead.cargo"
+              (ngModelChange)="actualizarLead($index, 'cargo', $event)"
+              placeholder="Cargo"
+              class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+            />
+            <input
+              [ngModel]="lead.telefono"
+              (ngModelChange)="actualizarLead($index, 'telefono', $event)"
+              placeholder="Teléfono"
+              class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+            />
+            <input
+              [ngModel]="lead.correo"
+              (ngModelChange)="actualizarLead($index, 'correo', $event)"
+              placeholder="Correo electrónico"
+              class="w-full rounded-lg border border-line px-2 py-1.5 text-[13px]"
+            />
+            <button type="button" (click)="quitarLead($index)" class="text-danger text-[12px] self-start">Quitar</button>
+          </div>
+        }
+        <button type="button" (click)="agregarLead()" class="rounded-lg border border-dashed border-line py-2 text-[12.5px]">
+          + Agregar lead
+        </button>
+
+        <div class="flex gap-2 mt-2">
+          <button type="button" (click)="anteriorDetalle()" class="flex-1 rounded-[11px] border border-line py-3 text-[13.5px]">
+            Atrás
+          </button>
+          <button
+            type="button"
+            (click)="guardarDetalleEvento()"
+            [disabled]="guardando()"
+            class="flex-1 rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+          >
+            {{ guardando() ? 'Guardando…' : 'Siguiente' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    @case ('competencia') {
+      <div class="flex flex-col gap-3">
+        <app-competidores-lista [visitaId]="visitaId()" />
+        <button
+          type="button"
+          (click)="finalizarCompetencia()"
+          class="w-full rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3"
+        >
+          Continuar
+        </button>
+      </div>
+    }
+  }
+</div>

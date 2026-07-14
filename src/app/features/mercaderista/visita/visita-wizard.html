@@ -1,14 +1,10 @@
-<div class="min-h-dvh sm:py-6 sm:px-3">
-  <div
-    class="w-full max-w-[520px] mx-auto bg-panel min-h-dvh sm:min-h-[calc(100dvh-48px)] sm:rounded-[20px] sm:border sm:border-line sm:shadow-lg flex flex-col"
-  >
-    <header class="px-4 py-3 border-b border-line">
-      <p class="text-muted text-[11px] font-mono uppercase">Visita en curso</p>
-      <h1 class="font-display font-bold text-[15px] truncate">{{ sesion.clienteNombre() }}</h1>
-    </header>
+<header class="px-4 py-3 border-b border-line">
+  <p class="text-muted text-[11px] font-mono uppercase">Visita en curso</p>
+  <h1 class="font-display font-bold text-[15px] truncate">{{ sesion.clienteNombre() }}</h1>
+</header>
 
-    <div class="flex-1 overflow-y-auto">
-      @switch (paso()) {
+<div>
+  @switch (paso()) {
         @case ('evidencia') {
           <div class="p-4">
             <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-3">
@@ -79,9 +75,13 @@
               [disabled]="guardando()"
               class="w-full rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
             >
-              Guardar y finalizar visita
+              Guardar y continuar
             </button>
           </div>
+        }
+
+        @case ('evento') {
+          <app-evento-visita [visitaId]="sesion.visitaId()!" (completada)="onEventoCompletado()" />
         }
 
         @case ('marcas') {
@@ -135,6 +135,4 @@
           }
         }
       }
-    </div>
-  </div>
 </div>

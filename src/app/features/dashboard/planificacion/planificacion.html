@@ -45,8 +45,18 @@
               (blur)="ocultarSugerenciasMercaderista()"
               placeholder="Escribe el nombre del mercaderista…"
               autocomplete="off"
-              class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal w-full"
+              class="bg-panel-alt border border-line rounded-[7px] text-ink pl-2.5 pr-8 py-2 text-[13px] outline-none focus:border-teal w-full"
             />
+            @if (busquedaMercaderista()) {
+              <button
+                type="button"
+                (click)="limpiarMercaderista()"
+                class="absolute top-1/2 -translate-y-1/2 right-2 text-muted hover:text-ink"
+                aria-label="Limpiar mercaderista"
+              >
+                ×
+              </button>
+            }
             @if (mostrarSugerenciasMercaderista() && mercaderistasFiltrados().length) {
               <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-panel border border-line rounded-lg shadow-[0_10px_24px_rgba(20,30,40,0.12)] max-h-[200px] overflow-y-auto z-10">
                 @for (m of mercaderistasFiltrados(); track m.id) {
@@ -74,8 +84,18 @@
               [disabled]="!nuevo.usuarioId"
               [placeholder]="!nuevo.usuarioId ? 'Selecciona primero un mercaderista…' : 'Buscar entre los clientes asignados…'"
               autocomplete="off"
-              class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              class="bg-panel-alt border border-line rounded-[7px] text-ink pl-2.5 pr-8 py-2 text-[13px] outline-none focus:border-teal w-full disabled:opacity-50 disabled:cursor-not-allowed"
             />
+            @if (busquedaCliente()) {
+              <button
+                type="button"
+                (click)="limpiarBusquedaCliente()"
+                class="absolute top-1/2 -translate-y-1/2 right-2 text-muted hover:text-ink"
+                aria-label="Limpiar cliente"
+              >
+                ×
+              </button>
+            }
             @if (mostrarSugerenciasCliente() && nuevo.usuarioId && clientesAsignadosFiltrados().length) {
               <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-panel border border-line rounded-lg shadow-[0_10px_24px_rgba(20,30,40,0.12)] max-h-[200px] overflow-y-auto z-10">
                 @for (c of clientesAsignadosFiltrados(); track c.id) {
@@ -91,7 +111,7 @@
             }
           </div>
           @if (clienteSeleccionado(); as c) {
-            <p class="mt-1 text-[11px] text-success">✓ Cliente asignado a este mercaderista</p>
+            <p class="mt-1 text-[11px] text-success">✓ Cliente seleccionado</p>
           } @else if (cargandoClientesAsignados()) {
             <p class="mt-1 text-[11px] text-muted">Cargando clientes asignados…</p>
           } @else if (nuevo.usuarioId && !clientesAsignados().length) {
@@ -126,40 +146,42 @@
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Fecha</label>
-          <input type="date" [(ngModel)]="nuevo.fechaProgramada" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+          <input
+            type="date"
+            [(ngModel)]="nuevo.fechaProgramada"
+            [attr.min]="fechaMinima"
+            class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+          />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Hora *</label>
-          <input type="time" required [(ngModel)]="nuevo.horaProgramada" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+          <input
+            type="time"
+            required
+            [(ngModel)]="nuevo.horaProgramada"
+            [attr.min]="horaMinimaNueva()"
+            class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+          />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Tipo</label>
-          <select [ngModel]="nuevo.tipoVisita" (ngModelChange)="onTipoVisitaChange($event)" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
-            <option value="PLANIFICADA">Planificada</option>
-            <option value="NO_PLANIFICADA">No planificada</option>
+          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Objetivo de la visita</label>
+          <select [ngModel]="nuevo.objetivoTipoId" (ngModelChange)="onObjetivoTipoChange($event)" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
+            <option [ngValue]="null">Selecciona…</option>
+            @for (t of objetivoTipos(); track t.id) {
+              <option [ngValue]="t.id">{{ t.nombre }}</option>
+            }
           </select>
         </div>
-        @if (nuevo.tipoVisita === 'PLANIFICADA') {
+        @if (subtiposDisponibles().length) {
           <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Objetivo de la visita</label>
-            <select [ngModel]="nuevo.objetivoTipoId" (ngModelChange)="onObjetivoTipoChange($event)" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
+            <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Detalle</label>
+            <select [(ngModel)]="nuevo.objetivoSubtipoId" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
               <option [ngValue]="null">Selecciona…</option>
-              @for (t of objetivoTipos(); track t.id) {
-                <option [ngValue]="t.id">{{ t.nombre }}</option>
+              @for (s of subtiposDisponibles(); track s.id) {
+                <option [ngValue]="s.id">{{ s.nombre }}</option>
               }
             </select>
           </div>
-          @if (subtiposDisponibles().length) {
-            <div class="flex flex-col gap-1.5">
-              <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Detalle</label>
-              <select [(ngModel)]="nuevo.objetivoSubtipoId" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal">
-                <option [ngValue]="null">Selecciona…</option>
-                @for (s of subtiposDisponibles(); track s.id) {
-                  <option [ngValue]="s.id">{{ s.nombre }}</option>
-                }
-              </select>
-            </div>
-          }
         }
         <div class="flex flex-col gap-1.5 col-span-2">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Comentario</label>
@@ -235,11 +257,21 @@
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Nueva fecha</label>
-          <input type="date" [(ngModel)]="reprogramarForm.fecha" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+          <input
+            type="date"
+            [(ngModel)]="reprogramarForm.fecha"
+            [attr.min]="fechaMinima"
+            class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+          />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Nueva hora</label>
-          <input type="time" [(ngModel)]="reprogramarForm.hora" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
+          <input
+            type="time"
+            [(ngModel)]="reprogramarForm.hora"
+            [attr.min]="horaMinimaReprogramar()"
+            class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+          />
         </div>
       </div>
 
@@ -247,7 +279,7 @@
         <button
           class="inline-flex items-center gap-1.5 rounded-lg border border-brand bg-brand px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition-colors hover:bg-[#ff8a4d] disabled:opacity-50 disabled:cursor-default"
           (click)="guardarReprogramacion()"
-          [disabled]="guardandoReprogramacion() || !reprogramarForm.fecha || !reprogramarForm.hora"
+          [disabled]="guardandoReprogramacion() || !reprogramarValido()"
         >
           Guardar
         </button>

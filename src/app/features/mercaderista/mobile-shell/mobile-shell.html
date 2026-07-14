@@ -7,9 +7,14 @@
         <p class="m-0 text-[11.5px] text-muted">Hola,</p>
         <h1 class="mt-0.5 text-[18px] font-display font-bold tracking-[-0.01em]">{{ usuario()?.nombre }} 👋</h1>
       </div>
-      <div class="flex items-center gap-[5px] bg-success-tint text-success px-2.5 py-[5px] rounded-full text-[10.5px] font-bold font-mono">
-        <i class="w-1.5 h-1.5 rounded-full bg-success inline-block"></i>
-        Sincronizado
+      <div class="flex flex-col items-end gap-1.5">
+        <div class="flex items-center gap-[5px] bg-success-tint text-success px-2.5 py-[5px] rounded-full text-[10.5px] font-bold font-mono">
+          <i class="w-1.5 h-1.5 rounded-full bg-success inline-block"></i>
+          Sincronizado
+        </div>
+        @if (esAdminOSupervisor()) {
+          <a routerLink="/dashboard" class="text-[11px] font-semibold text-brand-dim no-underline">← Volver al dashboard</a>
+        }
       </div>
     </header>
 

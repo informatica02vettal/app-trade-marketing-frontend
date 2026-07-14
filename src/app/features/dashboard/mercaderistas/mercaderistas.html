@@ -53,13 +53,9 @@
             class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
           />
         </div>
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1.5 col-span-2">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Región</label>
           <input [(ngModel)]="formulario.region" placeholder="Región" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Ejecutivo asociado</label>
-          <input [(ngModel)]="formulario.ejecutivoAsociado" placeholder="Ejecutivo" class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal" />
         </div>
       </div>
 
@@ -176,7 +172,6 @@
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Nombre</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Correo</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Región</th>
-        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Ejecutivo asociado</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
       </tr>
@@ -187,7 +182,6 @@
           <td class="px-2.5 py-2.5 align-middle">{{ m.nombre }}</td>
           <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ m.email }}</td>
           <td class="px-2.5 py-2.5 align-middle">{{ m.region || '—' }}</td>
-          <td class="px-2.5 py-2.5 align-middle">{{ m.ejecutivoAsociado || '—' }}</td>
           <td class="px-2.5 py-2.5 align-middle">
             @if (m.activo) {
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-semibold tracking-[0.02em] bg-success/[0.13] text-success">ACTIVO</span>

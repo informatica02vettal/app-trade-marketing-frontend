@@ -5,7 +5,6 @@ export interface Usuario {
   nombre: string;
   email: string;
   region: string | null;
-  ejecutivoAsociado: string | null;
   rol: RolUsuario;
   activo: boolean;
 }
@@ -15,7 +14,6 @@ export interface UsuarioRequest {
   email: string;
   password?: string;
   region?: string;
-  ejecutivoAsociado?: string;
   rol: RolUsuario;
   activo?: boolean;
 }

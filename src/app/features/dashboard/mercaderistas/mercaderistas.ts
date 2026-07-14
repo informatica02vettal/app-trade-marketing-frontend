@@ -6,7 +6,7 @@ import { Usuario, UsuarioRequest } from '../../../core/models/usuario.model';
 import { AsignacionCliente, ClienteLocal, SucursalLocal } from '../../../core/models/cliente.model';
 
 function formularioVacio(): UsuarioRequest {
-  return { nombre: '', email: '', password: '', region: '', ejecutivoAsociado: '', rol: 'MERCADERISTA' };
+  return { nombre: '', email: '', password: '', region: '', rol: 'MERCADERISTA' };
 }
 
 @Component({
@@ -90,7 +90,6 @@ export class Mercaderistas implements OnInit {
       email: m.email,
       password: '',
       region: m.region ?? '',
-      ejecutivoAsociado: m.ejecutivoAsociado ?? '',
       rol: m.rol,
       activo: m.activo,
     };
@@ -110,7 +109,6 @@ export class Mercaderistas implements OnInit {
       nombre: this.formulario.nombre,
       email: this.formulario.email,
       region: this.formulario.region || undefined,
-      ejecutivoAsociado: this.formulario.ejecutivoAsociado || undefined,
       rol: this.formulario.rol,
     };
     if (this.formulario.password) payload.password = this.formulario.password;
@@ -141,7 +139,6 @@ export class Mercaderistas implements OnInit {
         nombre: m.nombre,
         email: m.email,
         region: m.region ?? undefined,
-        ejecutivoAsociado: m.ejecutivoAsociado ?? undefined,
         rol: m.rol,
         activo: true,
       })

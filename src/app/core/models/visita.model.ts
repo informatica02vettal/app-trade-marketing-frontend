@@ -8,7 +8,10 @@ export type CategoriaEvidencia =
   | 'COMPETENCIA'
   | 'MATERIAL_POP'
   | 'ANTES'
-  | 'DESPUES';
+  | 'DESPUES'
+  | 'MONTAJE'
+  | 'DESARROLLO'
+  | 'CIERRE';
 
 export interface Visita {
   id: number;

@@ -12,6 +12,13 @@ import { BADGE_BAD, BADGE_OK, BADGE_WARN } from '../../../shared/ui/dash/badge-c
 
 const BADGE_CLASE: Record<string, string> = { EJECUTADA: BADGE_OK, PENDIENTE: BADGE_WARN, REPROGRAMADA: BADGE_BAD };
 
+function formatearFecha(fecha: Date): string {
+  const anio = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
+
 function nuevoFormulario() {
   return {
     clienteNombre: '',
@@ -41,6 +48,7 @@ export class Planificacion implements OnInit {
   private readonly objetivoVisitaService = inject(ObjetivoVisitaService);
 
   readonly badgeClase = BADGE_CLASE;
+  readonly fechaMinima = formatearFecha(new Date());
 
   readonly mercaderistas = signal<Usuario[]>([]);
   readonly plan = signal<PlanVisita[]>([]);
@@ -177,6 +185,13 @@ export class Planificacion implements OnInit {
     setTimeout(() => this.mostrarSugerenciasMercaderista.set(false), 150);
   }
 
+  limpiarMercaderista(): void {
+    this.busquedaMercaderista.set('');
+    this.mostrarSugerenciasMercaderista.set(false);
+    this.nuevo.usuarioId = null;
+    this.limpiarCliente();
+  }
+
   // ---- Cliente ----
   onBusquedaClienteChange(valor: string): void {
     this.busquedaCliente.set(valor);
@@ -212,10 +227,11 @@ export class Planificacion implements OnInit {
     });
   }
 
-  limpiarCliente(): void {
+  // Resetea solo la búsqueda/selección de cliente (mantiene la lista de clientes
+  // asignados al mercaderista, para poder seguir buscando entre ellos).
+  limpiarBusquedaCliente(): void {
     this.busquedaCliente.set('');
     this.mostrarSugerenciasCliente.set(false);
-    this.clientesAsignados.set([]);
     this.clienteSeleccionado.set(null);
     this.nuevo.clienteNombre = '';
     this.nuevo.erpClienteId = '';
@@ -223,14 +239,11 @@ export class Planificacion implements OnInit {
     this.sucursalesCliente.set([]);
   }
 
-  // ---- Tipo de visita ----
-  onTipoVisitaChange(valor: TipoVisita): void {
-    this.nuevo.tipoVisita = valor;
-    if (valor === 'NO_PLANIFICADA') {
-      this.nuevo.objetivoTipoId = null;
-      this.nuevo.objetivoSubtipoId = null;
-      this.subtiposDisponibles.set([]);
-    }
+  // Reset completo: además de la búsqueda, descarta la lista de clientes
+  // asignados (se usa al cambiar o quitar el mercaderista seleccionado).
+  limpiarCliente(): void {
+    this.limpiarBusquedaCliente();
+    this.clientesAsignados.set([]);
   }
 
   // ---- Objetivo de la visita ----
@@ -240,8 +253,33 @@ export class Planificacion implements OnInit {
     this.subtiposDisponibles.set(tipoId ? this.objetivoSubtipos().filter((s) => s.tipoId === tipoId) : []);
   }
 
+  private esFechaHoraPasada(fecha: string, hora: string): boolean {
+    if (!fecha || !hora) return false;
+    return new Date(`${fecha}T${hora}`).getTime() < Date.now();
+  }
+
+  private horaMinimaParaFecha(fecha: string): string | null {
+    if (!fecha || fecha !== this.fechaMinima) return null;
+    const ahora = new Date();
+    return `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+  }
+
+  horaMinimaNueva(): string | null {
+    return this.horaMinimaParaFecha(this.nuevo.fechaProgramada);
+  }
+
+  horaMinimaReprogramar(): string | null {
+    return this.horaMinimaParaFecha(this.reprogramarForm.fecha);
+  }
+
   formularioValido(): boolean {
-    return !!this.nuevo.usuarioId && !!this.nuevo.clienteNombre && !!this.nuevo.fechaProgramada && !!this.nuevo.horaProgramada;
+    return (
+      !!this.nuevo.usuarioId &&
+      !!this.nuevo.clienteNombre &&
+      !!this.nuevo.fechaProgramada &&
+      !!this.nuevo.horaProgramada &&
+      !this.esFechaHoraPasada(this.nuevo.fechaProgramada, this.nuevo.horaProgramada)
+    );
   }
 
   intentarCrear(): void {
@@ -317,9 +355,17 @@ export class Planificacion implements OnInit {
     this.mostrarModalReprogramar.set(false);
   }
 
+  reprogramarValido(): boolean {
+    return (
+      !!this.reprogramarForm.fecha &&
+      !!this.reprogramarForm.hora &&
+      !this.esFechaHoraPasada(this.reprogramarForm.fecha, this.reprogramarForm.hora)
+    );
+  }
+
   guardarReprogramacion(): void {
     const visita = this.visitaReprogramando();
-    if (!visita || !this.reprogramarForm.fecha || !this.reprogramarForm.hora) return;
+    if (!visita || !this.reprogramarValido()) return;
 
     this.guardandoReprogramacion.set(true);
     this.planVisitaService

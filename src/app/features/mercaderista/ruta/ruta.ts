@@ -90,6 +90,8 @@ export class Ruta implements OnInit {
       erpClienteId: p.erpClienteId ?? undefined,
       clienteNombre: p.clienteNombre,
       region: p.region ?? undefined,
+      objetivoTipoNombre: p.objetivoTipoNombre,
+      objetivoSubtipoNombre: p.objetivoSubtipoNombre,
     });
   }
 
@@ -104,7 +106,14 @@ export class Ruta implements OnInit {
   }
 
   private iniciarCheckin(
-    datos: { planId?: number; erpClienteId?: string; clienteNombre: string; region?: string },
+    datos: {
+      planId?: number;
+      erpClienteId?: string;
+      clienteNombre: string;
+      region?: string;
+      objetivoTipoNombre?: string | null;
+      objetivoSubtipoNombre?: string | null;
+    },
     esProspecto = false,
   ): void {
     const usuario = this.usuario();
@@ -117,7 +126,6 @@ export class Ruta implements OnInit {
         erpClienteId: datos.erpClienteId,
         clienteNombre: datos.clienteNombre,
         region: datos.region ?? usuario.region ?? undefined,
-        ejecutivoVentas: usuario.ejecutivoAsociado ?? undefined,
         checkinGpsLat: coords?.lat,
         checkinGpsLng: coords?.lng,
       };
@@ -131,6 +139,8 @@ export class Ruta implements OnInit {
             region: visita.region,
             planId: visita.planId,
             esProspecto,
+            objetivoTipoNombre: datos.objetivoTipoNombre,
+            objetivoSubtipoNombre: datos.objetivoSubtipoNombre,
           });
           this.iniciandoVisita.set(false);
           this.router.navigate(['/app/visita', visita.id]);

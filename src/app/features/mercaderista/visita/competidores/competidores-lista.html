@@ -1,0 +1,115 @@
+<div>
+  <div class="flex items-center justify-between mb-2">
+    <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Competencia detectada ({{ competidores().length }})</p>
+    @if (!mostrarFormulario()) {
+      <button type="button" (click)="abrirFormulario()" class="text-brand-dim text-[12px] font-bold">+ Agregar competidor</button>
+    }
+  </div>
+
+  @if (!competidores().length) {
+    <p class="text-muted text-[12.5px] mb-2">Sin competidores registrados todavía.</p>
+  } @else {
+    <div class="flex flex-col gap-2 mb-3">
+      @for (c of competidores(); track c.id) {
+        <div class="border border-line rounded-xl p-2.5">
+          <p class="font-bold text-[13px]">{{ c.nombreEmpresa }}</p>
+          @if (c.marcasRepresentadas) {
+            <p class="text-muted text-[11.5px]">{{ c.marcasRepresentadas }}</p>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (mostrarFormulario()) {
+    <div class="border border-line rounded-xl p-3 flex flex-col gap-3">
+      <input
+        [(ngModel)]="formulario.nombreEmpresa"
+        placeholder="Nombre de la empresa *"
+        class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+      />
+      <input
+        [(ngModel)]="formulario.marcasRepresentadas"
+        placeholder="Marcas representadas"
+        class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+      />
+      <input
+        [(ngModel)]="formulario.tipoProductosExhibidos"
+        placeholder="Tipo de productos exhibidos"
+        class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+      />
+      <input
+        [(ngModel)]="formulario.tamanoStand"
+        placeholder="Tamaño aproximado del stand"
+        class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+      />
+      <div class="flex gap-2">
+        <input
+          type="number"
+          min="0"
+          [(ngModel)]="formulario.cantidadPromotores"
+          placeholder="Cant. promotores"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        />
+        <input
+          type="number"
+          min="0"
+          [(ngModel)]="formulario.cantidadPersonalTecnico"
+          placeholder="Cant. personal técnico"
+          class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+        />
+      </div>
+
+      @for (a of amenidades; track a.campo) {
+        <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
+          <span>{{ a.label }}</span>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" (click)="setAmenidad(a.campo, true)" [class]="claseBotonSiNo(formulario[a.campo], true)">Sí</button>
+            <button type="button" (click)="setAmenidad(a.campo, false)" [class]="claseBotonSiNo(formulario[a.campo], false)">No</button>
+          </div>
+        </div>
+      }
+
+      <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Fotografías del stand</p>
+      <div class="grid grid-cols-3 gap-2">
+        @for (foto of fotosStandSlots(); track $index) {
+          <app-photo-picker label="Stand" [url]="foto" (urlChange)="setFotoStand($index, $event)" />
+        }
+      </div>
+      <button type="button" (click)="agregarSlotFotoStand()" class="text-brand-dim text-[12px] font-bold self-start">
+        + Agregar foto
+      </button>
+
+      <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Fotografías del material publicitario</p>
+      <div class="grid grid-cols-3 gap-2">
+        @for (foto of fotosMaterialSlots(); track $index) {
+          <app-photo-picker label="Material" [url]="foto" (urlChange)="setFotoMaterial($index, $event)" />
+        }
+      </div>
+      <button type="button" (click)="agregarSlotFotoMaterial()" class="text-brand-dim text-[12px] font-bold self-start">
+        + Agregar foto
+      </button>
+
+      <textarea
+        [(ngModel)]="formulario.observaciones"
+        rows="3"
+        placeholder="Observaciones relevantes"
+        class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+      ></textarea>
+
+      <div class="flex gap-2">
+        <button
+          type="button"
+          (click)="guardar()"
+          [disabled]="!formulario.nombreEmpresa.trim() || guardando()"
+          class="flex-1 rounded-[11px] bg-brand text-white font-bold text-[13px] py-2.5 disabled:opacity-50"
+        >
+          {{ guardando() ? 'Guardando…' : 'Guardar competidor' }}
+        </button>
+        <button type="button" (click)="cerrarFormulario()" class="flex-1 rounded-[11px] border border-line py-2.5 text-[13px]">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  }
+</div>

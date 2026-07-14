@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuditoriaService } from '../../../../core/services/auditoria.service';
 import { CatalogoService } from '../../../../core/services/catalogo.service';
@@ -6,11 +6,12 @@ import { MercadoService } from '../../../../core/services/mercado.service';
 import { SolicitudService } from '../../../../core/services/solicitud.service';
 import { VisitaService } from '../../../../core/services/visita.service';
 import { EstadoExhibidor, EstadoPop } from '../../../../core/models/auditoria.model';
-import { CategoriaMaterial, FamiliaMaterial, Material, MarcaCompetencia } from '../../../../core/models/catalogo.model';
+import { CategoriaMaterial, FamiliaMaterial, Material } from '../../../../core/models/catalogo.model';
 import { HallazgoMercado, HallazgoMaterial, HallazgoProducto, TipoHallazgo } from '../../../../core/models/mercado.model';
 import { CategoriaSolicitud, Solicitud, SolicitudItemRequest } from '../../../../core/models/solicitud.model';
 import { CategoriaEvidencia } from '../../../../core/models/visita.model';
 import { PhotoPicker } from '../../../../shared/ui/photo-picker/photo-picker';
+import { CompetidoresLista } from '../competidores/competidores-lista';
 
 type SubPaso = 'estado' | 'competencia' | 'fotos' | 'observaciones' | 'mercado' | 'solicitudes';
 
@@ -26,10 +27,10 @@ interface MaterialSeleccionado {
 @Component({
   selector: 'app-marca-detalle',
   standalone: true,
-  imports: [FormsModule, PhotoPicker],
+  imports: [FormsModule, PhotoPicker, CompetidoresLista],
   templateUrl: './marca-detalle.html',
 })
-export class MarcaDetalle implements OnInit {
+export class MarcaDetalle {
   private readonly auditoriaService = inject(AuditoriaService);
   private readonly catalogoService = inject(CatalogoService);
   private readonly mercadoService = inject(MercadoService);
@@ -75,11 +76,6 @@ export class MarcaDetalle implements OnInit {
     return Math.round((total / criterios.length) * 100);
   });
 
-  // ---- Competencia ----
-  readonly competenciaCatalogo = signal<MarcaCompetencia[]>([]);
-  readonly competenciaSeleccionada = signal<Set<string>>(new Set());
-  competenciaPersonalizada = '';
-
   // ---- Fotos ----
   readonly fotos = signal<Record<Extract<CategoriaEvidencia, 'EXHIBIDOR' | 'PRODUCTO' | 'COMPETENCIA' | 'MATERIAL_POP' | 'ANTES' | 'DESPUES'>, string | null>>({
     EXHIBIDOR: null,
@@ -111,10 +107,6 @@ export class MarcaDetalle implements OnInit {
   solicitudObservaciones = '';
   readonly solicitudesGuardadas = signal<Solicitud[]>([]);
   readonly guardandoSolicitud = signal(false);
-
-  ngOnInit(): void {
-    this.catalogoService.listarCompetenciaDeMarca(this.marcaId()).subscribe((c) => this.competenciaCatalogo.set(c));
-  }
 
   irA(paso: SubPaso): void {
     this.subPaso.set(paso);
@@ -149,23 +141,6 @@ export class MarcaDetalle implements OnInit {
       this.productoExhibidor.set(false);
       this.estadoExhibidores.set('NO_APLICA');
     }
-  }
-
-  toggleCompetencia(nombre: string): void {
-    const actual = new Set(this.competenciaSeleccionada());
-    if (actual.has(nombre)) {
-      actual.delete(nombre);
-    } else {
-      actual.add(nombre);
-    }
-    this.competenciaSeleccionada.set(actual);
-  }
-
-  agregarCompetenciaPersonalizada(): void {
-    const nombre = this.competenciaPersonalizada.trim();
-    if (!nombre) return;
-    this.toggleCompetencia(nombre);
-    this.competenciaPersonalizada = '';
   }
 
   setFoto(categoria: keyof ReturnType<typeof this.fotos>, url: string | null): void {
@@ -326,7 +301,6 @@ export class MarcaDetalle implements OnInit {
   guardarMarca(): void {
     const frentesVettal = this.frentesVettal() ?? 0;
     const frentesTotales = this.frentesTotales() ?? 0;
-    const competencia = Array.from(this.competenciaSeleccionada()).join(', ');
 
     this.guardando.set(true);
     this.auditoriaService
@@ -346,7 +320,6 @@ export class MarcaDetalle implements OnInit {
         empleadosUniforme: this.empleadosUniforme(),
         estadoExhibidores: this.estadoExhibidores(),
         estadoPop: this.estadoPop(),
-        competenciaDetectada: competencia || undefined,
         oportunidad: this.oportunidad || undefined,
       })
       .subscribe(() => {

@@ -7,13 +7,14 @@ import { VisitaSessionService } from '../../../core/session/visita-session.servi
 import { Marca } from '../../../core/models/catalogo.model';
 import { PhotoPicker } from '../../../shared/ui/photo-picker/photo-picker';
 import { MarcaDetalle } from './marca-detalle/marca-detalle';
+import { EventoVisita } from './evento-visita/evento-visita';
 
-type Paso = 'evidencia' | 'prospecto' | 'marcas' | 'marca-detalle';
+type Paso = 'evidencia' | 'prospecto' | 'evento' | 'marcas' | 'marca-detalle';
 
 @Component({
   selector: 'app-visita-wizard',
   standalone: true,
-  imports: [FormsModule, PhotoPicker, MarcaDetalle],
+  imports: [FormsModule, PhotoPicker, MarcaDetalle, EventoVisita],
   templateUrl: './visita-wizard.html',
 })
 export class VisitaWizard implements OnInit {
@@ -55,10 +56,23 @@ export class VisitaWizard implements OnInit {
     if (this.sesion.esProspecto()) {
       this.paso.set('prospecto');
     } else if (this.sesion.evidenciaGeneralCompleta()) {
-      this.paso.set('marcas');
+      this.irAPasoTrasEvidencia();
     } else {
       this.paso.set('evidencia');
     }
+  }
+
+  private irAPasoTrasEvidencia(): void {
+    if (this.sesion.objetivoTipoNombre() === 'Evento' && !this.sesion.eventoRegistrado()) {
+      this.paso.set('evento');
+    } else {
+      this.paso.set('marcas');
+    }
+  }
+
+  onEventoCompletado(): void {
+    this.sesion.marcarEventoRegistrado();
+    this.paso.set('marcas');
   }
 
   continuarEvidencia(): void {
@@ -72,7 +86,7 @@ export class VisitaWizard implements OnInit {
       this.visitaService.agregarFoto(visitaId, { categoria: 'PISO_VENTAS', url: piso }).subscribe(() => {
         this.guardando.set(false);
         this.sesion.marcarEvidenciaGeneralCompleta();
-        this.paso.set('marcas');
+        this.irAPasoTrasEvidencia();
       });
     });
   }
@@ -98,10 +112,15 @@ export class VisitaWizard implements OnInit {
         marcasCompetencia: this.prospecto.marcasCompetencia || undefined,
       })
       .subscribe(() => {
-        this.visitaService.checkout(visitaId, {}).subscribe(() => {
-          this.guardando.set(false);
-          this.sesion.finalizar();
-          this.router.navigateByUrl('/app/ruta');
+        // Las fotos de fachada/interior del prospecto cuentan como la evidencia
+        // general de la visita, para no volver a pedirlas — luego continúa el
+        // mismo flujo de auditoría por marca que sigue cualquier otra visita.
+        this.visitaService.agregarFoto(visitaId, { categoria: 'FACHADA', url: fachada }).subscribe(() => {
+          this.visitaService.agregarFoto(visitaId, { categoria: 'PISO_VENTAS', url: interior }).subscribe(() => {
+            this.guardando.set(false);
+            this.sesion.marcarEvidenciaGeneralCompleta();
+            this.irAPasoTrasEvidencia();
+          });
         });
       });
   }

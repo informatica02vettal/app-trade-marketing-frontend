@@ -120,37 +120,7 @@
     }
 
     @case ('competencia') {
-      <div class="flex flex-col gap-3">
-        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Competencia detectada</p>
-        <div class="flex flex-wrap gap-2">
-          @for (c of competenciaCatalogo(); track c.id) {
-            <button
-              type="button"
-              (click)="toggleCompetencia(c.nombre)"
-              class="rounded-full border px-3 py-1.5 text-[12.5px] font-semibold"
-              [class.bg-brand-tint]="competenciaSeleccionada().has(c.nombre)"
-              [class.text-brand-dim]="competenciaSeleccionada().has(c.nombre)"
-              [class.border-brand]="competenciaSeleccionada().has(c.nombre)"
-              [class.bg-panel-alt]="!competenciaSeleccionada().has(c.nombre)"
-              [class.text-muted]="!competenciaSeleccionada().has(c.nombre)"
-              [class.border-line]="!competenciaSeleccionada().has(c.nombre)"
-            >
-              {{ c.nombre }}
-            </button>
-          }
-        </div>
-
-        <div class="flex gap-2 mt-2">
-          <input
-            [(ngModel)]="competenciaPersonalizada"
-            placeholder="+ Nueva marca"
-            class="flex-1 rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
-          />
-          <button type="button" (click)="agregarCompetenciaPersonalizada()" class="rounded-[11px] border border-line px-3 text-[13px]">
-            Agregar
-          </button>
-        </div>
-      </div>
+      <app-competidores-lista [visitaId]="visitaId()" />
     }
 
     @case ('fotos') {

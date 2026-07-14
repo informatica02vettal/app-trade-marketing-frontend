@@ -13,6 +13,8 @@ export interface DatosInicioVisita {
   region?: string | null;
   planId?: number | null;
   esProspecto?: boolean;
+  objetivoTipoNombre?: string | null;
+  objetivoSubtipoNombre?: string | null;
 }
 
 interface EstadoPersistido {
@@ -22,6 +24,9 @@ interface EstadoPersistido {
   region: string | null;
   planId: number | null;
   esProspecto: boolean;
+  objetivoTipoNombre: string | null;
+  objetivoSubtipoNombre: string | null;
+  eventoRegistrado: boolean;
   evidenciaGeneralCompleta: boolean;
   marcas: MarcaProgreso[];
 }
@@ -41,6 +46,9 @@ export class VisitaSessionService {
   readonly region = signal<string | null>(null);
   readonly planId = signal<number | null>(null);
   readonly esProspecto = signal<boolean>(false);
+  readonly objetivoTipoNombre = signal<string | null>(null);
+  readonly objetivoSubtipoNombre = signal<string | null>(null);
+  readonly eventoRegistrado = signal<boolean>(false);
   readonly evidenciaGeneralCompleta = signal<boolean>(false);
   readonly marcas = signal<MarcaProgreso[]>([]);
 
@@ -59,6 +67,9 @@ export class VisitaSessionService {
     this.region.set(datos.region ?? null);
     this.planId.set(datos.planId ?? null);
     this.esProspecto.set(!!datos.esProspecto);
+    this.objetivoTipoNombre.set(datos.objetivoTipoNombre ?? null);
+    this.objetivoSubtipoNombre.set(datos.objetivoSubtipoNombre ?? null);
+    this.eventoRegistrado.set(false);
     this.evidenciaGeneralCompleta.set(false);
     this.marcas.set([]);
     this.persistir();
@@ -67,6 +78,17 @@ export class VisitaSessionService {
   marcarEvidenciaGeneralCompleta(): void {
     this.evidenciaGeneralCompleta.set(true);
     this.persistir();
+  }
+
+  marcarEventoRegistrado(): void {
+    this.eventoRegistrado.set(true);
+    this.persistir();
+  }
+
+  /** Es "evento grande" (feria/exposición/congreso/rueda de negocios): exige registro extendido + análisis de competencia. */
+  esEventoGrande(): boolean {
+    const subtipo = (this.objetivoSubtipoNombre() ?? '').trim().toLowerCase();
+    return ['feria', 'exposición', 'exposicion', 'congreso', 'rueda de negocios'].includes(subtipo);
   }
 
   marcarMarcaCompletada(marcaId: number, nombre: string): void {
@@ -90,6 +112,9 @@ export class VisitaSessionService {
     this.region.set(null);
     this.planId.set(null);
     this.esProspecto.set(false);
+    this.objetivoTipoNombre.set(null);
+    this.objetivoSubtipoNombre.set(null);
+    this.eventoRegistrado.set(false);
     this.evidenciaGeneralCompleta.set(false);
     this.marcas.set([]);
     sessionStorage.removeItem(STORAGE_KEY);
@@ -103,6 +128,9 @@ export class VisitaSessionService {
       region: this.region(),
       planId: this.planId(),
       esProspecto: this.esProspecto(),
+      objetivoTipoNombre: this.objetivoTipoNombre(),
+      objetivoSubtipoNombre: this.objetivoSubtipoNombre(),
+      eventoRegistrado: this.eventoRegistrado(),
       evidenciaGeneralCompleta: this.evidenciaGeneralCompleta(),
       marcas: this.marcas(),
     };
@@ -121,6 +149,9 @@ export class VisitaSessionService {
     this.region.set(estado.region);
     this.planId.set(estado.planId);
     this.esProspecto.set(estado.esProspecto);
+    this.objetivoTipoNombre.set(estado.objetivoTipoNombre ?? null);
+    this.objetivoSubtipoNombre.set(estado.objetivoSubtipoNombre ?? null);
+    this.eventoRegistrado.set(estado.eventoRegistrado ?? false);
     this.evidenciaGeneralCompleta.set(estado.evidenciaGeneralCompleta);
     this.marcas.set(estado.marcas ?? []);
   }
