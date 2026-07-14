@@ -163,6 +163,20 @@
           Inteligencia de mercado de esta marca (opcional)
         </p>
 
+        @if (productosPropiosDisponibles().length) {
+          <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Producto propio a auditar</p>
+          <select
+            [ngModel]="productoErpSeleccionadoId()"
+            (ngModelChange)="productoErpSeleccionadoId.set($event)"
+            class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+          >
+            <option [ngValue]="null">Sin producto específico</option>
+            @for (p of productosPropiosDisponibles(); track p.id) {
+              <option [ngValue]="p.id">{{ p.nombreComercial || p.producto }}</option>
+            }
+          </select>
+        }
+
         <select
           [ngModel]="mercadoTipo()"
           (ngModelChange)="mercadoTipo.set($event)"
@@ -272,7 +286,12 @@
           <div class="mt-2">
             <p class="text-muted text-[11px] font-mono uppercase mb-1">Hallazgos agregados</p>
             @for (h of mercadoGuardados(); track h.id) {
-              <p class="text-[12.5px] border-b border-line py-1">{{ h.tipo }}</p>
+              <p class="text-[12.5px] border-b border-line py-1">
+                {{ h.tipo }}
+                @if (h.productoErpNombre) {
+                  <span class="text-muted"> · {{ h.productoErpNombre }}</span>
+                }
+              </p>
             }
           </div>
         }

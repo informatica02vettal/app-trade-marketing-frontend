@@ -8,6 +8,7 @@ import { VisitaService } from '../../../core/services/visita.service';
 import { VisitaSessionService } from '../../../core/session/visita-session.service';
 import { ClienteErp } from '../../../core/models/cliente.model';
 import { PlanVisita } from '../../../core/models/plan-visita.model';
+import { ProductoResumen } from '../../../core/models/producto.model';
 import { VisitaCheckinRequest } from '../../../core/models/visita.model';
 
 function obtenerGps(): Promise<{ lat: number; lng: number } | null> {
@@ -92,6 +93,7 @@ export class Ruta implements OnInit {
       region: p.region ?? undefined,
       objetivoTipoNombre: p.objetivoTipoNombre,
       objetivoSubtipoNombre: p.objetivoSubtipoNombre,
+      productosAuditar: p.productosAuditar,
     });
   }
 
@@ -113,6 +115,7 @@ export class Ruta implements OnInit {
       region?: string;
       objetivoTipoNombre?: string | null;
       objetivoSubtipoNombre?: string | null;
+      productosAuditar?: ProductoResumen[];
     },
     esProspecto = false,
   ): void {
@@ -141,6 +144,7 @@ export class Ruta implements OnInit {
             esProspecto,
             objetivoTipoNombre: datos.objetivoTipoNombre,
             objetivoSubtipoNombre: datos.objetivoSubtipoNombre,
+            productosAuditar: datos.productosAuditar,
           });
           this.iniciandoVisita.set(false);
           this.router.navigate(['/app/visita', visita.id]);

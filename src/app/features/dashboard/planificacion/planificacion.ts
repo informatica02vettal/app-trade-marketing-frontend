@@ -4,13 +4,16 @@ import { PlanVisitaService } from '../../../core/services/plan-visita.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { ObjetivoVisitaService } from '../../../core/services/objetivo-visita.service';
+import { ProductoService } from '../../../core/services/producto.service';
 import { EstadoPlanVisita, PlanVisita, TipoVisita } from '../../../core/models/plan-visita.model';
 import { Usuario } from '../../../core/models/usuario.model';
 import { AsignacionCliente, SucursalLocal } from '../../../core/models/cliente.model';
 import { ObjetivoVisitaSubtipo, ObjetivoVisitaTipo } from '../../../core/models/objetivo-visita.model';
+import { ProductoLocal } from '../../../core/models/producto.model';
 import { BADGE_BAD, BADGE_OK, BADGE_WARN } from '../../../shared/ui/dash/badge-classes';
 
 const BADGE_CLASE: Record<string, string> = { EJECUTADA: BADGE_OK, PENDIENTE: BADGE_WARN, REPROGRAMADA: BADGE_BAD };
+const NOMBRE_TIPO_AUDITORIA_MARCA = 'Auditoría de marca';
 
 function formatearFecha(fecha: Date): string {
   const anio = fecha.getFullYear();
@@ -35,6 +38,17 @@ function nuevoFormulario() {
   };
 }
 
+function coincideBusquedaProducto(p: ProductoLocal, termino: string): boolean {
+  return (
+    (p.producto ?? '').toLowerCase().includes(termino) ||
+    (p.nombreComercial ?? '').toLowerCase().includes(termino) ||
+    (p.marca ?? '').toLowerCase().includes(termino) ||
+    (p.linea ?? '').toLowerCase().includes(termino) ||
+    (p.subcategoria ?? '').toLowerCase().includes(termino) ||
+    p.codigo.toLowerCase().includes(termino)
+  );
+}
+
 @Component({
   selector: 'app-planificacion',
   standalone: true,
@@ -46,6 +60,7 @@ export class Planificacion implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
   private readonly clienteService = inject(ClienteService);
   private readonly objetivoVisitaService = inject(ObjetivoVisitaService);
+  private readonly productoService = inject(ProductoService);
 
   readonly badgeClase = BADGE_CLASE;
   readonly fechaMinima = formatearFecha(new Date());
@@ -89,6 +104,48 @@ export class Planificacion implements OnInit {
   readonly objetivoSubtipos = signal<ObjetivoVisitaSubtipo[]>([]);
   readonly subtiposDisponibles = signal<ObjetivoVisitaSubtipo[]>([]);
 
+  // Nota: método plano (no computed) porque depende de `nuevo.objetivoTipoId`,
+  // una propiedad de objeto plano y no una señal — un computed() nunca
+  // reaccionaría a sus cambios y quedaría "congelado" en su primer valor.
+  esAuditoriaMarca(): boolean {
+    const tipo = this.objetivoTipos().find((t) => t.id === this.nuevo.objetivoTipoId);
+    return tipo?.nombre === NOMBRE_TIPO_AUDITORIA_MARCA;
+  }
+
+  // ---- Productos propios a auditar (solo si el objetivo es "Auditoría de marca") ----
+  readonly productos = signal<ProductoLocal[]>([]);
+  readonly busquedaProducto = signal('');
+  readonly filtroProductoMarca = signal('');
+  readonly filtroProductoLinea = signal('');
+  readonly filtroProductoSubcategoria = signal('');
+  readonly productosSeleccionados = signal<ProductoLocal[]>([]);
+
+  private valoresUnicos(selector: (p: ProductoLocal) => string | null): string[] {
+    return Array.from(new Set(this.productos().map(selector).filter((v): v is string => !!v))).sort((a, b) =>
+      a.localeCompare(b),
+    );
+  }
+
+  readonly marcasProducto = computed(() => this.valoresUnicos((p) => p.marca));
+  readonly lineasProducto = computed(() => this.valoresUnicos((p) => p.linea));
+  readonly subcategoriasProducto = computed(() => this.valoresUnicos((p) => p.subcategoria));
+
+  readonly productosFiltrados = computed(() => {
+    const termino = this.busquedaProducto().trim().toLowerCase();
+    const marca = this.filtroProductoMarca();
+    const linea = this.filtroProductoLinea();
+    const subcategoria = this.filtroProductoSubcategoria();
+    const seleccionadosIds = new Set(this.productosSeleccionados().map((p) => p.id));
+
+    let disponibles = this.productos().filter((p) => !seleccionadosIds.has(p.id));
+    if (marca) disponibles = disponibles.filter((p) => p.marca === marca);
+    if (linea) disponibles = disponibles.filter((p) => p.linea === linea);
+    if (subcategoria) disponibles = disponibles.filter((p) => p.subcategoria === subcategoria);
+    if (termino) disponibles = disponibles.filter((p) => coincideBusquedaProducto(p, termino));
+
+    return disponibles.slice(0, 50);
+  });
+
   // ---- Búsqueda de mercaderista (lista ya cargada, sin llamada a API) ----
   readonly busquedaMercaderista = signal('');
   readonly mostrarSugerenciasMercaderista = signal(false);
@@ -108,6 +165,7 @@ export class Planificacion implements OnInit {
     this.usuarioService.listar().subscribe((usuarios) => this.mercaderistas.set(usuarios.filter((u) => u.rol === 'MERCADERISTA')));
     this.objetivoVisitaService.listarTipos().subscribe((tipos) => this.objetivoTipos.set(tipos.filter((t) => t.activo)));
     this.objetivoVisitaService.listarSubtipos().subscribe((subtipos) => this.objetivoSubtipos.set(subtipos.filter((s) => s.activo)));
+    this.productoService.listar().subscribe((productos) => this.productos.set(productos));
     this.cargarPlan();
   }
 
@@ -147,6 +205,11 @@ export class Planificacion implements OnInit {
     this.busquedaMercaderista.set('');
     this.mostrarSugerenciasMercaderista.set(false);
     this.subtiposDisponibles.set([]);
+    this.busquedaProducto.set('');
+    this.filtroProductoMarca.set('');
+    this.filtroProductoLinea.set('');
+    this.filtroProductoSubcategoria.set('');
+    this.productosSeleccionados.set([]);
     this.limpiarCliente();
     this.mostrarModal.set(true);
   }
@@ -251,6 +314,24 @@ export class Planificacion implements OnInit {
     this.nuevo.objetivoTipoId = tipoId;
     this.nuevo.objetivoSubtipoId = null;
     this.subtiposDisponibles.set(tipoId ? this.objetivoSubtipos().filter((s) => s.tipoId === tipoId) : []);
+    if (!this.esAuditoriaMarca()) {
+      this.busquedaProducto.set('');
+      this.filtroProductoMarca.set('');
+      this.filtroProductoLinea.set('');
+      this.filtroProductoSubcategoria.set('');
+      this.productosSeleccionados.set([]);
+    }
+  }
+
+  // ---- Productos propios a auditar (Auditoría de marca) ----
+  seleccionarProducto(p: ProductoLocal): void {
+    if (this.productosSeleccionados().some((sel) => sel.id === p.id)) return;
+    this.productosSeleccionados.set([...this.productosSeleccionados(), p]);
+    this.busquedaProducto.set('');
+  }
+
+  quitarProductoSeleccionado(id: number): void {
+    this.productosSeleccionados.set(this.productosSeleccionados().filter((p) => p.id !== id));
   }
 
   private esFechaHoraPasada(fecha: string, hora: string): boolean {
@@ -333,6 +414,9 @@ export class Planificacion implements OnInit {
         objetivoSubtipoId: this.nuevo.objetivoSubtipoId ?? undefined,
         comentario: this.nuevo.comentario || undefined,
         tipoVisita: this.nuevo.tipoVisita,
+        productoErpIds: this.productosSeleccionados().length
+          ? this.productosSeleccionados().map((p) => p.id)
+          : undefined,
       })
       .subscribe({
         next: () => {

@@ -1,3 +1,5 @@
+import { ProductoResumen } from './producto.model';
+
 export type TipoVisita = 'PLANIFICADA' | 'NO_PLANIFICADA';
 
 export type EstadoPlanVisita = 'PENDIENTE' | 'EJECUTADA' | 'REPROGRAMADA';
@@ -21,6 +23,7 @@ export interface PlanVisita {
   comentario: string | null;
   tipoVisita: TipoVisita;
   estado: EstadoPlanVisita;
+  productosAuditar: ProductoResumen[];
 }
 
 export interface PlanVisitaRequest {
@@ -35,6 +38,7 @@ export interface PlanVisitaRequest {
   objetivoSubtipoId?: number;
   comentario?: string;
   tipoVisita?: TipoVisita;
+  productoErpIds?: number[];
 }
 
 export interface PlanVisitaReprogramarRequest {

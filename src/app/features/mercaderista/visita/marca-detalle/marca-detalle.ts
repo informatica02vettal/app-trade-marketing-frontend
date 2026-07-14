@@ -5,6 +5,7 @@ import { CatalogoService } from '../../../../core/services/catalogo.service';
 import { MercadoService } from '../../../../core/services/mercado.service';
 import { SolicitudService } from '../../../../core/services/solicitud.service';
 import { VisitaService } from '../../../../core/services/visita.service';
+import { VisitaSessionService } from '../../../../core/session/visita-session.service';
 import { EstadoExhibidor, EstadoPop } from '../../../../core/models/auditoria.model';
 import { CategoriaMaterial, FamiliaMaterial, Material } from '../../../../core/models/catalogo.model';
 import { HallazgoMercado, HallazgoMaterial, HallazgoProducto, TipoHallazgo } from '../../../../core/models/mercado.model';
@@ -36,6 +37,7 @@ export class MarcaDetalle {
   private readonly mercadoService = inject(MercadoService);
   private readonly solicitudService = inject(SolicitudService);
   private readonly visitaService = inject(VisitaService);
+  private readonly sesion = inject(VisitaSessionService);
 
   readonly visitaId = input.required<number>();
   readonly marcaId = input.required<number>();
@@ -98,6 +100,15 @@ export class MarcaDetalle {
   readonly mercadoMateriales = signal<HallazgoMaterial[]>([]);
   readonly mercadoGuardados = signal<HallazgoMercado[]>([]);
   readonly guardandoMercado = signal(false);
+  readonly productoErpSeleccionadoId = signal<number | null>(null);
+
+  // Productos propios del plan de esta visita, priorizando los de esta marca.
+  readonly productosPropiosDisponibles = computed(() => {
+    const productos = this.sesion.productosAuditar();
+    const marca = this.marcaNombre().trim().toLowerCase();
+    const coincidentes = productos.filter((p) => (p.marca ?? '').trim().toLowerCase() === marca);
+    return coincidentes.length ? coincidentes : productos;
+  });
 
   // ---- Solicitudes (por marca) ----
   readonly solicitudCategoria = signal<CategoriaSolicitud | ''>('');
@@ -185,6 +196,7 @@ export class MarcaDetalle {
       .crear({
         visitaId: this.visitaId(),
         marcaId: this.marcaId(),
+        productoErpId: this.productoErpSeleccionadoId() ?? undefined,
         tipo,
         observacionTexto: this.mercadoObservacion || undefined,
         detalle: this.mercadoDetalle || undefined,

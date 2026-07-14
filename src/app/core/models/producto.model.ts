@@ -1,3 +1,11 @@
+export interface ProductoResumen {
+  id: number;
+  codigo: string;
+  producto: string | null;
+  nombreComercial: string | null;
+  marca: string | null;
+}
+
 export interface ProductoLocal {
   id: number;
   codigo: string;

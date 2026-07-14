@@ -183,6 +183,123 @@
             </select>
           </div>
         }
+
+        @if (esAuditoriaMarca()) {
+          <div class="flex flex-col gap-1.5 col-span-2">
+            <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Productos a auditar (opcional)</label>
+            <div class="flex gap-2 flex-wrap">
+              <input
+                [ngModel]="busquedaProducto()"
+                (ngModelChange)="busquedaProducto.set($event)"
+                placeholder="Buscar por código o nombre…"
+                autocomplete="off"
+                class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal flex-1 min-w-[160px]"
+              />
+              <select
+                [ngModel]="filtroProductoMarca()"
+                (ngModelChange)="filtroProductoMarca.set($event)"
+                class="bg-panel-alt border border-line rounded-[7px] text-ink px-2 py-2 text-[13px] outline-none focus:border-teal"
+              >
+                <option value="">Marca</option>
+                @for (m of marcasProducto(); track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
+              </select>
+              <select
+                [ngModel]="filtroProductoLinea()"
+                (ngModelChange)="filtroProductoLinea.set($event)"
+                class="bg-panel-alt border border-line rounded-[7px] text-ink px-2 py-2 text-[13px] outline-none focus:border-teal"
+              >
+                <option value="">Línea</option>
+                @for (l of lineasProducto(); track l) {
+                  <option [value]="l">{{ l }}</option>
+                }
+              </select>
+              <select
+                [ngModel]="filtroProductoSubcategoria()"
+                (ngModelChange)="filtroProductoSubcategoria.set($event)"
+                class="bg-panel-alt border border-line rounded-[7px] text-ink px-2 py-2 text-[13px] outline-none focus:border-teal"
+              >
+                <option value="">Subcategoría</option>
+                @for (s of subcategoriasProducto(); track s) {
+                  <option [value]="s">{{ s }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="border border-line rounded-lg max-h-[220px] overflow-y-auto">
+              <table class="w-full border-collapse text-[12px]">
+                <thead>
+                  <tr>
+                    <th class="sticky top-0 bg-panel text-left text-muted font-semibold text-[10px] uppercase tracking-[0.05em] px-2 py-1.5 border-b border-line font-mono">Código</th>
+                    <th class="sticky top-0 bg-panel text-left text-muted font-semibold text-[10px] uppercase tracking-[0.05em] px-2 py-1.5 border-b border-line font-mono">Producto</th>
+                    <th class="sticky top-0 bg-panel text-left text-muted font-semibold text-[10px] uppercase tracking-[0.05em] px-2 py-1.5 border-b border-line font-mono">Marca</th>
+                    <th class="sticky top-0 bg-panel text-left text-muted font-semibold text-[10px] uppercase tracking-[0.05em] px-2 py-1.5 border-b border-line font-mono">Línea / Subcategoría</th>
+                    <th class="sticky top-0 bg-panel px-2 py-1.5 border-b border-line"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of productosFiltrados(); track p.id) {
+                    <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
+                      <td class="px-2 py-1.5 align-middle font-mono text-[11px] text-muted whitespace-nowrap">{{ p.codigo }}</td>
+                      <td class="px-2 py-1.5 align-middle">{{ p.nombreComercial || p.producto }}</td>
+                      <td class="px-2 py-1.5 align-middle whitespace-nowrap">{{ p.marca || '—' }}</td>
+                      <td class="px-2 py-1.5 align-middle text-muted whitespace-nowrap">{{ p.linea || '—' }} / {{ p.subcategoria || '—' }}</td>
+                      <td class="px-2 py-1.5 align-middle text-right">
+                        <button
+                          type="button"
+                          (click)="seleccionarProducto(p)"
+                          class="inline-flex items-center gap-1 rounded-md border border-brand bg-brand-tint px-2 py-1 text-[11px] font-semibold text-brand-dim hover:bg-brand hover:text-white whitespace-nowrap"
+                        >
+                          + Agregar
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="5" class="px-2 py-3 text-center text-muted text-[12px]">
+                        @if (!productos().length) {
+                          El catálogo de productos está vacío. Sincronízalo desde "Productos".
+                        } @else if (busquedaProducto() || filtroProductoMarca() || filtroProductoLinea() || filtroProductoSubcategoria()) {
+                          Sin resultados para los filtros aplicados.
+                        } @else {
+                          Todos los productos disponibles ya fueron agregados.
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="border border-line rounded-lg mt-1">
+              <p class="text-[11px] text-muted font-mono uppercase px-2.5 pt-2 pb-1">
+                Productos a auditar ({{ productosSeleccionados().length }})
+              </p>
+              @if (productosSeleccionados().length) {
+                <table class="w-full border-collapse text-[12px]">
+                  <tbody>
+                    @for (p of productosSeleccionados(); track p.id) {
+                      <tr class="border-b border-line last:border-b-0">
+                        <td class="px-2.5 py-1.5 align-middle font-mono text-[11px] text-muted whitespace-nowrap">{{ p.codigo }}</td>
+                        <td class="px-2.5 py-1.5 align-middle">{{ p.nombreComercial || p.producto }}</td>
+                        <td class="px-2.5 py-1.5 align-middle text-muted whitespace-nowrap">{{ p.marca || '—' }}</td>
+                        <td class="px-2.5 py-1.5 align-middle text-right">
+                          <button type="button" (click)="quitarProductoSeleccionado(p.id)" class="text-danger text-[11px] font-semibold hover:underline">
+                            Quitar
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              } @else {
+                <p class="text-[11.5px] text-muted px-2.5 pb-2">Sin productos seleccionados todavía.</p>
+              }
+            </div>
+          </div>
+        }
+
         <div class="flex flex-col gap-1.5 col-span-2">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Comentario</label>
           <textarea

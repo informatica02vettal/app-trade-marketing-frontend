@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { ProductoResumen } from '../models/producto.model';
 
 export interface MarcaProgreso {
   marcaId: number;
@@ -15,6 +16,7 @@ export interface DatosInicioVisita {
   esProspecto?: boolean;
   objetivoTipoNombre?: string | null;
   objetivoSubtipoNombre?: string | null;
+  productosAuditar?: ProductoResumen[];
 }
 
 interface EstadoPersistido {
@@ -28,6 +30,7 @@ interface EstadoPersistido {
   objetivoSubtipoNombre: string | null;
   eventoRegistrado: boolean;
   evidenciaGeneralCompleta: boolean;
+  productosAuditar: ProductoResumen[];
   marcas: MarcaProgreso[];
 }
 
@@ -50,6 +53,7 @@ export class VisitaSessionService {
   readonly objetivoSubtipoNombre = signal<string | null>(null);
   readonly eventoRegistrado = signal<boolean>(false);
   readonly evidenciaGeneralCompleta = signal<boolean>(false);
+  readonly productosAuditar = signal<ProductoResumen[]>([]);
   readonly marcas = signal<MarcaProgreso[]>([]);
 
   constructor() {
@@ -71,6 +75,7 @@ export class VisitaSessionService {
     this.objetivoSubtipoNombre.set(datos.objetivoSubtipoNombre ?? null);
     this.eventoRegistrado.set(false);
     this.evidenciaGeneralCompleta.set(false);
+    this.productosAuditar.set(datos.productosAuditar ?? []);
     this.marcas.set([]);
     this.persistir();
   }
@@ -116,6 +121,7 @@ export class VisitaSessionService {
     this.objetivoSubtipoNombre.set(null);
     this.eventoRegistrado.set(false);
     this.evidenciaGeneralCompleta.set(false);
+    this.productosAuditar.set([]);
     this.marcas.set([]);
     sessionStorage.removeItem(STORAGE_KEY);
   }
@@ -132,6 +138,7 @@ export class VisitaSessionService {
       objetivoSubtipoNombre: this.objetivoSubtipoNombre(),
       eventoRegistrado: this.eventoRegistrado(),
       evidenciaGeneralCompleta: this.evidenciaGeneralCompleta(),
+      productosAuditar: this.productosAuditar(),
       marcas: this.marcas(),
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
@@ -153,6 +160,7 @@ export class VisitaSessionService {
     this.objetivoSubtipoNombre.set(estado.objetivoSubtipoNombre ?? null);
     this.eventoRegistrado.set(estado.eventoRegistrado ?? false);
     this.evidenciaGeneralCompleta.set(estado.evidenciaGeneralCompleta);
+    this.productosAuditar.set(estado.productosAuditar ?? []);
     this.marcas.set(estado.marcas ?? []);
   }
 }

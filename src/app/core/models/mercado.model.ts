@@ -25,6 +25,9 @@ export interface HallazgoMercado {
   tipo: TipoHallazgo;
   marcaId: number | null;
   marcaNombre: string | null;
+  productoErpId: number | null;
+  productoErpCodigo: string | null;
+  productoErpNombre: string | null;
   categoriaProductoId: number | null;
   categoriaProductoNombre: string | null;
   marcaCompetencia: string | null;
@@ -41,6 +44,7 @@ export interface HallazgoMercadoRequest {
   visitaId: number;
   tipo: TipoHallazgo;
   marcaId?: number;
+  productoErpId?: number;
   categoriaProductoId?: number;
   marcaCompetencia?: string;
   observacionTexto?: string;
