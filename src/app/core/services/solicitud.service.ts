@@ -11,10 +11,11 @@ const BASE_URL = `${environment.apiBaseUrl}/solicitudes`;
 export class SolicitudService {
   constructor(private readonly http: HttpClient) {}
 
-  listar(estado?: EstadoSolicitud, solicitanteId?: number): Observable<Solicitud[]> {
+  listar(estado?: EstadoSolicitud, solicitanteId?: number, visitaId?: number): Observable<Solicitud[]> {
     const params: Record<string, string | number> = {};
     if (estado) params['estado'] = estado;
     if (solicitanteId) params['solicitanteId'] = solicitanteId;
+    if (visitaId) params['visitaId'] = visitaId;
     return this.http.get<ApiResponse<Solicitud[]>>(BASE_URL, { params }).pipe(map((res) => res.data));
   }
 

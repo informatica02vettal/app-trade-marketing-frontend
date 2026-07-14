@@ -11,11 +11,14 @@ const BASE_URL = `${environment.apiBaseUrl}/mercado`;
 export class MercadoService {
   constructor(private readonly http: HttpClient) {}
 
-  listar(opts: { tipo?: TipoHallazgo; usuarioId?: number; marcaId?: number } = {}): Observable<HallazgoMercado[]> {
+  listar(
+    opts: { tipo?: TipoHallazgo; usuarioId?: number; marcaId?: number; visitaId?: number } = {},
+  ): Observable<HallazgoMercado[]> {
     const params: Record<string, string | number> = {};
     if (opts.tipo) params['tipo'] = opts.tipo;
     if (opts.usuarioId) params['usuarioId'] = opts.usuarioId;
     if (opts.marcaId) params['marcaId'] = opts.marcaId;
+    if (opts.visitaId) params['visitaId'] = opts.visitaId;
     return this.http.get<ApiResponse<HallazgoMercado[]>>(BASE_URL, { params }).pipe(map((res) => res.data));
   }
 

@@ -19,13 +19,13 @@
       <tr>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Cliente</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Mercaderista</th>
-        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Ejecutivo ventas</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Región</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Inicio</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Fin</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Permanencia</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Fotos</th>
         <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
+        <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
       </tr>
     </thead>
     <tbody>
@@ -33,15 +33,289 @@
         <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
           <td class="px-2.5 py-2.5 align-middle">{{ v.clienteNombre }}</td>
           <td class="px-2.5 py-2.5 align-middle">{{ v.usuarioNombre }}</td>
-          <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ v.ejecutivoVentas }}</td>
           <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ v.region }}</td>
           <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ v.checkinAt | date: 'short' }}</td>
           <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ v.checkoutAt ? (v.checkoutAt | date: 'short') : '—' }}</td>
           <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ v.permanenciaMin != null ? v.permanenciaMin + ' min' : '—' }}</td>
           <td class="px-2.5 py-2.5 align-middle font-mono text-[11.5px] text-muted">{{ v.cantidadFotos }} 📷</td>
           <td class="px-2.5 py-2.5 align-middle"><span [class]="badgeClase[v.estado] || badgeNeutral">{{ v.estado }}</span></td>
+          <td class="px-2.5 py-2.5 align-middle whitespace-nowrap">
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel-alt px-2.5 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-panel-hover"
+              (click)="abrirDetalle(v)"
+            >
+              Ver detalle
+            </button>
+          </td>
         </tr>
       }
     </tbody>
   </table>
 </div>
+
+@if (mostrarDetalle()) {
+  <div class="fixed inset-0 bg-[rgba(20,24,28,0.45)] flex items-center justify-center p-5 z-[100]" (click)="cerrarDetalle()">
+    <div
+      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[720px] max-h-[calc(100vh-40px)] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex justify-between items-start flex-wrap gap-3.5 mb-3">
+        <div>
+          <p class="font-display text-[16px] font-semibold mb-0.5">{{ visitaSeleccionada()?.clienteNombre }}</p>
+          <p class="text-muted text-[12px]">
+            {{ visitaSeleccionada()?.usuarioNombre }} · {{ visitaSeleccionada()?.region || 'Sin región' }}
+          </p>
+        </div>
+        <button type="button" class="bg-transparent border-none cursor-pointer text-muted text-xl leading-none p-1 hover:text-ink" (click)="cerrarDetalle()">×</button>
+      </div>
+
+      @if (cargandoDetalle()) {
+        <p class="text-muted text-[12.5px] text-center py-6">Cargando todo lo registrado en esta visita…</p>
+      } @else {
+        <div class="flex flex-col gap-5">
+          <!-- Resumen -->
+          <div class="grid grid-cols-3 gap-2.5 text-[12px]">
+            <div class="bg-panel-alt rounded-lg p-2.5">
+              <p class="text-muted font-mono text-[10px] uppercase mb-0.5">Check-in</p>
+              <p class="font-semibold">{{ visitaSeleccionada()?.checkinAt | date: 'short' }}</p>
+            </div>
+            <div class="bg-panel-alt rounded-lg p-2.5">
+              <p class="text-muted font-mono text-[10px] uppercase mb-0.5">Check-out</p>
+              <p class="font-semibold">
+                {{ visitaSeleccionada()?.checkoutAt ? (visitaSeleccionada()?.checkoutAt | date: 'short') : 'En curso' }}
+              </p>
+            </div>
+            <div class="bg-panel-alt rounded-lg p-2.5">
+              <p class="text-muted font-mono text-[10px] uppercase mb-0.5">Permanencia</p>
+              <p class="font-semibold">
+                {{ visitaSeleccionada()?.permanenciaMin != null ? visitaSeleccionada()?.permanenciaMin + ' min' : '—' }}
+              </p>
+            </div>
+          </div>
+          @if (visitaSeleccionada()?.observaciones) {
+            <p class="text-[12.5px] text-muted"><b class="text-ink">Observaciones del cierre:</b> {{ visitaSeleccionada()?.observaciones }}</p>
+          }
+
+          <!-- Evidencia general -->
+          @if (fotosGenerales().length) {
+            <div>
+              <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Evidencia general ({{ fotosGenerales().length }})</p>
+              <div class="grid grid-cols-4 gap-2">
+                @for (f of fotosGenerales(); track f.id) {
+                  <a [href]="archivoUploadService.urlAbsoluta(f.url)" target="_blank" class="block">
+                    <img [src]="archivoUploadService.urlAbsoluta(f.url)" [alt]="f.categoria" class="w-full aspect-square object-cover rounded-lg border border-line" />
+                    <p class="text-[10px] text-muted text-center mt-0.5 truncate">{{ f.categoria }}</p>
+                  </a>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Cliente prospecto -->
+          @if (prospectos().length) {
+            <div>
+              <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Cliente no registrado</p>
+              @for (p of prospectos(); track p.id) {
+                <div class="border border-line rounded-xl p-2.5 text-[12.5px] flex flex-col gap-1">
+                  <p class="font-bold">{{ p.nombre }}</p>
+                  <p class="text-muted">RIF {{ p.rif }} · WhatsApp {{ p.whatsapp }}</p>
+                  @if (p.marcasCompetencia) {
+                    <p class="text-muted">Competencia detectada: {{ p.marcasCompetencia }}</p>
+                  }
+                  <div class="grid grid-cols-4 gap-2 mt-1">
+                    <a [href]="archivoUploadService.urlAbsoluta(p.fotoFachadaUrl)" target="_blank">
+                      <img [src]="archivoUploadService.urlAbsoluta(p.fotoFachadaUrl)" alt="Fachada" class="w-full aspect-square object-cover rounded-lg border border-line" />
+                    </a>
+                    <a [href]="archivoUploadService.urlAbsoluta(p.fotoInteriorUrl)" target="_blank">
+                      <img [src]="archivoUploadService.urlAbsoluta(p.fotoInteriorUrl)" alt="Interior" class="w-full aspect-square object-cover rounded-lg border border-line" />
+                    </a>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Auditorías de marca -->
+          @if (auditorias().length) {
+            <div>
+              <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Auditorías de marca ({{ auditorias().length }})</p>
+              <div class="flex flex-col gap-2.5">
+                @for (a of auditorias(); track a.id) {
+                  <div class="border border-line rounded-xl p-3 text-[12.5px] flex flex-col gap-2">
+                    <div class="flex justify-between items-center">
+                      <p class="font-bold">{{ a.marcaNombre }}</p>
+                      <p class="font-mono text-[11px] text-muted">Presencia {{ a.presenciaPct }}%</p>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (item of checklistAuditoria(a); track item.label) {
+                        <span
+                          class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-semibold"
+                          [class.bg-success]="item.valor"
+                          [class.text-white]="item.valor"
+                          [class.bg-panel-alt]="!item.valor"
+                          [class.text-muted]="!item.valor"
+                        >
+                          {{ item.valor ? '✓' : '✕' }} {{ item.label }}
+                        </span>
+                      }
+                    </div>
+                    <p class="text-muted text-[11.5px]">
+                      Exhibidores: {{ a.estadoExhibidores }} · Material POP: {{ a.estadoPop }} · Frentes {{ a.frentesVettal }}/{{ a.frentesTotales }}
+                    </p>
+                    @if (a.competenciaDetectada) {
+                      <p class="text-[12px]"><b>Competencia detectada:</b> {{ a.competenciaDetectada }}</p>
+                    }
+                    @if (a.oportunidad) {
+                      <p class="text-[12px]"><b>Oportunidad:</b> {{ a.oportunidad }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Inteligencia de mercado -->
+          @if (hallazgosMercado().length) {
+            <div>
+              <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Inteligencia de mercado ({{ hallazgosMercado().length }})</p>
+              <div class="flex flex-col gap-2.5">
+                @for (h of hallazgosMercado(); track h.id) {
+                  <div class="border border-line rounded-xl p-3 text-[12.5px] flex flex-col gap-1.5">
+                    <div class="flex justify-between items-center">
+                      <p class="font-bold">{{ h.tipo }}</p>
+                      @if (h.marcaNombre) {
+                        <p class="text-muted text-[11px]">{{ h.marcaNombre }}</p>
+                      }
+                    </div>
+                    @if (h.productoErpNombre) {
+                      <p class="text-muted">Producto propio: {{ h.productoErpNombre }}</p>
+                    }
+                    @if (h.observacionTexto) {
+                      <p>{{ h.observacionTexto }}</p>
+                    }
+                    @if (h.detalle) {
+                      <p class="text-muted">{{ h.detalle }}</p>
+                    }
+                    @for (p of h.productos; track $index) {
+                      <p class="text-muted text-[11.5px]">· {{ p.marca }} {{ p.modelo }} — {{ p.precio != null ? ('$' + p.precio) : 'sin precio' }}</p>
+                    }
+                    @for (m of h.materiales; track $index) {
+                      <p class="text-muted text-[11.5px]">· {{ m.marca }} — {{ m.material }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Solicitudes -->
+          @if (solicitudes().length) {
+            <div>
+              <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Solicitudes ({{ solicitudes().length }})</p>
+              <div class="flex flex-col gap-2.5">
+                @for (s of solicitudes(); track s.id) {
+                  <div class="border border-line rounded-xl p-3 text-[12.5px] flex flex-col gap-1.5">
+                    <div class="flex justify-between items-center">
+                      <p class="font-bold">{{ s.categoria }} · {{ s.marcaNombre }}</p>
+                      <span [class]="badgeNeutral">{{ s.estado }}</span>
+                    </div>
+                    @for (item of s.items; track item.id) {
+                      <p class="text-muted">
+                        {{ item.materialNombre }}
+                        @if (item.medidas) { · {{ item.medidas }} }
+                        @if (item.ubicacion) { · {{ item.ubicacion }} }
+                      </p>
+                      @if (item.fotos.length) {
+                        <div class="grid grid-cols-4 gap-2">
+                          @for (foto of item.fotos; track $index) {
+                            <a [href]="archivoUploadService.urlAbsoluta(foto)" target="_blank">
+                              <img [src]="archivoUploadService.urlAbsoluta(foto)" alt="Foto" class="w-full aspect-square object-cover rounded-lg border border-line" />
+                            </a>
+                          }
+                        </div>
+                      }
+                    }
+                    @if (s.observaciones) {
+                      <p class="text-muted">{{ s.observaciones }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Evento -->
+          @if (evento(); as e) {
+            <div>
+              <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Evento</p>
+              <div class="border border-line rounded-xl p-3 text-[12.5px] flex flex-col gap-1">
+                <p class="font-bold">{{ motivosEvento[e.motivo] }}{{ e.nombreEvento ? ' · ' + e.nombreEvento : '' }}</p>
+                @if (e.ciudad || e.estado) {
+                  <p class="text-muted">{{ e.ciudad }}{{ e.ciudad && e.estado ? ', ' : '' }}{{ e.estado }}</p>
+                }
+                @if (e.organizador) {
+                  <p class="text-muted">Organizador: {{ e.organizador }}</p>
+                }
+                @if (e.participacionVettal) {
+                  <p class="text-muted">Vettal participó como: {{ e.participacionVettal }}</p>
+                }
+                @if (e.cantidadAsistentesEstimada != null) {
+                  <p class="text-muted">Asistentes estimados: {{ e.cantidadAsistentesEstimada }}</p>
+                }
+                @if (e.leads?.length) {
+                  <p class="font-semibold mt-1">Leads generados ({{ e.leads?.length }})</p>
+                  @for (lead of e.leads; track $index) {
+                    <p class="text-muted">· {{ lead.nombre }} — {{ lead.empresa }} ({{ lead.telefono }})</p>
+                  }
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Competidores -->
+          @if (competidores().length) {
+            <div>
+              <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mb-2">Competencia en el evento ({{ competidores().length }})</p>
+              <div class="flex flex-col gap-2.5">
+                @for (c of competidores(); track c.id) {
+                  <div class="border border-line rounded-xl p-3 text-[12.5px] flex flex-col gap-1.5">
+                    <p class="font-bold">{{ c.nombreEmpresa }}</p>
+                    @if (c.marcasRepresentadas) {
+                      <p class="text-muted">Marcas: {{ c.marcasRepresentadas }}</p>
+                    }
+                    @if (c.tamanoStand) {
+                      <p class="text-muted">Stand: {{ c.tamanoStand }}</p>
+                    }
+                    @if (amenidadesActivas(c).length) {
+                      <div class="flex flex-wrap gap-1.5">
+                        @for (label of amenidadesActivas(c); track label) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-brand-tint text-brand-dim">{{ label }}</span>
+                        }
+                      </div>
+                    }
+                    @if (c.observaciones) {
+                      <p class="text-muted">{{ c.observaciones }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (
+            !fotosGenerales().length &&
+            !prospectos().length &&
+            !auditorias().length &&
+            !hallazgosMercado().length &&
+            !solicitudes().length &&
+            !evento() &&
+            !competidores().length
+          ) {
+            <p class="text-muted text-[12.5px] text-center py-6">Esta visita todavía no tiene información registrada.</p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

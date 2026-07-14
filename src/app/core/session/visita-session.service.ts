@@ -39,7 +39,11 @@ const STORAGE_KEY = 'tm_visita_activa';
 /**
  * Mantiene el cliente y la visita seleccionados vigentes durante todo el
  * recorrido (Ruta -> Visita -> marca por marca -> Finalizar), para que
- * ningún módulo tenga que volver a pedir esa información.
+ * ningún módulo tenga que volver a pedir esa información. Se persiste en
+ * localStorage (no sessionStorage) para sobrevivir a que el mercaderista
+ * cierre por completo la app a mitad de una visita — de todas formas, si
+ * este estado local se llegara a perder, `Ruta` puede reconstruirlo
+ * consultando al backend (la visita ya quedó guardada ahí).
  */
 @Injectable({ providedIn: 'root' })
 export class VisitaSessionService {
@@ -123,7 +127,7 @@ export class VisitaSessionService {
     this.evidenciaGeneralCompleta.set(false);
     this.productosAuditar.set([]);
     this.marcas.set([]);
-    sessionStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
   }
 
   private persistir(): void {
@@ -141,11 +145,11 @@ export class VisitaSessionService {
       productosAuditar: this.productosAuditar(),
       marcas: this.marcas(),
     };
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
   }
 
   private restaurar(): void {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return;
     }
