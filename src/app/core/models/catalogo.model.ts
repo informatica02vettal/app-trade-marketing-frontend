@@ -8,7 +8,14 @@ export interface Marca {
 
 export interface MarcaCompetencia {
   id: number;
+  marcaId: number;
   nombre: string;
+  activo: boolean;
+}
+
+export interface MarcaCompetenciaRequest {
+  nombre: string;
+  activo?: boolean;
 }
 
 export interface CategoriaMaterial {

@@ -9,6 +9,7 @@ import {
   FamiliaMaterial,
   Marca,
   MarcaCompetencia,
+  MarcaCompetenciaRequest,
   Material,
 } from '../models/catalogo.model';
 
@@ -27,6 +28,18 @@ export class CatalogoService {
   listarCompetenciaDeMarca(marcaId: number): Observable<MarcaCompetencia[]> {
     return this.http
       .get<ApiResponse<MarcaCompetencia[]>>(`${BASE_URL}/marcas/${marcaId}/competencia`)
+      .pipe(map((res) => res.data));
+  }
+
+  crearCompetencia(marcaId: number, request: MarcaCompetenciaRequest): Observable<MarcaCompetencia> {
+    return this.http
+      .post<ApiResponse<MarcaCompetencia>>(`${BASE_URL}/marcas/${marcaId}/competencia`, request)
+      .pipe(map((res) => res.data));
+  }
+
+  actualizarCompetencia(id: number, request: MarcaCompetenciaRequest): Observable<MarcaCompetencia> {
+    return this.http
+      .put<ApiResponse<MarcaCompetencia>>(`${BASE_URL}/competencia/${id}`, request)
       .pipe(map((res) => res.data));
   }
 

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuditoriaService } from '../../../../core/services/auditoria.service';
 import { CatalogoService } from '../../../../core/services/catalogo.service';
@@ -7,16 +7,22 @@ import { SolicitudService } from '../../../../core/services/solicitud.service';
 import { VisitaService } from '../../../../core/services/visita.service';
 import { VisitaSessionService } from '../../../../core/session/visita-session.service';
 import { EstadoExhibidor, EstadoPop } from '../../../../core/models/auditoria.model';
-import { CategoriaMaterial, FamiliaMaterial, Material } from '../../../../core/models/catalogo.model';
+import { CategoriaMaterial, FamiliaMaterial, MarcaCompetencia, Material } from '../../../../core/models/catalogo.model';
 import { HallazgoMercado, HallazgoMaterial, HallazgoProducto, TipoHallazgo } from '../../../../core/models/mercado.model';
 import { CategoriaSolicitud, Solicitud, SolicitudItemRequest } from '../../../../core/models/solicitud.model';
 import { CategoriaEvidencia } from '../../../../core/models/visita.model';
 import { PhotoPicker } from '../../../../shared/ui/photo-picker/photo-picker';
-import { CompetidoresLista } from '../competidores/competidores-lista';
+import { borrarBorrador, cargarBorrador, guardarBorrador } from '../../../../core/utils/borrador.util';
 
-type SubPaso = 'estado' | 'competencia' | 'fotos' | 'observaciones' | 'mercado' | 'solicitudes';
+type SubPaso = 'presencia' | 'estado' | 'fotos' | 'competencia' | 'observaciones' | 'mercado' | 'solicitudes';
 
-const ORDEN: SubPaso[] = ['estado', 'competencia', 'fotos', 'observaciones', 'mercado', 'solicitudes'];
+const ORDEN: SubPaso[] = ['presencia', 'estado', 'fotos', 'competencia', 'observaciones', 'mercado', 'solicitudes'];
+
+type FotosMarca = Record<Extract<CategoriaEvidencia, 'EXHIBIDOR' | 'PRODUCTO' | 'COMPETENCIA' | 'MATERIAL_POP' | 'ANTES' | 'DESPUES'>, string | null>;
+
+function fotosVacias(): FotosMarca {
+  return { EXHIBIDOR: null, PRODUCTO: null, COMPETENCIA: null, MATERIAL_POP: null, ANTES: null, DESPUES: null };
+}
 
 interface MaterialSeleccionado {
   material: Material;
@@ -28,10 +34,10 @@ interface MaterialSeleccionado {
 @Component({
   selector: 'app-marca-detalle',
   standalone: true,
-  imports: [FormsModule, PhotoPicker, CompetidoresLista],
+  imports: [FormsModule, PhotoPicker],
   templateUrl: './marca-detalle.html',
 })
-export class MarcaDetalle {
+export class MarcaDetalle implements OnInit {
   private readonly auditoriaService = inject(AuditoriaService);
   private readonly catalogoService = inject(CatalogoService);
   private readonly mercadoService = inject(MercadoService);
@@ -46,8 +52,9 @@ export class MarcaDetalle {
   readonly completada = output<void>();
   readonly cancelar = output<void>();
 
-  readonly subPaso = signal<SubPaso>('estado');
+  readonly subPaso = signal<SubPaso>('presencia');
   readonly guardando = signal(false);
+  readonly presenciaMarca = signal<boolean | null>(null);
 
   // ---- Estado del exhibidor / presencia / anaquel ----
   readonly exhibidorMarca = signal(false);
@@ -78,15 +85,17 @@ export class MarcaDetalle {
     return Math.round((total / criterios.length) * 100);
   });
 
+  // ---- Competencia (marcas que le hacen competencia a esta marca) ----
+  readonly competenciaCatalogo = signal<MarcaCompetencia[]>([]);
+  readonly competenciaSeleccionada = signal<Set<string>>(new Set());
+  readonly agregandoCompetencia = signal(false);
+  competenciaPersonalizada = '';
+
   // ---- Fotos ----
-  readonly fotos = signal<Record<Extract<CategoriaEvidencia, 'EXHIBIDOR' | 'PRODUCTO' | 'COMPETENCIA' | 'MATERIAL_POP' | 'ANTES' | 'DESPUES'>, string | null>>({
-    EXHIBIDOR: null,
-    PRODUCTO: null,
-    COMPETENCIA: null,
-    MATERIAL_POP: null,
-    ANTES: null,
-    DESPUES: null,
-  });
+  // Persistidas en localStorage para que no se pierdan si el mercaderista
+  // cierra la app a mitad de la auditoría (ya se subieron al servidor, solo
+  // falta no olvidar en qué casilla va cada una).
+  readonly fotos = signal<FotosMarca>(fotosVacias());
 
   // ---- Observaciones / oportunidad ----
   observaciones = '';
@@ -110,6 +119,19 @@ export class MarcaDetalle {
     return coincidentes.length ? coincidentes : productos;
   });
 
+  // Al elegir el producto propio a auditar, adelanta directo al formulario de
+  // "precio de competencia" (con una fila lista para llenar) en vez de dejar
+  // que el mercaderista tenga que elegir el tipo de hallazgo por su cuenta.
+  onProductoErpSeleccionado(id: number | null): void {
+    this.productoErpSeleccionadoId.set(id);
+    if (id !== null && !this.mercadoTipo()) {
+      this.mercadoTipo.set('PRECIO_COMPETENCIA');
+      if (!this.mercadoProductos().length) {
+        this.agregarProductoMercado();
+      }
+    }
+  }
+
   // ---- Solicitudes (por marca) ----
   readonly solicitudCategoria = signal<CategoriaSolicitud | ''>('');
   readonly categoriasMaterial = signal<CategoriaMaterial[]>([]);
@@ -119,11 +141,97 @@ export class MarcaDetalle {
   readonly solicitudesGuardadas = signal<Solicitud[]>([]);
   readonly guardandoSolicitud = signal(false);
 
+  private claveBorradorFotos(): string {
+    return `tm_fotos_marca_${this.visitaId()}_${this.marcaId()}`;
+  }
+
+  ngOnInit(): void {
+    this.catalogoService
+      .listarCompetenciaDeMarca(this.marcaId())
+      .subscribe((catalogo) => this.competenciaCatalogo.set(catalogo.filter((c) => c.activo)));
+
+    this.fotos.set(cargarBorrador(this.claveBorradorFotos(), fotosVacias()));
+  }
+
   irA(paso: SubPaso): void {
     this.subPaso.set(paso);
   }
 
+  // ---- Competencia ----
+  toggleCompetencia(nombre: string): void {
+    const actual = new Set(this.competenciaSeleccionada());
+    if (actual.has(nombre)) {
+      actual.delete(nombre);
+    } else {
+      actual.add(nombre);
+    }
+    this.competenciaSeleccionada.set(actual);
+  }
+
+  agregarCompetenciaPersonalizada(): void {
+    const nombre = this.competenciaPersonalizada.trim();
+    if (!nombre || this.agregandoCompetencia()) return;
+
+    this.agregandoCompetencia.set(true);
+    this.catalogoService.crearCompetencia(this.marcaId(), { nombre }).subscribe({
+      next: (creada) => {
+        this.competenciaCatalogo.set([...this.competenciaCatalogo(), creada]);
+        this.toggleCompetencia(creada.nombre);
+        this.competenciaPersonalizada = '';
+        this.agregandoCompetencia.set(false);
+      },
+      error: () => this.agregandoCompetencia.set(false),
+    });
+  }
+
+  // ---- Presencia de marca (primer paso, filtra el resto del flujo) ----
+  confirmarPresencia(existe: boolean): void {
+    this.presenciaMarca.set(existe);
+    if (existe) {
+      this.subPaso.set('estado');
+    } else {
+      this.guardarSinPresencia();
+    }
+  }
+
+  private guardarSinPresencia(): void {
+    this.guardando.set(true);
+    this.auditoriaService
+      .crear({
+        visitaId: this.visitaId(),
+        marcaId: this.marcaId(),
+        presenciaPct: 0,
+        frentesVettal: 0,
+        frentesTotales: 0,
+        exhibidorMarca: false,
+        productoExhibidor: false,
+        productoAnaquel: false,
+        avisoFachada: false,
+        avisoPared: false,
+        banderines: false,
+        rotulado: false,
+        empleadosUniforme: false,
+        estadoExhibidores: 'NO_APLICA',
+        estadoPop: 'NO_APLICA',
+        oportunidad: 'Sin presencia de la marca en este local.',
+      })
+      .subscribe(() => {
+        this.guardando.set(false);
+        borrarBorrador(this.claveBorradorFotos());
+        this.completada.emit();
+      });
+  }
+
+  // La foto de la competencia es obligatoria para poder avanzar desde ese paso.
+  puedeAvanzar(): boolean {
+    if (this.subPaso() === 'competencia') {
+      return !!this.fotos().COMPETENCIA;
+    }
+    return true;
+  }
+
   siguiente(): void {
+    if (!this.puedeAvanzar()) return;
     const idx = ORDEN.indexOf(this.subPaso());
     if (idx < ORDEN.length - 1) {
       this.subPaso.set(ORDEN[idx + 1]);
@@ -156,6 +264,7 @@ export class MarcaDetalle {
 
   setFoto(categoria: keyof ReturnType<typeof this.fotos>, url: string | null): void {
     this.fotos.set({ ...this.fotos(), [categoria]: url });
+    guardarBorrador(this.claveBorradorFotos(), this.fotos());
   }
 
   // ---- Mercado ----
@@ -313,6 +422,7 @@ export class MarcaDetalle {
   guardarMarca(): void {
     const frentesVettal = this.frentesVettal() ?? 0;
     const frentesTotales = this.frentesTotales() ?? 0;
+    const competencia = Array.from(this.competenciaSeleccionada()).join(', ');
 
     this.guardando.set(true);
     this.auditoriaService
@@ -332,6 +442,7 @@ export class MarcaDetalle {
         empleadosUniforme: this.empleadosUniforme(),
         estadoExhibidores: this.estadoExhibidores(),
         estadoPop: this.estadoPop(),
+        competenciaDetectada: competencia || undefined,
         oportunidad: this.oportunidad || undefined,
       })
       .subscribe(() => {
@@ -342,6 +453,7 @@ export class MarcaDetalle {
 
         if (!subidas.length) {
           this.guardando.set(false);
+          borrarBorrador(this.claveBorradorFotos());
           this.completada.emit();
           return;
         }
@@ -352,6 +464,7 @@ export class MarcaDetalle {
             restantes -= 1;
             if (restantes === 0) {
               this.guardando.set(false);
+              borrarBorrador(this.claveBorradorFotos());
               this.completada.emit();
             }
           }),

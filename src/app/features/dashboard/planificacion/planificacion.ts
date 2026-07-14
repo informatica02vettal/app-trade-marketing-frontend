@@ -120,15 +120,39 @@ export class Planificacion implements OnInit {
   readonly filtroProductoSubcategoria = signal('');
   readonly productosSeleccionados = signal<ProductoLocal[]>([]);
 
-  private valoresUnicos(selector: (p: ProductoLocal) => string | null): string[] {
-    return Array.from(new Set(this.productos().map(selector).filter((v): v is string => !!v))).sort((a, b) =>
-      a.localeCompare(b),
-    );
+  private valoresUnicos(lista: ProductoLocal[], selector: (p: ProductoLocal) => string | null): string[] {
+    return Array.from(new Set(lista.map(selector).filter((v): v is string => !!v))).sort((a, b) => a.localeCompare(b));
   }
 
-  readonly marcasProducto = computed(() => this.valoresUnicos((p) => p.marca));
-  readonly lineasProducto = computed(() => this.valoresUnicos((p) => p.linea));
-  readonly subcategoriasProducto = computed(() => this.valoresUnicos((p) => p.subcategoria));
+  // Selects en cascada: marca -> línea -> subcategoría. Cada uno solo ofrece
+  // los valores que efectivamente existen dentro de lo ya elegido más arriba.
+  readonly marcasProducto = computed(() => this.valoresUnicos(this.productos(), (p) => p.marca));
+
+  readonly lineasProducto = computed(() => {
+    const marca = this.filtroProductoMarca();
+    const base = marca ? this.productos().filter((p) => p.marca === marca) : this.productos();
+    return this.valoresUnicos(base, (p) => p.linea);
+  });
+
+  readonly subcategoriasProducto = computed(() => {
+    const marca = this.filtroProductoMarca();
+    const linea = this.filtroProductoLinea();
+    let base = this.productos();
+    if (marca) base = base.filter((p) => p.marca === marca);
+    if (linea) base = base.filter((p) => p.linea === linea);
+    return this.valoresUnicos(base, (p) => p.subcategoria);
+  });
+
+  onFiltroProductoMarcaChange(valor: string): void {
+    this.filtroProductoMarca.set(valor);
+    this.filtroProductoLinea.set('');
+    this.filtroProductoSubcategoria.set('');
+  }
+
+  onFiltroProductoLineaChange(valor: string): void {
+    this.filtroProductoLinea.set(valor);
+    this.filtroProductoSubcategoria.set('');
+  }
 
   readonly productosFiltrados = computed(() => {
     const termino = this.busquedaProducto().trim().toLowerCase();

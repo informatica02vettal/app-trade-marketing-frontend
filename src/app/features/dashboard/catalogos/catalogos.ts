@@ -32,7 +32,7 @@ export class Catalogos implements OnInit {
 
   seleccionar(marca: Marca): void {
     this.marcaSeleccionada.set(marca);
-    this.catalogoService.listarCompetenciaDeMarca(marca.id).subscribe((c) => this.competencia.set(c));
+    this.catalogoService.listarCompetenciaDeMarca(marca.id).subscribe((c) => this.competencia.set(c.filter((x) => x.activo)));
     this.catalogoService.listarMateriales(marca.id).subscribe((m) => this.materiales.set(m));
   }
 }

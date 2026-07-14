@@ -11,11 +11,11 @@
               Evidencia general (una sola vez)
             </p>
             <div class="grid grid-cols-2 gap-3 mb-4">
-              <app-photo-picker label="Fachada" [url]="fotoFachada()" (urlChange)="fotoFachada.set($event)" />
+              <app-photo-picker label="Fachada" [url]="fotoFachada()" (urlChange)="setFotoFachada($event)" />
               <app-photo-picker
                 label="Piso de ventas"
                 [url]="fotoPisoVentas()"
-                (urlChange)="fotoPisoVentas.set($event)"
+                (urlChange)="setFotoPisoVentas($event)"
               />
             </div>
             <button
@@ -61,12 +61,12 @@
               <app-photo-picker
                 label="Foto de fachada"
                 [url]="prospectoFotoFachada()"
-                (urlChange)="prospectoFotoFachada.set($event)"
+                (urlChange)="setProspectoFotoFachada($event)"
               />
               <app-photo-picker
                 label="Foto del interior"
                 [url]="prospectoFotoInterior()"
-                (urlChange)="prospectoFotoInterior.set($event)"
+                (urlChange)="setProspectoFotoInterior($event)"
               />
             </div>
             <button

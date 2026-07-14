@@ -3,6 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { CompetidorService } from '../../../../core/services/competidor.service';
 import { Competidor, CompetidorRequest } from '../../../../core/models/competidor.model';
 import { PhotoPicker } from '../../../../shared/ui/photo-picker/photo-picker';
+import { borrarBorrador, cargarBorrador, guardarBorrador } from '../../../../core/utils/borrador.util';
+
+interface FotosCompetidor {
+  fotosStand: (string | null)[];
+  fotosMaterial: (string | null)[];
+}
+
+function fotosCompetidorVacias(): FotosCompetidor {
+  return { fotosStand: [null], fotosMaterial: [null] };
+}
 
 type CampoAmenidad =
   | 'poseeInflables'
@@ -88,15 +98,28 @@ export class CompetidoresLista implements OnInit {
     this.competidorService.listarPorVisita(this.visitaId()).subscribe((competidores) => this.competidores.set(competidores));
   }
 
+  private claveBorradorFotos(): string {
+    return `tm_fotos_competidor_${this.visitaId()}`;
+  }
+
+  private persistirFotos(): void {
+    guardarBorrador(this.claveBorradorFotos(), {
+      fotosStand: this.fotosStandSlots(),
+      fotosMaterial: this.fotosMaterialSlots(),
+    });
+  }
+
   abrirFormulario(): void {
     this.formulario = formularioVacio(this.visitaId());
-    this.fotosStandSlots.set([null]);
-    this.fotosMaterialSlots.set([null]);
+    const borrador = cargarBorrador(this.claveBorradorFotos(), fotosCompetidorVacias());
+    this.fotosStandSlots.set(borrador.fotosStand);
+    this.fotosMaterialSlots.set(borrador.fotosMaterial);
     this.mostrarFormulario.set(true);
   }
 
   cerrarFormulario(): void {
     this.mostrarFormulario.set(false);
+    borrarBorrador(this.claveBorradorFotos());
   }
 
   setAmenidad(campo: CampoAmenidad, valor: boolean): void {
@@ -118,6 +141,7 @@ export class CompetidoresLista implements OnInit {
     const fotos = [...this.fotosStandSlots()];
     fotos[index] = url;
     this.fotosStandSlots.set(fotos);
+    this.persistirFotos();
   }
 
   agregarSlotFotoMaterial(): void {
@@ -128,6 +152,7 @@ export class CompetidoresLista implements OnInit {
     const fotos = [...this.fotosMaterialSlots()];
     fotos[index] = url;
     this.fotosMaterialSlots.set(fotos);
+    this.persistirFotos();
   }
 
   guardar(): void {
@@ -145,6 +170,7 @@ export class CompetidoresLista implements OnInit {
       next: () => {
         this.guardando.set(false);
         this.mostrarFormulario.set(false);
+        borrarBorrador(this.claveBorradorFotos());
         this.cargar();
       },
       error: () => this.guardando.set(false),

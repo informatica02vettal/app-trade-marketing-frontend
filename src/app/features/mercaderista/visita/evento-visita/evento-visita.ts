@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { EventoService } from '../../../../core/services/evento.service';
@@ -9,10 +9,23 @@ import { EvidenciaFoto } from '../../../../core/models/visita.model';
 import { PhotoPicker } from '../../../../shared/ui/photo-picker/photo-picker';
 import { VideoPicker } from '../../../../shared/ui/video-picker/video-picker';
 import { CompetidoresLista } from '../competidores/competidores-lista';
+import { borrarBorrador, cargarBorrador, guardarBorrador } from '../../../../core/utils/borrador.util';
 
 type SubPasoEvento = 'motivo' | 'detalle' | 'competencia';
 
 type CategoriaFotoEvento = 'MONTAJE' | 'DESARROLLO' | 'CIERRE';
+
+interface FotosEvento {
+  fotosPorCategoria: Record<CategoriaFotoEvento, (string | null)[]>;
+  videosEntrevista: (string | null)[];
+}
+
+function fotosEventoVacias(): FotosEvento {
+  return {
+    fotosPorCategoria: { MONTAJE: [null], DESARROLLO: [null], CIERRE: [null] },
+    videosEntrevista: [null],
+  };
+}
 
 @Component({
   selector: 'app-evento-visita',
@@ -20,7 +33,7 @@ type CategoriaFotoEvento = 'MONTAJE' | 'DESARROLLO' | 'CIERRE';
   imports: [FormsModule, PhotoPicker, VideoPicker, CompetidoresLista],
   templateUrl: './evento-visita.html',
 })
-export class EventoVisita {
+export class EventoVisita implements OnInit {
   private readonly eventoService = inject(EventoService);
   private readonly visitaService = inject(VisitaService);
   readonly sesion = inject(VisitaSessionService);
@@ -66,6 +79,23 @@ export class EventoVisita {
     return this.sesion.esEventoGrande();
   }
 
+  private claveBorradorFotos(): string {
+    return `tm_fotos_evento_${this.visitaId()}`;
+  }
+
+  ngOnInit(): void {
+    const borrador = cargarBorrador(this.claveBorradorFotos(), fotosEventoVacias());
+    this.fotosPorCategoria.set(borrador.fotosPorCategoria);
+    this.videosEntrevista.set(borrador.videosEntrevista);
+  }
+
+  private persistirFotos(): void {
+    guardarBorrador(this.claveBorradorFotos(), {
+      fotosPorCategoria: this.fotosPorCategoria(),
+      videosEntrevista: this.videosEntrevista(),
+    });
+  }
+
   confirmarMotivo(): void {
     if (!this.motivo) return;
     if (this.esEventoGrande) {
@@ -101,6 +131,7 @@ export class EventoVisita {
     const videos = [...this.videosEntrevista()];
     videos[index] = url;
     this.videosEntrevista.set(videos);
+    this.persistirFotos();
   }
 
   agregarSlotFoto(categoria: CategoriaFotoEvento): void {
@@ -113,6 +144,7 @@ export class EventoVisita {
     const fotos = [...actual[categoria]];
     fotos[index] = url;
     this.fotosPorCategoria.set({ ...actual, [categoria]: fotos });
+    this.persistirFotos();
   }
 
   private guardarEventoSimple(): void {
@@ -171,6 +203,7 @@ export class EventoVisita {
 
           if (!subidas.length) {
             this.guardando.set(false);
+            borrarBorrador(this.claveBorradorFotos());
             this.subPaso.set('competencia');
             return;
           }
@@ -181,6 +214,7 @@ export class EventoVisita {
               restantes -= 1;
               if (restantes === 0) {
                 this.guardando.set(false);
+                borrarBorrador(this.claveBorradorFotos());
                 this.subPaso.set('competencia');
               }
             }),

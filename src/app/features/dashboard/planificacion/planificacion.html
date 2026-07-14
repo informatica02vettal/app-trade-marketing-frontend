@@ -24,7 +24,7 @@
 @if (mostrarModal()) {
   <div class="fixed inset-0 bg-[rgba(20,24,28,0.45)] flex items-center justify-center p-5 z-[100]" (click)="cerrarModal()">
     <div
-      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[560px] max-h-[calc(100vh-40px)] overflow-y-auto"
+      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[1080px] max-h-[calc(100vh-40px)] overflow-y-auto"
       (click)="$event.stopPropagation()"
     >
       <div class="flex justify-between items-start flex-wrap gap-3.5 mb-1">
@@ -197,7 +197,7 @@
               />
               <select
                 [ngModel]="filtroProductoMarca()"
-                (ngModelChange)="filtroProductoMarca.set($event)"
+                (ngModelChange)="onFiltroProductoMarcaChange($event)"
                 class="bg-panel-alt border border-line rounded-[7px] text-ink px-2 py-2 text-[13px] outline-none focus:border-teal"
               >
                 <option value="">Marca</option>
@@ -207,7 +207,7 @@
               </select>
               <select
                 [ngModel]="filtroProductoLinea()"
-                (ngModelChange)="filtroProductoLinea.set($event)"
+                (ngModelChange)="onFiltroProductoLineaChange($event)"
                 class="bg-panel-alt border border-line rounded-[7px] text-ink px-2 py-2 text-[13px] outline-none focus:border-teal"
               >
                 <option value="">Línea</option>

@@ -6,6 +6,31 @@
   </div>
 
   @switch (subPaso()) {
+    @case ('presencia') {
+      <div class="flex flex-col gap-4">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Presencia de marca</p>
+        <p class="text-[14px] leading-[1.5]">¿Existe presencia de <b>{{ marcaNombre() }}</b> en este local?</p>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="confirmarPresencia(true)"
+            [disabled]="guardando()"
+            class="flex-1 rounded-[11px] bg-success text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+          >
+            Sí, hay presencia
+          </button>
+          <button
+            type="button"
+            (click)="confirmarPresencia(false)"
+            [disabled]="guardando()"
+            class="flex-1 rounded-[11px] bg-danger text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+          >
+            {{ guardando() ? 'Guardando…' : 'No hay presencia' }}
+          </button>
+        </div>
+      </div>
+    }
+
     @case ('estado') {
       <div class="flex flex-col gap-3">
         <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Checklist de presencia</p>
@@ -119,21 +144,66 @@
       </div>
     }
 
-    @case ('competencia') {
-      <app-competidores-lista [visitaId]="visitaId()" />
-    }
-
     @case ('fotos') {
       <div class="flex flex-col gap-3">
         <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Fotos de la marca</p>
         <div class="grid grid-cols-3 gap-3">
           <app-photo-picker label="Exhibidor" [url]="fotos().EXHIBIDOR" (urlChange)="setFoto('EXHIBIDOR', $event)" />
           <app-photo-picker label="Producto" [url]="fotos().PRODUCTO" (urlChange)="setFoto('PRODUCTO', $event)" />
-          <app-photo-picker label="Competencia" [url]="fotos().COMPETENCIA" (urlChange)="setFoto('COMPETENCIA', $event)" />
           <app-photo-picker label="Material POP" [url]="fotos().MATERIAL_POP" (urlChange)="setFoto('MATERIAL_POP', $event)" />
           <app-photo-picker label="Antes" [url]="fotos().ANTES" (urlChange)="setFoto('ANTES', $event)" />
           <app-photo-picker label="Después" [url]="fotos().DESPUES" (urlChange)="setFoto('DESPUES', $event)" />
         </div>
+      </div>
+    }
+
+    @case ('competencia') {
+      <div class="flex flex-col gap-3">
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted">Marcas de la competencia detectadas</p>
+        <div class="flex flex-wrap gap-2">
+          @for (c of competenciaCatalogo(); track c.id) {
+            <button
+              type="button"
+              (click)="toggleCompetencia(c.nombre)"
+              class="rounded-full border px-3 py-1.5 text-[12.5px] font-semibold"
+              [class.bg-brand-tint]="competenciaSeleccionada().has(c.nombre)"
+              [class.text-brand-dim]="competenciaSeleccionada().has(c.nombre)"
+              [class.border-brand]="competenciaSeleccionada().has(c.nombre)"
+              [class.bg-panel-alt]="!competenciaSeleccionada().has(c.nombre)"
+              [class.text-muted]="!competenciaSeleccionada().has(c.nombre)"
+              [class.border-line]="!competenciaSeleccionada().has(c.nombre)"
+            >
+              {{ c.nombre }}
+            </button>
+          }
+          @if (!competenciaCatalogo().length) {
+            <p class="text-muted text-[12.5px]">Todavía no hay marcas de competencia registradas para {{ marcaNombre() }}.</p>
+          }
+        </div>
+
+        <div class="flex gap-2 mt-2">
+          <input
+            [(ngModel)]="competenciaPersonalizada"
+            placeholder="+ Nueva marca de competencia"
+            class="flex-1 rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
+          />
+          <button
+            type="button"
+            (click)="agregarCompetenciaPersonalizada()"
+            [disabled]="!competenciaPersonalizada.trim() || agregandoCompetencia()"
+            class="rounded-[11px] border border-line px-3 text-[13px] disabled:opacity-50"
+          >
+            {{ agregandoCompetencia() ? 'Agregando…' : 'Agregar' }}
+          </button>
+        </div>
+
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Foto de la competencia *</p>
+        <div class="grid grid-cols-3 gap-3">
+          <app-photo-picker label="Competencia" [url]="fotos().COMPETENCIA" (urlChange)="setFoto('COMPETENCIA', $event)" />
+        </div>
+        @if (!fotos().COMPETENCIA) {
+          <p class="text-[11.5px] text-danger">Debes agregar una foto de la competencia para continuar.</p>
+        }
       </div>
     }
 
@@ -167,7 +237,7 @@
           <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-1">Producto propio a auditar</p>
           <select
             [ngModel]="productoErpSeleccionadoId()"
-            (ngModelChange)="productoErpSeleccionadoId.set($event)"
+            (ngModelChange)="onProductoErpSeleccionado($event)"
             class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
           >
             <option [ngValue]="null">Sin producto específico</option>
@@ -420,20 +490,27 @@
     }
   }
 
-  <div class="flex gap-2 mt-5">
-    @if (subPaso() !== 'solicitudes') {
-      <button type="button" (click)="siguiente()" class="flex-1 rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3">
-        Siguiente
-      </button>
-    } @else {
-      <button
-        type="button"
-        (click)="guardarMarca()"
-        [disabled]="guardando()"
-        class="flex-1 rounded-[11px] bg-success text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
-      >
-        {{ guardando() ? 'Guardando…' : 'Guardar marca' }}
-      </button>
-    }
-  </div>
+  @if (subPaso() !== 'presencia') {
+    <div class="flex gap-2 mt-5">
+      @if (subPaso() !== 'solicitudes') {
+        <button
+          type="button"
+          (click)="siguiente()"
+          [disabled]="!puedeAvanzar()"
+          class="flex-1 rounded-[11px] bg-brand text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+        >
+          Siguiente
+        </button>
+      } @else {
+        <button
+          type="button"
+          (click)="guardarMarca()"
+          [disabled]="guardando()"
+          class="flex-1 rounded-[11px] bg-success text-white font-bold text-[13.5px] py-3 disabled:opacity-50"
+        >
+          {{ guardando() ? 'Guardando…' : 'Guardar marca' }}
+        </button>
+      }
+    </div>
+  }
 </div>

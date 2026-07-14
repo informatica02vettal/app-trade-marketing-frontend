@@ -30,6 +30,10 @@ export const DASHBOARD_ROUTES: Routes = [
         loadComponent: () => import('./objetivos-visita/objetivos-visita').then((m) => m.ObjetivosVisita),
       },
       { path: 'productos', loadComponent: () => import('./productos/productos').then((m) => m.Productos) },
+      {
+        path: 'marcas-competencia',
+        loadComponent: () => import('./marcas-competencia/marcas-competencia').then((m) => m.MarcasCompetencia),
+      },
     ],
   },
 ];

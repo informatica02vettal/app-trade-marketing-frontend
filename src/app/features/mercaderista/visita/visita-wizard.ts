@@ -8,8 +8,19 @@ import { Marca } from '../../../core/models/catalogo.model';
 import { PhotoPicker } from '../../../shared/ui/photo-picker/photo-picker';
 import { MarcaDetalle } from './marca-detalle/marca-detalle';
 import { EventoVisita } from './evento-visita/evento-visita';
+import { borrarBorrador, cargarBorrador, guardarBorrador } from '../../../core/utils/borrador.util';
 
 type Paso = 'evidencia' | 'prospecto' | 'evento' | 'marcas' | 'marca-detalle';
+
+interface FotosEvidencia {
+  fachada: string | null;
+  piso: string | null;
+}
+
+interface FotosProspecto {
+  fachada: string | null;
+  interior: string | null;
+}
 
 @Component({
   selector: 'app-visita-wizard',
@@ -53,6 +64,14 @@ export class VisitaWizard implements OnInit {
 
     this.catalogoService.listarMarcas().subscribe((marcas) => this.marcas.set(marcas));
 
+    const evidencia = cargarBorrador<FotosEvidencia>(this.claveEvidencia(), { fachada: null, piso: null });
+    this.fotoFachada.set(evidencia.fachada);
+    this.fotoPisoVentas.set(evidencia.piso);
+
+    const prospecto = cargarBorrador<FotosProspecto>(this.claveProspecto(), { fachada: null, interior: null });
+    this.prospectoFotoFachada.set(prospecto.fachada);
+    this.prospectoFotoInterior.set(prospecto.interior);
+
     if (this.sesion.esProspecto()) {
       this.paso.set('prospecto');
     } else if (this.sesion.evidenciaGeneralCompleta()) {
@@ -60,6 +79,34 @@ export class VisitaWizard implements OnInit {
     } else {
       this.paso.set('evidencia');
     }
+  }
+
+  private claveEvidencia(): string {
+    return `tm_evidencia_${this.sesion.visitaId()}`;
+  }
+
+  private claveProspecto(): string {
+    return `tm_prospecto_fotos_${this.sesion.visitaId()}`;
+  }
+
+  setFotoFachada(url: string | null): void {
+    this.fotoFachada.set(url);
+    guardarBorrador(this.claveEvidencia(), { fachada: url, piso: this.fotoPisoVentas() });
+  }
+
+  setFotoPisoVentas(url: string | null): void {
+    this.fotoPisoVentas.set(url);
+    guardarBorrador(this.claveEvidencia(), { fachada: this.fotoFachada(), piso: url });
+  }
+
+  setProspectoFotoFachada(url: string | null): void {
+    this.prospectoFotoFachada.set(url);
+    guardarBorrador(this.claveProspecto(), { fachada: url, interior: this.prospectoFotoInterior() });
+  }
+
+  setProspectoFotoInterior(url: string | null): void {
+    this.prospectoFotoInterior.set(url);
+    guardarBorrador(this.claveProspecto(), { fachada: this.prospectoFotoFachada(), interior: url });
   }
 
   private irAPasoTrasEvidencia(): void {
@@ -85,6 +132,7 @@ export class VisitaWizard implements OnInit {
     this.visitaService.agregarFoto(visitaId, { categoria: 'FACHADA', url: fachada }).subscribe(() => {
       this.visitaService.agregarFoto(visitaId, { categoria: 'PISO_VENTAS', url: piso }).subscribe(() => {
         this.guardando.set(false);
+        borrarBorrador(this.claveEvidencia());
         this.sesion.marcarEvidenciaGeneralCompleta();
         this.irAPasoTrasEvidencia();
       });
@@ -118,6 +166,7 @@ export class VisitaWizard implements OnInit {
         this.visitaService.agregarFoto(visitaId, { categoria: 'FACHADA', url: fachada }).subscribe(() => {
           this.visitaService.agregarFoto(visitaId, { categoria: 'PISO_VENTAS', url: interior }).subscribe(() => {
             this.guardando.set(false);
+            borrarBorrador(this.claveProspecto());
             this.sesion.marcarEvidenciaGeneralCompleta();
             this.irAPasoTrasEvidencia();
           });
