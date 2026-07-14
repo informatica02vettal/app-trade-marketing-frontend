@@ -21,6 +21,17 @@
           />
         }
 
+        <div class="flex items-center justify-between rounded-[11px] border border-line px-3 py-2.5 text-[12.5px]">
+          @if (capturandoGps()) {
+            <span class="text-muted">Obteniendo ubicación GPS del evento…</span>
+          } @else if (gpsLat() !== null && gpsLng() !== null) {
+            <span class="text-success font-semibold">✓ Ubicación GPS capturada</span>
+          } @else {
+            <span class="text-danger font-semibold">No se pudo obtener la ubicación GPS</span>
+            <button type="button" (click)="capturarGps()" class="text-brand-dim font-bold text-[12px]">Reintentar</button>
+          }
+        </div>
+
         <button
           type="button"
           (click)="confirmarMotivo()"
