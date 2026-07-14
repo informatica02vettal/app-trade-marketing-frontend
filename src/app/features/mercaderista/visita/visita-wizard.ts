@@ -89,11 +89,22 @@ export class VisitaWizard implements OnInit {
     });
   }
 
+  // El motivo del evento se pregunta al entrar en la visita, antes que
+  // cualquier otro paso — no se espera a que termine la evidencia general.
+  // Una visita de evento nunca continúa a evidencia/auditoría de marca: si
+  // el evento ya quedó registrado (p. ej. se cerró la app justo después de
+  // guardarlo, antes del checkout), retoma finalizando la visita.
   private decidirPasoInicial(): void {
     if (this.sesion.esProspecto()) {
       this.paso.set('prospecto');
+    } else if (this.sesion.objetivoTipoNombre() === 'Evento') {
+      if (this.sesion.eventoRegistrado()) {
+        this.finalizarVisita();
+      } else {
+        this.paso.set('evento');
+      }
     } else if (this.sesion.evidenciaGeneralCompleta()) {
-      this.irAPasoTrasEvidencia();
+      this.paso.set('marcas');
     } else {
       this.paso.set('evidencia');
     }
@@ -123,17 +134,12 @@ export class VisitaWizard implements OnInit {
     this.prospectoFotoInterior.set(url);
   }
 
-  private irAPasoTrasEvidencia(): void {
-    if (this.sesion.objetivoTipoNombre() === 'Evento' && !this.sesion.eventoRegistrado()) {
-      this.paso.set('evento');
-    } else {
-      this.paso.set('marcas');
-    }
-  }
-
+  // En una visita de evento el recorrido termina con el registro del evento
+  // (leads incluidos, y análisis de competencia si es feria/congreso) — no
+  // continúa con evidencia general ni auditoría de marca.
   onEventoCompletado(): void {
     this.sesion.marcarEventoRegistrado();
-    this.paso.set('marcas');
+    this.finalizarVisita();
   }
 
   continuarEvidencia(): void {
@@ -142,9 +148,10 @@ export class VisitaWizard implements OnInit {
     if (!fachada || !piso) return;
 
     // Las fotos ya se subieron al backend en cuanto se seleccionaron; aquí
-    // solo se marca el paso como completo y se avanza.
+    // solo se marca el paso como completo y se avanza. El evento (si aplica)
+    // ya se preguntó antes de llegar aquí.
     this.sesion.marcarEvidenciaGeneralCompleta();
-    this.irAPasoTrasEvidencia();
+    this.paso.set('marcas');
   }
 
   guardarProspecto(): void {
@@ -175,7 +182,7 @@ export class VisitaWizard implements OnInit {
           this.visitaService.agregarFoto(visitaId, { categoria: 'PISO_VENTAS', url: interior }).subscribe(() => {
             this.guardando.set(false);
             this.sesion.marcarEvidenciaGeneralCompleta();
-            this.irAPasoTrasEvidencia();
+            this.paso.set('marcas');
           });
         });
       });
@@ -202,7 +209,8 @@ export class VisitaWizard implements OnInit {
 
   finalizarVisita(): void {
     const visitaId = this.sesion.visitaId();
-    if (!visitaId || !this.sesion.tieneAlMenosUnaMarcaCompletada()) return;
+    const puedeFinalizar = this.sesion.tieneAlMenosUnaMarcaCompletada() || this.sesion.eventoRegistrado();
+    if (!visitaId || !puedeFinalizar) return;
 
     this.guardando.set(true);
     this.visitaService.checkout(visitaId, {}).subscribe(() => {

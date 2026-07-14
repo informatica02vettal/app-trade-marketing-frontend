@@ -26,6 +26,7 @@ export class Auditoria implements OnInit {
 
   readonly badgeExhibidor = BADGE_EXHIBIDOR;
   readonly badgePop = BADGE_POP;
+  readonly badgeNeutral = BADGE_NEUTRAL;
 
   readonly visitas = signal<Visita[]>([]);
   readonly visitaId = signal<number | null>(null);

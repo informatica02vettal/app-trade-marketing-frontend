@@ -50,7 +50,7 @@
           </div>
         </div>
         <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
-          <span>Producto en piso de ventas / anaquel</span>
+          <span>Producto en piso de ventas / Exhibidor</span>
           <div class="flex gap-1.5 shrink-0">
             <button type="button" (click)="actualizarChecklist('productoAnaquel', true)" [class]="claseBotonSiNo(productoAnaquel(), true)">Sí</button>
             <button type="button" (click)="actualizarChecklist('productoAnaquel', false)" [class]="claseBotonSiNo(productoAnaquel(), false)">No</button>
@@ -97,12 +97,12 @@
           <p class="font-display text-xl font-bold">{{ presenciaPct() }}%</p>
         </div>
 
-        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Participación de anaquel</p>
+        <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Participación de exhibidores — conteo de exhibidores</p>
         <div class="flex gap-2">
           <input
             type="number"
             min="0"
-            placeholder="Frentes propios"
+            [placeholder]="'Exhibidores de ' + marcaNombre()"
             [ngModel]="frentesVettal()"
             (ngModelChange)="actualizarFrentes('frentesVettal', $event)"
             class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
@@ -110,7 +110,7 @@
           <input
             type="number"
             min="0"
-            placeholder="Frentes totales"
+            placeholder="Exhibidores totales de marcas competencia"
             [ngModel]="frentesTotales()"
             (ngModelChange)="actualizarFrentes('frentesTotales', $event)"
             class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
@@ -222,7 +222,7 @@
           [(ngModel)]="oportunidad"
           (blur)="guardarOportunidad()"
           rows="3"
-          placeholder="Oportunidad detectada (reposición, ampliación de anaquel, etc.)"
+          placeholder="Oportunidad detectada (reposición, ampliación de Exhibidor, etc.)"
           class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
         ></textarea>
       </div>

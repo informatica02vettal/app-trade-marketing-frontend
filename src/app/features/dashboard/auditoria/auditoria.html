@@ -53,8 +53,19 @@
       </div>
 
       <div class="flex gap-1.5 flex-wrap mt-3">
-        <span [class]="badgeExhibidor[a.estadoExhibidores]">Exhibidor: {{ a.estadoExhibidores }}</span>
-        <span [class]="badgePop[a.estadoPop]">POP: {{ a.estadoPop }}</span>
+        @if (a.estadoExhibidores) {
+          <span [class]="badgeExhibidor[a.estadoExhibidores]">Exhibidor: {{ a.estadoExhibidores }}</span>
+        } @else {
+          <span [class]="badgeNeutral">Exhibidor: pendiente</span>
+        }
+        @if (a.estadoPop) {
+          <span [class]="badgePop[a.estadoPop]">POP: {{ a.estadoPop }}</span>
+        } @else {
+          <span [class]="badgeNeutral">POP: pendiente</span>
+        }
+        @if (!a.completa) {
+          <span [class]="badgeNeutral">Auditoría en progreso</span>
+        }
       </div>
 
       @if (a.competenciaDetectada) {

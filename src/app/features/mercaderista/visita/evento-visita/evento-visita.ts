@@ -1,31 +1,16 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
 import { EventoService } from '../../../../core/services/evento.service';
 import { VisitaService } from '../../../../core/services/visita.service';
 import { VisitaSessionService } from '../../../../core/session/visita-session.service';
 import { EventoLead, MotivoEvento, ParticipacionVettal } from '../../../../core/models/evento.model';
-import { EvidenciaFoto } from '../../../../core/models/visita.model';
 import { PhotoPicker } from '../../../../shared/ui/photo-picker/photo-picker';
 import { VideoPicker } from '../../../../shared/ui/video-picker/video-picker';
 import { CompetidoresLista } from '../competidores/competidores-lista';
-import { borrarBorrador, cargarBorrador, guardarBorrador } from '../../../../core/utils/borrador.util';
 
 type SubPasoEvento = 'motivo' | 'detalle' | 'competencia';
 
 type CategoriaFotoEvento = 'MONTAJE' | 'DESARROLLO' | 'CIERRE';
-
-interface FotosEvento {
-  fotosPorCategoria: Record<CategoriaFotoEvento, (string | null)[]>;
-  videosEntrevista: (string | null)[];
-}
-
-function fotosEventoVacias(): FotosEvento {
-  return {
-    fotosPorCategoria: { MONTAJE: [null], DESARROLLO: [null], CIERRE: [null] },
-    videosEntrevista: [null],
-  };
-}
 
 @Component({
   selector: 'app-evento-visita',
@@ -79,34 +64,33 @@ export class EventoVisita implements OnInit {
     return this.sesion.esEventoGrande();
   }
 
-  private claveBorradorFotos(): string {
-    return `tm_fotos_evento_${this.visitaId()}`;
-  }
-
   ngOnInit(): void {
-    const borrador = cargarBorrador(this.claveBorradorFotos(), fotosEventoVacias());
-    this.fotosPorCategoria.set(borrador.fotosPorCategoria);
-    this.videosEntrevista.set(borrador.videosEntrevista);
-  }
+    // Las fotos/videos ya subidos quedan asociados a la visita en el backend;
+    // se recuperan aquí para no perderlos si el componente se vuelve a crear.
+    this.visitaService.listarFotos(this.visitaId()).subscribe((fotos) => {
+      const porCategoria: Record<CategoriaFotoEvento, (string | null)[]> = { MONTAJE: [], DESARROLLO: [], CIERRE: [] };
+      (Object.keys(porCategoria) as CategoriaFotoEvento[]).forEach((categoria) => {
+        const urls = fotos.filter((f) => f.categoria === categoria).map((f) => f.url);
+        porCategoria[categoria] = urls.length ? urls : [null];
+      });
+      this.fotosPorCategoria.set(porCategoria);
 
-  private persistirFotos(): void {
-    guardarBorrador(this.claveBorradorFotos(), {
-      fotosPorCategoria: this.fotosPorCategoria(),
-      videosEntrevista: this.videosEntrevista(),
+      const videos = fotos.filter((f) => f.categoria === 'ENTREVISTA').map((f) => f.url);
+      this.videosEntrevista.set(videos.length ? videos : [null]);
     });
   }
 
   confirmarMotivo(): void {
     if (!this.motivo) return;
-    if (this.esEventoGrande) {
-      this.subPaso.set('detalle');
-      return;
-    }
-    this.guardarEventoSimple();
+    this.subPaso.set('detalle');
   }
 
   anteriorDetalle(): void {
     this.subPaso.set('motivo');
+  }
+
+  anteriorCompetencia(): void {
+    this.subPaso.set('detalle');
   }
 
   agregarLead(): void {
@@ -131,7 +115,9 @@ export class EventoVisita implements OnInit {
     const videos = [...this.videosEntrevista()];
     videos[index] = url;
     this.videosEntrevista.set(videos);
-    this.persistirFotos();
+    if (url) {
+      this.visitaService.agregarFoto(this.visitaId(), { categoria: 'ENTREVISTA', url }).subscribe();
+    }
   }
 
   agregarSlotFoto(categoria: CategoriaFotoEvento): void {
@@ -144,25 +130,9 @@ export class EventoVisita implements OnInit {
     const fotos = [...actual[categoria]];
     fotos[index] = url;
     this.fotosPorCategoria.set({ ...actual, [categoria]: fotos });
-    this.persistirFotos();
-  }
-
-  private guardarEventoSimple(): void {
-    if (!this.motivo || this.guardando()) return;
-    this.guardando.set(true);
-    this.eventoService
-      .crear({
-        visitaId: this.visitaId(),
-        motivo: this.motivo,
-        motivoOtroDetalle: this.motivo === 'OTRO' ? this.motivoOtroDetalle || undefined : undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.guardando.set(false);
-          this.completada.emit();
-        },
-        error: () => this.guardando.set(false),
-      });
+    if (url) {
+      this.visitaService.agregarFoto(this.visitaId(), { categoria, url }).subscribe();
+    }
   }
 
   guardarDetalleEvento(): void {
@@ -171,54 +141,39 @@ export class EventoVisita implements OnInit {
 
     const leads = this.leads().filter((l) => l.nombre.trim());
     const videos = this.videosEntrevista().filter((v): v is string => !!v);
+    const esGrande = this.esEventoGrande;
 
+    // Las fotos y videos ya se subieron al backend apenas se seleccionaron;
+    // aquí solo se guarda la metadata del evento. Los campos propios de
+    // feria/exposición/congreso/rueda de negocios solo se envían cuando
+    // aplica ese tipo de evento.
     this.eventoService
       .crear({
         visitaId: this.visitaId(),
         motivo: this.motivo,
         motivoOtroDetalle: this.motivo === 'OTRO' ? this.motivoOtroDetalle || undefined : undefined,
-        nombreEvento: this.nombreEvento || undefined,
-        ciudad: this.ciudad || undefined,
-        estado: this.estado || undefined,
-        lugarRealizacion: this.lugarRealizacion || undefined,
-        fechaEvento: this.fechaEvento || undefined,
+        nombreEvento: esGrande ? this.nombreEvento || undefined : undefined,
+        ciudad: esGrande ? this.ciudad || undefined : undefined,
+        estado: esGrande ? this.estado || undefined : undefined,
+        lugarRealizacion: esGrande ? this.lugarRealizacion || undefined : undefined,
+        fechaEvento: esGrande ? this.fechaEvento || undefined : undefined,
+        organizador: esGrande ? this.organizador || undefined : undefined,
+        objetivoParticipacion: esGrande ? this.objetivoParticipacion || undefined : undefined,
+        participacionVettal: esGrande ? this.participacionVettal || undefined : undefined,
         horaInicio: this.horaInicio || undefined,
         horaFin: this.horaFin || undefined,
-        organizador: this.organizador || undefined,
-        objetivoParticipacion: this.objetivoParticipacion || undefined,
-        participacionVettal: this.participacionVettal || undefined,
         cantidadAsistentesEstimada: this.cantidadAsistentesEstimada ?? undefined,
         leads: leads.length ? leads : undefined,
         videosEntrevistaUrls: videos.length ? videos : undefined,
       })
       .subscribe({
         next: () => {
-          const fotos = this.fotosPorCategoria();
-          const subidas: Observable<EvidenciaFoto>[] = [];
-          (Object.keys(fotos) as CategoriaFotoEvento[]).forEach((categoria) => {
-            fotos[categoria]
-              .filter((url): url is string => !!url)
-              .forEach((url) => subidas.push(this.visitaService.agregarFoto(this.visitaId(), { categoria, url })));
-          });
-
-          if (!subidas.length) {
-            this.guardando.set(false);
-            borrarBorrador(this.claveBorradorFotos());
+          this.guardando.set(false);
+          if (esGrande) {
             this.subPaso.set('competencia');
-            return;
+          } else {
+            this.completada.emit();
           }
-
-          let restantes = subidas.length;
-          subidas.forEach((obs) =>
-            obs.subscribe(() => {
-              restantes -= 1;
-              if (restantes === 0) {
-                this.guardando.set(false);
-                borrarBorrador(this.claveBorradorFotos());
-                this.subPaso.set('competencia');
-              }
-            }),
-          );
         },
         error: () => this.guardando.set(false),
       });
