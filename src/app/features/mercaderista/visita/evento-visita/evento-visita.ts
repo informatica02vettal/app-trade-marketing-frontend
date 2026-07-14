@@ -4,7 +4,7 @@ import { EventoService } from '../../../../core/services/evento.service';
 import { VisitaService } from '../../../../core/services/visita.service';
 import { VisitaSessionService } from '../../../../core/session/visita-session.service';
 import { EventoLead, MotivoEvento, ParticipacionVettal } from '../../../../core/models/evento.model';
-import { obtenerGps } from '../../../../core/utils/gps.util';
+import { GpsError, obtenerGpsConDiagnostico } from '../../../../core/utils/gps.util';
 import { PhotoPicker } from '../../../../shared/ui/photo-picker/photo-picker';
 import { VideoPicker } from '../../../../shared/ui/video-picker/video-picker';
 import { CompetidoresLista } from '../competidores/competidores-lista';
@@ -67,6 +67,7 @@ export class EventoVisita implements OnInit {
   readonly gpsLat = signal<number | null>(null);
   readonly gpsLng = signal<number | null>(null);
   readonly capturandoGps = signal(true);
+  readonly gpsErrorMotivo = signal<GpsError | null>(null);
 
   get esEventoGrande(): boolean {
     return this.sesion.esEventoGrande();
@@ -92,9 +93,11 @@ export class EventoVisita implements OnInit {
 
   capturarGps(): void {
     this.capturandoGps.set(true);
-    obtenerGps().then((coords) => {
+    this.gpsErrorMotivo.set(null);
+    obtenerGpsConDiagnostico().then(({ coords, error }) => {
       this.gpsLat.set(coords?.lat ?? null);
       this.gpsLng.set(coords?.lng ?? null);
+      this.gpsErrorMotivo.set(error);
       this.capturandoGps.set(false);
     });
   }

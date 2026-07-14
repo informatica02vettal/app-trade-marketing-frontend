@@ -21,14 +21,34 @@
           />
         }
 
-        <div class="flex items-center justify-between rounded-[11px] border border-line px-3 py-2.5 text-[12.5px]">
-          @if (capturandoGps()) {
-            <span class="text-muted">Obteniendo ubicación GPS del evento…</span>
-          } @else if (gpsLat() !== null && gpsLng() !== null) {
-            <span class="text-success font-semibold">✓ Ubicación GPS capturada</span>
-          } @else {
-            <span class="text-danger font-semibold">No se pudo obtener la ubicación GPS</span>
-            <button type="button" (click)="capturarGps()" class="text-brand-dim font-bold text-[12px]">Reintentar</button>
+        <div class="flex flex-col gap-1 rounded-[11px] border border-line px-3 py-2.5 text-[12.5px]">
+          <div class="flex items-center justify-between">
+            @if (capturandoGps()) {
+              <span class="text-muted">Obteniendo ubicación GPS del evento…</span>
+            } @else if (gpsLat() !== null && gpsLng() !== null) {
+              <span class="text-success font-semibold">✓ Ubicación GPS capturada</span>
+            } @else {
+              <span class="text-danger font-semibold">No se pudo obtener la ubicación GPS</span>
+              <button type="button" (click)="capturarGps()" class="text-brand-dim font-bold text-[12px]">Reintentar</button>
+            }
+          </div>
+          @if (!capturandoGps() && gpsErrorMotivo() === 'PERMISO_DENEGADO') {
+            <p class="text-muted text-[11px]">
+              El navegador tiene bloqueado el permiso de ubicación para esta página. Tócalo desde el ícono de
+              candado/información junto a la dirección del sitio, permite "Ubicación" y luego toca "Reintentar".
+            </p>
+          }
+          @if (!capturandoGps() && gpsErrorMotivo() === 'NO_DISPONIBLE') {
+            <p class="text-muted text-[11px]">
+              El dispositivo no pudo determinar la ubicación. Verifica que el GPS/Ubicación esté activado en los
+              ajustes del sistema (en Windows: Configuración → Privacidad y seguridad → Ubicación) y reintenta.
+            </p>
+          }
+          @if (!capturandoGps() && gpsErrorMotivo() === 'TIEMPO_AGOTADO') {
+            <p class="text-muted text-[11px]">Tardó demasiado en responder. Reintenta en un lugar con mejor señal.</p>
+          }
+          @if (!capturandoGps() && gpsErrorMotivo() === 'SIN_SOPORTE') {
+            <p class="text-muted text-[11px]">Este navegador no soporta geolocalización.</p>
           }
         </div>
 
