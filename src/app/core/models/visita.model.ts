@@ -11,7 +11,8 @@ export type CategoriaEvidencia =
   | 'DESPUES'
   | 'MONTAJE'
   | 'DESARROLLO'
-  | 'CIERRE';
+  | 'CIERRE'
+  | 'ENTREVISTA';
 
 export interface Visita {
   id: number;
@@ -47,6 +48,7 @@ export interface VisitaCheckoutRequest {
 export interface EvidenciaFoto {
   id: number;
   visitaId: number;
+  marcaId: number | null;
   categoria: CategoriaEvidencia;
   url: string;
   createdAt: string;
@@ -55,6 +57,7 @@ export interface EvidenciaFoto {
 export interface EvidenciaFotoRequest {
   categoria: CategoriaEvidencia;
   url: string;
+  marcaId?: number;
 }
 
 export interface ClienteProspecto {

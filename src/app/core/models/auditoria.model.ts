@@ -19,19 +19,20 @@ export interface AuditoriaMarca {
   banderines: boolean;
   rotulado: boolean;
   empleadosUniforme: boolean;
-  estadoExhibidores: EstadoExhibidor;
-  estadoPop: EstadoPop;
+  estadoExhibidores: EstadoExhibidor | null;
+  estadoPop: EstadoPop | null;
   competenciaDetectada: string | null;
   oportunidad: string | null;
+  completa: boolean;
   createdAt: string;
 }
 
 export interface AuditoriaMarcaRequest {
   visitaId: number;
   marcaId: number;
-  presenciaPct: number;
-  frentesVettal: number;
-  frentesTotales: number;
+  presenciaPct?: number;
+  frentesVettal?: number;
+  frentesTotales?: number;
   exhibidorMarca: boolean;
   productoExhibidor: boolean;
   productoAnaquel: boolean;
@@ -40,8 +41,10 @@ export interface AuditoriaMarcaRequest {
   banderines: boolean;
   rotulado: boolean;
   empleadosUniforme: boolean;
-  estadoExhibidores: EstadoExhibidor;
-  estadoPop: EstadoPop;
+  estadoExhibidores?: EstadoExhibidor | null;
+  estadoPop?: EstadoPop | null;
   competenciaDetectada?: string;
   oportunidad?: string;
+  /** false mientras se está llenando (guardado incremental); true en el envío final. */
+  completa: boolean;
 }

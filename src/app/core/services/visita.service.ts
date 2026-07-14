@@ -29,6 +29,10 @@ export class VisitaService {
     return this.http.post<ApiResponse<Visita>>(BASE_URL, request).pipe(map((res) => res.data));
   }
 
+  obtener(id: number): Observable<Visita> {
+    return this.http.get<ApiResponse<Visita>>(`${BASE_URL}/${id}`).pipe(map((res) => res.data));
+  }
+
   listarFotos(visitaId: number): Observable<EvidenciaFoto[]> {
     return this.http
       .get<ApiResponse<EvidenciaFoto[]>>(`${BASE_URL}/${visitaId}/fotos`)

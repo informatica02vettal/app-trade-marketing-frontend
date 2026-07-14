@@ -1,24 +1,25 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
 import { AuditoriaService } from '../../../../core/services/auditoria.service';
 import { CatalogoService } from '../../../../core/services/catalogo.service';
 import { MercadoService } from '../../../../core/services/mercado.service';
 import { SolicitudService } from '../../../../core/services/solicitud.service';
 import { VisitaService } from '../../../../core/services/visita.service';
 import { VisitaSessionService } from '../../../../core/session/visita-session.service';
-import { EstadoExhibidor, EstadoPop } from '../../../../core/models/auditoria.model';
+import { AuditoriaMarca, EstadoExhibidor, EstadoPop } from '../../../../core/models/auditoria.model';
 import { CategoriaMaterial, FamiliaMaterial, MarcaCompetencia, Material } from '../../../../core/models/catalogo.model';
 import { HallazgoMercado, HallazgoMaterial, HallazgoProducto, TipoHallazgo } from '../../../../core/models/mercado.model';
 import { CategoriaSolicitud, Solicitud, SolicitudItemRequest } from '../../../../core/models/solicitud.model';
 import { CategoriaEvidencia } from '../../../../core/models/visita.model';
 import { PhotoPicker } from '../../../../shared/ui/photo-picker/photo-picker';
-import { borrarBorrador, cargarBorrador, guardarBorrador } from '../../../../core/utils/borrador.util';
 
 type SubPaso = 'presencia' | 'estado' | 'fotos' | 'competencia' | 'observaciones' | 'mercado' | 'solicitudes';
 
 const ORDEN: SubPaso[] = ['presencia', 'estado', 'fotos', 'competencia', 'observaciones', 'mercado', 'solicitudes'];
 
-type FotosMarca = Record<Extract<CategoriaEvidencia, 'EXHIBIDOR' | 'PRODUCTO' | 'COMPETENCIA' | 'MATERIAL_POP' | 'ANTES' | 'DESPUES'>, string | null>;
+type CategoriaFotoMarca = Extract<CategoriaEvidencia, 'EXHIBIDOR' | 'PRODUCTO' | 'COMPETENCIA' | 'MATERIAL_POP' | 'ANTES' | 'DESPUES'>;
+type FotosMarca = Record<CategoriaFotoMarca, string | null>;
 
 function fotosVacias(): FotosMarca {
   return { EXHIBIDOR: null, PRODUCTO: null, COMPETENCIA: null, MATERIAL_POP: null, ANTES: null, DESPUES: null };
@@ -92,9 +93,9 @@ export class MarcaDetalle implements OnInit {
   competenciaPersonalizada = '';
 
   // ---- Fotos ----
-  // Persistidas en localStorage para que no se pierdan si el mercaderista
-  // cierra la app a mitad de la auditoría (ya se subieron al servidor, solo
-  // falta no olvidar en qué casilla va cada una).
+  // Cada foto se sube al backend en el momento (agregarFoto), asociada a
+  // esta marca — así queda en la base de datos de inmediato y se puede
+  // recuperar en cualquier dispositivo, sin depender del navegador.
   readonly fotos = signal<FotosMarca>(fotosVacias());
 
   // ---- Observaciones / oportunidad ----
@@ -141,20 +142,88 @@ export class MarcaDetalle implements OnInit {
   readonly solicitudesGuardadas = signal<Solicitud[]>([]);
   readonly guardandoSolicitud = signal(false);
 
-  private claveBorradorFotos(): string {
-    return `tm_fotos_marca_${this.visitaId()}_${this.marcaId()}`;
-  }
-
   ngOnInit(): void {
     this.catalogoService
       .listarCompetenciaDeMarca(this.marcaId())
       .subscribe((catalogo) => this.competenciaCatalogo.set(catalogo.filter((c) => c.activo)));
 
-    this.fotos.set(cargarBorrador(this.claveBorradorFotos(), fotosVacias()));
+    // Si esta marca ya tenía una auditoría en progreso (o completa) guardada
+    // en el backend, se recupera todo el formulario desde ahí — funciona
+    // igual sin importar desde qué dispositivo se entre.
+    this.auditoriaService.listarPorVisita(this.visitaId()).subscribe((auditorias) => {
+      const existente = auditorias.find((a) => a.marcaId === this.marcaId());
+      if (existente) {
+        this.prefillDesdeAuditoriaExistente(existente);
+      }
+    });
+
+    this.visitaService.listarFotos(this.visitaId()).subscribe((fotos) => {
+      const propias = fotos.filter((f) => f.marcaId === this.marcaId());
+      const ultimaPorCategoria = (categoria: CategoriaFotoMarca): string | null => {
+        const coincidencias = propias.filter((f) => f.categoria === categoria);
+        return coincidencias.length ? coincidencias[coincidencias.length - 1].url : null;
+      };
+      this.fotos.set({
+        EXHIBIDOR: ultimaPorCategoria('EXHIBIDOR'),
+        PRODUCTO: ultimaPorCategoria('PRODUCTO'),
+        COMPETENCIA: ultimaPorCategoria('COMPETENCIA'),
+        MATERIAL_POP: ultimaPorCategoria('MATERIAL_POP'),
+        ANTES: ultimaPorCategoria('ANTES'),
+        DESPUES: ultimaPorCategoria('DESPUES'),
+      });
+    });
+  }
+
+  private prefillDesdeAuditoriaExistente(a: AuditoriaMarca): void {
+    this.presenciaMarca.set(true);
+    this.subPaso.set('estado');
+    this.exhibidorMarca.set(a.exhibidorMarca);
+    this.productoExhibidor.set(a.productoExhibidor);
+    this.productoAnaquel.set(a.productoAnaquel);
+    this.avisoFachada.set(a.avisoFachada);
+    this.avisoPared.set(a.avisoPared);
+    this.banderines.set(a.banderines);
+    this.rotulado.set(a.rotulado);
+    this.empleadosUniforme.set(a.empleadosUniforme);
+    this.frentesVettal.set(a.frentesVettal || null);
+    this.frentesTotales.set(a.frentesTotales || null);
+    if (a.estadoExhibidores) this.estadoExhibidores.set(a.estadoExhibidores);
+    if (a.estadoPop) this.estadoPop.set(a.estadoPop);
+    this.oportunidad = a.oportunidad ?? '';
+    if (a.competenciaDetectada) {
+      this.competenciaSeleccionada.set(new Set(a.competenciaDetectada.split(', ').filter(Boolean)));
+    }
   }
 
   irA(paso: SubPaso): void {
     this.subPaso.set(paso);
+  }
+
+  // Guarda (o actualiza) de inmediato el progreso de esta auditoría en el
+  // backend — se llama después de cada respuesta para que nada dependa de
+  // llegar hasta el final del formulario.
+  private guardarProgreso(completa: boolean): Observable<AuditoriaMarca> {
+    const competencia = Array.from(this.competenciaSeleccionada()).join(', ');
+    return this.auditoriaService.crear({
+      visitaId: this.visitaId(),
+      marcaId: this.marcaId(),
+      presenciaPct: this.presenciaPct(),
+      frentesVettal: this.frentesVettal() ?? undefined,
+      frentesTotales: this.frentesTotales() ?? undefined,
+      exhibidorMarca: this.exhibidorMarca(),
+      productoExhibidor: this.productoExhibidor(),
+      productoAnaquel: this.productoAnaquel(),
+      avisoFachada: this.avisoFachada(),
+      avisoPared: this.avisoPared(),
+      banderines: this.banderines(),
+      rotulado: this.rotulado(),
+      empleadosUniforme: this.empleadosUniforme(),
+      estadoExhibidores: this.estadoExhibidores(),
+      estadoPop: this.estadoPop(),
+      competenciaDetectada: competencia || undefined,
+      oportunidad: this.oportunidad || undefined,
+      completa,
+    });
   }
 
   // ---- Competencia ----
@@ -166,6 +235,7 @@ export class MarcaDetalle implements OnInit {
       actual.add(nombre);
     }
     this.competenciaSeleccionada.set(actual);
+    this.guardarProgreso(false).subscribe();
   }
 
   agregarCompetenciaPersonalizada(): void {
@@ -189,6 +259,7 @@ export class MarcaDetalle implements OnInit {
     this.presenciaMarca.set(existe);
     if (existe) {
       this.subPaso.set('estado');
+      this.guardarProgreso(false).subscribe();
     } else {
       this.guardarSinPresencia();
     }
@@ -214,10 +285,10 @@ export class MarcaDetalle implements OnInit {
         estadoExhibidores: 'NO_APLICA',
         estadoPop: 'NO_APLICA',
         oportunidad: 'Sin presencia de la marca en este local.',
+        completa: true,
       })
       .subscribe(() => {
         this.guardando.set(false);
-        borrarBorrador(this.claveBorradorFotos());
         this.completada.emit();
       });
   }
@@ -260,11 +331,41 @@ export class MarcaDetalle implements OnInit {
       this.productoExhibidor.set(false);
       this.estadoExhibidores.set('NO_APLICA');
     }
+    this.guardarProgreso(false).subscribe();
+  }
+
+  actualizarChecklist(
+    campo: 'productoExhibidor' | 'productoAnaquel' | 'avisoFachada' | 'avisoPared' | 'banderines' | 'rotulado' | 'empleadosUniforme',
+    valor: boolean,
+  ): void {
+    this[campo].set(valor);
+    this.guardarProgreso(false).subscribe();
+  }
+
+  actualizarFrentes(campo: 'frentesVettal' | 'frentesTotales', valor: number | null): void {
+    this[campo].set(valor);
+    this.guardarProgreso(false).subscribe();
+  }
+
+  actualizarEstadoExhibidores(valor: EstadoExhibidor): void {
+    this.estadoExhibidores.set(valor);
+    this.guardarProgreso(false).subscribe();
+  }
+
+  actualizarEstadoPop(valor: EstadoPop): void {
+    this.estadoPop.set(valor);
+    this.guardarProgreso(false).subscribe();
+  }
+
+  guardarOportunidad(): void {
+    this.guardarProgreso(false).subscribe();
   }
 
   setFoto(categoria: keyof ReturnType<typeof this.fotos>, url: string | null): void {
     this.fotos.set({ ...this.fotos(), [categoria]: url });
-    guardarBorrador(this.claveBorradorFotos(), this.fotos());
+    if (url) {
+      this.visitaService.agregarFoto(this.visitaId(), { categoria, url, marcaId: this.marcaId() }).subscribe();
+    }
   }
 
   // ---- Mercado ----
@@ -418,57 +519,15 @@ export class MarcaDetalle implements OnInit {
       });
   }
 
-  // ---- Guardar auditoría de la marca ----
+  // ---- Guardar auditoría de la marca (envío final) ----
   guardarMarca(): void {
-    const frentesVettal = this.frentesVettal() ?? 0;
-    const frentesTotales = this.frentesTotales() ?? 0;
-    const competencia = Array.from(this.competenciaSeleccionada()).join(', ');
-
     this.guardando.set(true);
-    this.auditoriaService
-      .crear({
-        visitaId: this.visitaId(),
-        marcaId: this.marcaId(),
-        presenciaPct: this.presenciaPct(),
-        frentesVettal,
-        frentesTotales,
-        exhibidorMarca: this.exhibidorMarca(),
-        productoExhibidor: this.productoExhibidor(),
-        productoAnaquel: this.productoAnaquel(),
-        avisoFachada: this.avisoFachada(),
-        avisoPared: this.avisoPared(),
-        banderines: this.banderines(),
-        rotulado: this.rotulado(),
-        empleadosUniforme: this.empleadosUniforme(),
-        estadoExhibidores: this.estadoExhibidores(),
-        estadoPop: this.estadoPop(),
-        competenciaDetectada: competencia || undefined,
-        oportunidad: this.oportunidad || undefined,
-      })
-      .subscribe(() => {
-        const fotos = this.fotos();
-        const subidas = (Object.keys(fotos) as (keyof typeof fotos)[])
-          .filter((categoria) => fotos[categoria])
-          .map((categoria) => this.visitaService.agregarFoto(this.visitaId(), { categoria, url: fotos[categoria]! }));
-
-        if (!subidas.length) {
-          this.guardando.set(false);
-          borrarBorrador(this.claveBorradorFotos());
-          this.completada.emit();
-          return;
-        }
-
-        let restantes = subidas.length;
-        subidas.forEach((obs) =>
-          obs.subscribe(() => {
-            restantes -= 1;
-            if (restantes === 0) {
-              this.guardando.set(false);
-              borrarBorrador(this.claveBorradorFotos());
-              this.completada.emit();
-            }
-          }),
-        );
-      });
+    this.guardarProgreso(true).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.completada.emit();
+      },
+      error: () => this.guardando.set(false),
+    });
   }
 }

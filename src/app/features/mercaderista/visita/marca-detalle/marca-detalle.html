@@ -45,50 +45,50 @@
         <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
           <span>Producto en el exhibidor</span>
           <div class="flex gap-1.5 shrink-0">
-            <button type="button" [disabled]="!exhibidorMarca()" (click)="productoExhibidor.set(true)" [class]="claseBotonSiNo(productoExhibidor(), true)">Sí</button>
-            <button type="button" [disabled]="!exhibidorMarca()" (click)="productoExhibidor.set(false)" [class]="claseBotonSiNo(productoExhibidor(), false)">No</button>
+            <button type="button" [disabled]="!exhibidorMarca()" (click)="actualizarChecklist('productoExhibidor', true)" [class]="claseBotonSiNo(productoExhibidor(), true)">Sí</button>
+            <button type="button" [disabled]="!exhibidorMarca()" (click)="actualizarChecklist('productoExhibidor', false)" [class]="claseBotonSiNo(productoExhibidor(), false)">No</button>
           </div>
         </div>
         <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
           <span>Producto en piso de ventas / anaquel</span>
           <div class="flex gap-1.5 shrink-0">
-            <button type="button" (click)="productoAnaquel.set(true)" [class]="claseBotonSiNo(productoAnaquel(), true)">Sí</button>
-            <button type="button" (click)="productoAnaquel.set(false)" [class]="claseBotonSiNo(productoAnaquel(), false)">No</button>
+            <button type="button" (click)="actualizarChecklist('productoAnaquel', true)" [class]="claseBotonSiNo(productoAnaquel(), true)">Sí</button>
+            <button type="button" (click)="actualizarChecklist('productoAnaquel', false)" [class]="claseBotonSiNo(productoAnaquel(), false)">No</button>
           </div>
         </div>
         <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
           <span>Aviso de fachada</span>
           <div class="flex gap-1.5 shrink-0">
-            <button type="button" (click)="avisoFachada.set(true)" [class]="claseBotonSiNo(avisoFachada(), true)">Sí</button>
-            <button type="button" (click)="avisoFachada.set(false)" [class]="claseBotonSiNo(avisoFachada(), false)">No</button>
+            <button type="button" (click)="actualizarChecklist('avisoFachada', true)" [class]="claseBotonSiNo(avisoFachada(), true)">Sí</button>
+            <button type="button" (click)="actualizarChecklist('avisoFachada', false)" [class]="claseBotonSiNo(avisoFachada(), false)">No</button>
           </div>
         </div>
         <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
           <span>Aviso de pared / rompetráfico</span>
           <div class="flex gap-1.5 shrink-0">
-            <button type="button" (click)="avisoPared.set(true)" [class]="claseBotonSiNo(avisoPared(), true)">Sí</button>
-            <button type="button" (click)="avisoPared.set(false)" [class]="claseBotonSiNo(avisoPared(), false)">No</button>
+            <button type="button" (click)="actualizarChecklist('avisoPared', true)" [class]="claseBotonSiNo(avisoPared(), true)">Sí</button>
+            <button type="button" (click)="actualizarChecklist('avisoPared', false)" [class]="claseBotonSiNo(avisoPared(), false)">No</button>
           </div>
         </div>
         <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
           <span>Banderines</span>
           <div class="flex gap-1.5 shrink-0">
-            <button type="button" (click)="banderines.set(true)" [class]="claseBotonSiNo(banderines(), true)">Sí</button>
-            <button type="button" (click)="banderines.set(false)" [class]="claseBotonSiNo(banderines(), false)">No</button>
+            <button type="button" (click)="actualizarChecklist('banderines', true)" [class]="claseBotonSiNo(banderines(), true)">Sí</button>
+            <button type="button" (click)="actualizarChecklist('banderines', false)" [class]="claseBotonSiNo(banderines(), false)">No</button>
           </div>
         </div>
         <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
           <span>Rotulado / stickers</span>
           <div class="flex gap-1.5 shrink-0">
-            <button type="button" (click)="rotulado.set(true)" [class]="claseBotonSiNo(rotulado(), true)">Sí</button>
-            <button type="button" (click)="rotulado.set(false)" [class]="claseBotonSiNo(rotulado(), false)">No</button>
+            <button type="button" (click)="actualizarChecklist('rotulado', true)" [class]="claseBotonSiNo(rotulado(), true)">Sí</button>
+            <button type="button" (click)="actualizarChecklist('rotulado', false)" [class]="claseBotonSiNo(rotulado(), false)">No</button>
           </div>
         </div>
         <div class="flex items-center justify-between text-[13px] py-2 border-b border-line gap-2.5">
           <span>Empleados con ropa de marca</span>
           <div class="flex gap-1.5 shrink-0">
-            <button type="button" (click)="empleadosUniforme.set(true)" [class]="claseBotonSiNo(empleadosUniforme(), true)">Sí</button>
-            <button type="button" (click)="empleadosUniforme.set(false)" [class]="claseBotonSiNo(empleadosUniforme(), false)">No</button>
+            <button type="button" (click)="actualizarChecklist('empleadosUniforme', true)" [class]="claseBotonSiNo(empleadosUniforme(), true)">Sí</button>
+            <button type="button" (click)="actualizarChecklist('empleadosUniforme', false)" [class]="claseBotonSiNo(empleadosUniforme(), false)">No</button>
           </div>
         </div>
 
@@ -104,7 +104,7 @@
             min="0"
             placeholder="Frentes propios"
             [ngModel]="frentesVettal()"
-            (ngModelChange)="frentesVettal.set($event)"
+            (ngModelChange)="actualizarFrentes('frentesVettal', $event)"
             class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
           />
           <input
@@ -112,7 +112,7 @@
             min="0"
             placeholder="Frentes totales"
             [ngModel]="frentesTotales()"
-            (ngModelChange)="frentesTotales.set($event)"
+            (ngModelChange)="actualizarFrentes('frentesTotales', $event)"
             class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
           />
         </div>
@@ -120,7 +120,7 @@
         <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Estado del exhibidor</p>
         <select
           [ngModel]="estadoExhibidores()"
-          (ngModelChange)="estadoExhibidores.set($event)"
+          (ngModelChange)="actualizarEstadoExhibidores($event)"
           [disabled]="!exhibidorMarca()"
           class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
         >
@@ -133,7 +133,7 @@
         <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Estado de material POP</p>
         <select
           [ngModel]="estadoPop()"
-          (ngModelChange)="estadoPop.set($event)"
+          (ngModelChange)="actualizarEstadoPop($event)"
           class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
         >
           <option value="OPTIMO">Óptimo</option>
@@ -220,6 +220,7 @@
         <p class="font-mono text-[10.5px] uppercase tracking-wide text-muted mt-2">Oportunidad comercial</p>
         <textarea
           [(ngModel)]="oportunidad"
+          (blur)="guardarOportunidad()"
           rows="3"
           placeholder="Oportunidad detectada (reposición, ampliación de anaquel, etc.)"
           class="w-full rounded-[11px] border border-line px-3 py-2.5 text-[13.5px]"
