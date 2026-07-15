@@ -11,6 +11,8 @@ import {
   MarcaCompetencia,
   MarcaCompetenciaRequest,
   Material,
+  Region,
+  RegionRequest,
 } from '../models/catalogo.model';
 
 const BASE_URL = `${environment.apiBaseUrl}/catalogos`;
@@ -64,6 +66,24 @@ export class CatalogoService {
   listarCategoriasMercado(): Observable<CategoriaProductoMercado[]> {
     return this.http
       .get<ApiResponse<CategoriaProductoMercado[]>>(`${BASE_URL}/categorias-mercado`)
+      .pipe(map((res) => res.data));
+  }
+
+  listarRegiones(): Observable<Region[]> {
+    return this.http.get<ApiResponse<Region[]>>(`${BASE_URL}/regiones`).pipe(map((res) => res.data));
+  }
+
+  crearRegion(request: RegionRequest): Observable<Region> {
+    return this.http.post<ApiResponse<Region>>(`${BASE_URL}/regiones`, request).pipe(map((res) => res.data));
+  }
+
+  actualizarRegion(id: number, request: RegionRequest): Observable<Region> {
+    return this.http.put<ApiResponse<Region>>(`${BASE_URL}/regiones/${id}`, request).pipe(map((res) => res.data));
+  }
+
+  cambiarEstadoRegion(id: number, activo: boolean): Observable<Region> {
+    return this.http
+      .patch<ApiResponse<Region>>(`${BASE_URL}/regiones/${id}/estado`, { activo })
       .pipe(map((res) => res.data));
   }
 }

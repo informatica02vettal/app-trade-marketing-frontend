@@ -34,6 +34,7 @@ export const DASHBOARD_ROUTES: Routes = [
         path: 'marcas-competencia',
         loadComponent: () => import('./marcas-competencia/marcas-competencia').then((m) => m.MarcasCompetencia),
       },
+      { path: 'regiones', loadComponent: () => import('./regiones/regiones').then((m) => m.Regiones) },
     ],
   },
 ];

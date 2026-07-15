@@ -2,8 +2,10 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { ClienteService } from '../../../core/services/cliente.service';
+import { CatalogoService } from '../../../core/services/catalogo.service';
 import { Usuario, UsuarioRequest } from '../../../core/models/usuario.model';
 import { AsignacionCliente, ClienteLocal, SucursalLocal } from '../../../core/models/cliente.model';
+import { Region } from '../../../core/models/catalogo.model';
 
 function formularioVacio(): UsuarioRequest {
   return { nombre: '', email: '', password: '', region: '', rol: 'MERCADERISTA' };
@@ -18,9 +20,11 @@ function formularioVacio(): UsuarioRequest {
 export class Mercaderistas implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
   private readonly clienteService = inject(ClienteService);
+  private readonly catalogoService = inject(CatalogoService);
 
   readonly mercaderistas = signal<Usuario[]>([]);
   readonly clientesLocales = signal<ClienteLocal[]>([]);
+  readonly regiones = signal<Region[]>([]);
   readonly cargando = signal(false);
   readonly guardando = signal(false);
   readonly error = signal<string | null>(null);
@@ -62,6 +66,7 @@ export class Mercaderistas implements OnInit {
   ngOnInit(): void {
     this.cargar();
     this.clienteService.listarLocales().subscribe((clientes) => this.clientesLocales.set(clientes));
+    this.catalogoService.listarRegiones().subscribe((regiones) => this.regiones.set(regiones.filter((r) => r.activo)));
   }
 
   cargar(): void {

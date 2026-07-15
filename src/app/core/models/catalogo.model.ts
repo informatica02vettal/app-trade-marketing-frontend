@@ -40,3 +40,15 @@ export interface CategoriaProductoMercado {
   nombre: string;
   marcaId: number;
 }
+
+export interface Region {
+  id: number;
+  nombre: string;
+  detalles: string | null;
+  activo: boolean;
+}
+
+export interface RegionRequest {
+  nombre: string;
+  detalles?: string;
+}
