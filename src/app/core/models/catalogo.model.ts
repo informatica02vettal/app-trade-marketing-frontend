@@ -4,6 +4,12 @@ export interface Marca {
   id: number;
   codigo: string;
   nombre: string;
+  activo: boolean;
+}
+
+export interface MarcaRequest {
+  codigo: string;
+  nombre: string;
 }
 
 export interface MarcaCompetencia {

@@ -48,7 +48,7 @@ export class VisitaWizard implements OnInit {
 
   ngOnInit(): void {
     const visitaId = Number(this.route.snapshot.paramMap.get('visitaId'));
-    this.catalogoService.listarMarcas().subscribe((marcas) => this.marcas.set(marcas));
+    this.catalogoService.listarMarcas().subscribe((marcas) => this.marcas.set(marcas.filter((m) => m.activo)));
 
     if (this.sesion.hayVisitaActiva && this.sesion.visitaId() === visitaId) {
       this.prefillEvidenciaSiFalta(visitaId);

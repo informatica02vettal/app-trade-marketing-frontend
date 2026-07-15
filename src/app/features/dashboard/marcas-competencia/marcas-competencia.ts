@@ -1,7 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CatalogoService } from '../../../core/services/catalogo.service';
-import { Marca, MarcaCompetencia } from '../../../core/models/catalogo.model';
+import { Marca, MarcaCompetencia, MarcaRequest } from '../../../core/models/catalogo.model';
+
+function marcaFormularioVacio(): MarcaRequest {
+  return { codigo: '', nombre: '' };
+}
 
 @Component({
   selector: 'app-marcas-competencia',
@@ -15,6 +19,11 @@ export class MarcasCompetencia implements OnInit {
   readonly marcas = signal<Marca[]>([]);
   readonly cargando = signal(false);
   readonly error = signal<string | null>(null);
+
+  // ---- Alta de marca / activar-desactivar ----
+  readonly mostrarModalMarca = signal(false);
+  readonly guardandoMarca = signal(false);
+  formularioMarca: MarcaRequest = marcaFormularioVacio();
 
   // ---- Gestión de competencia de una marca ----
   readonly mostrarModal = signal(false);
@@ -39,6 +48,60 @@ export class MarcasCompetencia implements OnInit {
     });
   }
 
+  // ---- Alta de marca ----
+  abrirModalNuevaMarca(): void {
+    this.formularioMarca = marcaFormularioVacio();
+    this.error.set(null);
+    this.mostrarModalMarca.set(true);
+  }
+
+  cerrarModalMarca(): void {
+    this.mostrarModalMarca.set(false);
+  }
+
+  guardarMarcaDeshabilitado(): boolean {
+    return this.guardandoMarca() || !this.formularioMarca.codigo.trim() || !this.formularioMarca.nombre.trim();
+  }
+
+  guardarMarca(): void {
+    if (this.guardarMarcaDeshabilitado()) return;
+
+    this.guardandoMarca.set(true);
+    this.error.set(null);
+    this.catalogoService
+      .crearMarca({ codigo: this.formularioMarca.codigo.trim(), nombre: this.formularioMarca.nombre.trim() })
+      .subscribe({
+        next: () => {
+          this.guardandoMarca.set(false);
+          this.mostrarModalMarca.set(false);
+          this.cargar();
+        },
+        error: (err) => {
+          this.error.set(err?.error?.message || 'No fue posible crear la marca');
+          this.guardandoMarca.set(false);
+        },
+      });
+  }
+
+  // Al desactivar una marca, la app de mercaderistas deja de mostrarla en el
+  // selector de marcas a auditar (filtra por activo del lado del cliente).
+  desactivarMarca(m: Marca): void {
+    this.error.set(null);
+    this.catalogoService.cambiarEstadoMarca(m.id, false).subscribe({
+      next: () => this.cargar(),
+      error: (err) => this.error.set(err?.error?.message || 'No fue posible desactivar la marca'),
+    });
+  }
+
+  reactivarMarca(m: Marca): void {
+    this.error.set(null);
+    this.catalogoService.cambiarEstadoMarca(m.id, true).subscribe({
+      next: () => this.cargar(),
+      error: (err) => this.error.set(err?.error?.message || 'No fue posible reactivar la marca'),
+    });
+  }
+
+  // ---- Gestión de competencia ----
   abrirCompetencia(m: Marca): void {
     this.marcaSeleccionada.set(m);
     this.nuevoNombre = '';

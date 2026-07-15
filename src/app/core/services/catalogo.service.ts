@@ -10,6 +10,7 @@ import {
   Marca,
   MarcaCompetencia,
   MarcaCompetenciaRequest,
+  MarcaRequest,
   Material,
   Region,
   RegionRequest,
@@ -24,6 +25,16 @@ export class CatalogoService {
   listarMarcas(): Observable<Marca[]> {
     return this.http
       .get<ApiResponse<Marca[]>>(`${BASE_URL}/marcas`)
+      .pipe(map((res) => res.data));
+  }
+
+  crearMarca(request: MarcaRequest): Observable<Marca> {
+    return this.http.post<ApiResponse<Marca>>(`${BASE_URL}/marcas`, request).pipe(map((res) => res.data));
+  }
+
+  cambiarEstadoMarca(id: number, activo: boolean): Observable<Marca> {
+    return this.http
+      .patch<ApiResponse<Marca>>(`${BASE_URL}/marcas/${id}/estado`, { activo })
       .pipe(map((res) => res.data));
   }
 
