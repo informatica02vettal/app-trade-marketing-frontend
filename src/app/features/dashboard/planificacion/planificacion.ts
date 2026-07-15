@@ -60,15 +60,11 @@ function nuevoFormulario() {
   };
 }
 
-function coincideBusquedaProducto(p: ProductoLocal, termino: string): boolean {
-  return (
-    (p.producto ?? '').toLowerCase().includes(termino) ||
-    (p.nombreComercial ?? '').toLowerCase().includes(termino) ||
-    (p.marca ?? '').toLowerCase().includes(termino) ||
-    (p.linea ?? '').toLowerCase().includes(termino) ||
-    (p.subcategoria ?? '').toLowerCase().includes(termino) ||
-    p.codigo.toLowerCase().includes(termino)
-  );
+type CampoBusquedaProducto = 'codigo' | 'nombre';
+
+function coincideBusquedaProducto(p: ProductoLocal, campo: CampoBusquedaProducto, termino: string): boolean {
+  if (campo === 'codigo') return p.codigo.toLowerCase().includes(termino);
+  return (p.nombreComercial ?? '').toLowerCase().includes(termino) || (p.producto ?? '').toLowerCase().includes(termino);
 }
 
 @Component({
@@ -153,7 +149,8 @@ export class Planificacion implements OnInit {
 
   // ---- Productos propios a auditar (solo si el objetivo es "Auditoría de marca") ----
   readonly productos = signal<ProductoLocal[]>([]);
-  readonly mostrarBusquedaProductos = signal(false);
+  readonly mostrarModalProductos = signal(false);
+  readonly campoBusquedaProducto = signal<CampoBusquedaProducto>('nombre');
   readonly busquedaProducto = signal('');
   readonly filtroProductoMarca = signal('');
   readonly filtroProductoLinea = signal('');
@@ -205,10 +202,26 @@ export class Planificacion implements OnInit {
     if (marca) disponibles = disponibles.filter((p) => p.marca === marca);
     if (linea) disponibles = disponibles.filter((p) => p.linea === linea);
     if (subcategoria) disponibles = disponibles.filter((p) => p.subcategoria === subcategoria);
-    if (termino) disponibles = disponibles.filter((p) => coincideBusquedaProducto(p, termino));
+    if (termino) disponibles = disponibles.filter((p) => coincideBusquedaProducto(p, this.campoBusquedaProducto(), termino));
 
     return disponibles.slice(0, 50);
   });
+
+  hayFiltrosProductosActivos(): boolean {
+    return (
+      !!this.busquedaProducto().trim() ||
+      !!this.filtroProductoMarca() ||
+      !!this.filtroProductoLinea() ||
+      !!this.filtroProductoSubcategoria()
+    );
+  }
+
+  limpiarFiltrosProductos(): void {
+    this.busquedaProducto.set('');
+    this.filtroProductoMarca.set('');
+    this.filtroProductoLinea.set('');
+    this.filtroProductoSubcategoria.set('');
+  }
 
   // ---- Búsqueda de mercaderista (lista ya cargada, sin llamada a API) ----
   readonly busquedaMercaderista = signal('');
@@ -266,7 +279,8 @@ export class Planificacion implements OnInit {
     this.busquedaMercaderista.set('');
     this.mostrarSugerenciasMercaderista.set(false);
     this.subtiposDisponibles.set([]);
-    this.mostrarBusquedaProductos.set(false);
+    this.mostrarModalProductos.set(false);
+    this.campoBusquedaProducto.set('nombre');
     this.busquedaProducto.set('');
     this.filtroProductoMarca.set('');
     this.filtroProductoLinea.set('');
@@ -391,6 +405,7 @@ export class Planificacion implements OnInit {
     this.nuevo.objetivoSubtipoId = null;
     this.subtiposDisponibles.set(tipoId ? this.objetivoSubtipos().filter((s) => s.tipoId === tipoId) : []);
     if (!this.esAuditoriaMarca()) {
+      this.mostrarModalProductos.set(false);
       this.busquedaProducto.set('');
       this.filtroProductoMarca.set('');
       this.filtroProductoLinea.set('');
@@ -400,8 +415,12 @@ export class Planificacion implements OnInit {
   }
 
   // ---- Productos propios a auditar (Auditoría de marca) ----
-  toggleBusquedaProductos(): void {
-    this.mostrarBusquedaProductos.update((v) => !v);
+  abrirModalProductos(): void {
+    this.mostrarModalProductos.set(true);
+  }
+
+  cerrarModalProductos(): void {
+    this.mostrarModalProductos.set(false);
   }
 
   seleccionarProducto(p: ProductoLocal): void {
@@ -431,6 +450,19 @@ export class Planificacion implements OnInit {
 
   horaMinimaReprogramar(): string | null {
     return this.horaMinimaParaFecha(this.reprogramarForm.fecha);
+  }
+
+  // El navegador solo marca visualmente el campo hora como inválido cuando
+  // queda por debajo de [attr.min] — no impide que el valor quede seteado
+  // igual (p. ej. si se eligió la hora temprano y pasó el tiempo antes de
+  // completar el resto del formulario). Esto avisa explícitamente en vez de
+  // dejar "Crear"/"Guardar" bloqueado sin ninguna explicación.
+  fechaHoraNuevaPasada(): boolean {
+    return this.esFechaHoraPasada(this.nuevo.fechaProgramada, this.nuevo.horaProgramada);
+  }
+
+  fechaHoraReprogramarPasada(): boolean {
+    return this.esFechaHoraPasada(this.reprogramarForm.fecha, this.reprogramarForm.hora);
   }
 
   formularioValido(): boolean {
