@@ -7,7 +7,7 @@ export function obtenerGps(): Promise<{ lat: number; lng: number } | null> {
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => resolve(null),
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   });
 }
@@ -39,7 +39,7 @@ export function obtenerGpsConDiagnostico(): Promise<GpsResultado> {
               : 'NO_DISPONIBLE';
         resolve({ coords: null, error });
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   });
 }
