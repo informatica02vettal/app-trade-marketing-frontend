@@ -37,9 +37,9 @@ export class Login {
         const destino = data.usuario.rol === 'MERCADERISTA' ? '/app/ruta' : '/dashboard';
         this.router.navigateByUrl(destino);
       },
-      error: () => {
+      error: (err) => {
         this.cargando.set(false);
-        this.error.set('Correo o contraseña incorrectos');
+        this.error.set(err?.error?.message || 'Correo o contraseña incorrectos');
       },
     });
   }

@@ -51,7 +51,11 @@
             [(ngModel)]="formulario.password"
             [placeholder]="usuarioEditando() ? 'Dejar en blanco para no cambiarla' : 'Mínimo 8 caracteres'"
             class="bg-panel-alt border border-line rounded-[7px] text-ink px-2.5 py-2 text-[13px] outline-none focus:border-teal"
+            [class.border-danger]="passwordInvalida()"
           />
+          @if (passwordInvalida()) {
+            <p class="text-[11px] text-danger">La contraseña debe tener al menos 8 caracteres.</p>
+          }
         </div>
         <div class="flex flex-col gap-1.5 col-span-2">
           <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Región</label>
@@ -87,15 +91,17 @@
 @if (mostrarModalAsignar()) {
   <div class="fixed inset-0 bg-[rgba(20,24,28,0.45)] flex items-center justify-center p-5 z-[100]" (click)="cerrarModalAsignar()">
     <div
-      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[560px] max-h-[calc(100vh-40px)] overflow-y-auto"
+      class="bg-panel rounded-[10px] border border-line shadow-[0_20px_50px_rgba(20,30,40,0.2)] p-5 px-[22px] w-full max-w-[560px] max-h-[calc(100vh-40px)] flex flex-col"
       (click)="$event.stopPropagation()"
     >
-      <div class="flex justify-between items-start flex-wrap gap-3.5 mb-1">
+      <div class="flex justify-between items-start flex-wrap gap-3.5 mb-1 shrink-0">
         <p class="font-display text-[15px] font-semibold mb-0.5">Clientes asignados · {{ mercaderistaSeleccionado()?.nombre }}</p>
         <button type="button" class="bg-transparent border-none cursor-pointer text-muted text-xl leading-none p-1 hover:text-ink" (click)="cerrarModalAsignar()">×</button>
       </div>
 
-      <div class="flex flex-col gap-1.5 relative mb-3.5">
+      <!-- Fuera del contenedor con scroll (más abajo) para que la lista desplegable
+           de resultados no quede recortada por el overflow de la tabla. -->
+      <div class="flex flex-col gap-1.5 relative mb-3.5 shrink-0">
         <label class="text-[11px] text-muted font-semibold uppercase tracking-[0.04em]">Agregar cliente</label>
         <input
           [ngModel]="busquedaCliente()"
@@ -119,45 +125,47 @@
         }
       </div>
 
-      <table class="w-full border-collapse text-[12.5px]">
-        <thead>
-          <tr>
-            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Cliente</th>
-            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
-            <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (a of asignaciones(); track a.id) {
-            <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
-              <td class="px-2.5 pt-2.5 pb-1 align-middle">{{ a.clienteNombre }} <span class="font-mono text-[11px] text-muted">· {{ a.erpClienteId }}</span></td>
-              <td class="px-2.5 pt-2.5 pb-1 align-middle font-mono text-[11.5px] text-muted">{{ a.region || '—' }}</td>
-              <td class="px-2.5 pt-2.5 pb-1 align-middle">
-                <button type="button" class="text-danger text-[11.5px] font-semibold bg-transparent border-none cursor-pointer hover:underline" (click)="quitarAsignacion(a)">
-                  Quitar
-                </button>
-              </td>
-            </tr>
-            <tr class="border-b border-line last:border-b-0">
-              <td colspan="3" class="px-2.5 pb-2.5 pt-0 align-middle">
-                @if (sedesPorCliente()[a.erpClienteId]?.length) {
-                  <div class="flex flex-wrap gap-1.5">
-                    @for (s of sedesPorCliente()[a.erpClienteId]; track s.erpId) {
-                      <span class="bg-panel-alt border border-line px-2 py-1 rounded-full text-[11px] text-muted">{{ s.nombreSucursal || 'Sede sin nombre' }} · {{ s.ciudad || '—' }}</span>
-                    }
-                  </div>
-                } @else {
-                  <p class="text-[11px] text-muted">Sin sedes registradas para este cliente.</p>
-                }
-              </td>
-            </tr>
-          } @empty {
+      <div class="overflow-y-auto min-h-0">
+        <table class="w-full border-collapse text-[12.5px]">
+          <thead>
             <tr>
-              <td colspan="3" class="px-2.5 py-4 text-center text-muted text-[12.5px]">Sin clientes asignados todavía.</td>
+              <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Cliente</th>
+              <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono">Estado</th>
+              <th class="text-left text-muted font-semibold text-[10.5px] uppercase tracking-[0.05em] px-2.5 py-2 border-b border-line font-mono"></th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (a of asignaciones(); track a.id) {
+              <tr class="border-b border-line last:border-b-0 hover:bg-black/[0.02]">
+                <td class="px-2.5 pt-2.5 pb-1 align-middle">{{ a.clienteNombre }} <span class="font-mono text-[11px] text-muted">· {{ a.erpClienteId }}</span></td>
+                <td class="px-2.5 pt-2.5 pb-1 align-middle font-mono text-[11.5px] text-muted">{{ a.region || '—' }}</td>
+                <td class="px-2.5 pt-2.5 pb-1 align-middle">
+                  <button type="button" class="text-danger text-[11.5px] font-semibold bg-transparent border-none cursor-pointer hover:underline" (click)="quitarAsignacion(a)">
+                    Quitar
+                  </button>
+                </td>
+              </tr>
+              <tr class="border-b border-line last:border-b-0">
+                <td colspan="3" class="px-2.5 pb-2.5 pt-0 align-middle">
+                  @if (sedesPorCliente()[a.erpClienteId]?.length) {
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (s of sedesPorCliente()[a.erpClienteId]; track s.erpId) {
+                        <span class="bg-panel-alt border border-line px-2 py-1 rounded-full text-[11px] text-muted">{{ s.nombreSucursal || 'Sede sin nombre' }} · {{ s.ciudad || '—' }}</span>
+                      }
+                    </div>
+                  } @else {
+                    <p class="text-[11px] text-muted">Sin sedes registradas para este cliente.</p>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="px-2.5 py-4 text-center text-muted text-[12.5px]">Sin clientes asignados todavía.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 }

@@ -34,12 +34,21 @@ export class Mercaderistas implements OnInit {
   readonly usuarioEditando = signal<Usuario | null>(null);
   formulario: UsuarioRequest = formularioVacio();
 
+  // El backend exige mínimo 8 caracteres (cuando se envía contraseña); se
+  // valida también aquí para poder mostrar el motivo exacto en el formulario
+  // en vez de que se entere recién con el error genérico del backend.
+  passwordInvalida(): boolean {
+    const password = this.formulario.password;
+    return !!password && password.length < 8;
+  }
+
   guardarDeshabilitado(): boolean {
     return (
       this.guardando() ||
       !this.formulario.nombre ||
       !this.formulario.email ||
-      (!this.usuarioEditando() && !this.formulario.password)
+      (!this.usuarioEditando() && !this.formulario.password) ||
+      this.passwordInvalida()
     );
   }
 

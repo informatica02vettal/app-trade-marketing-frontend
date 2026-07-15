@@ -7,6 +7,12 @@ import { ApiResponse } from '../models/api-response.model';
 function extraerMensajeError(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
     const cuerpo = error.error as ApiResponse<unknown> | undefined;
+    if (cuerpo?.errors && Object.keys(cuerpo.errors).length) {
+      // "Error de validación" a secas no dice qué campo falló ni por qué —
+      // se agregan los detalles por campo que ya manda el backend.
+      const detalles = Object.values(cuerpo.errors).join(' · ');
+      return cuerpo.message ? `${cuerpo.message}: ${detalles}` : detalles;
+    }
     if (cuerpo?.message) return cuerpo.message;
     if (error.status === 0) return 'No fue posible conectar con el servidor';
     return `Error inesperado (HTTP ${error.status})`;
