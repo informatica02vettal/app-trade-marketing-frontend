@@ -30,4 +30,10 @@ export class UsuarioService {
   eliminar(id: number): Observable<void> {
     return this.http.delete<ApiResponse<void>>(`${BASE_URL}/${id}`).pipe(map(() => undefined));
   }
+
+  cambiarEstado(id: number, activo: boolean): Observable<Usuario> {
+    return this.http
+      .patch<ApiResponse<Usuario>>(`${BASE_URL}/${id}/estado`, { activo })
+      .pipe(map((res) => res.data));
+  }
 }

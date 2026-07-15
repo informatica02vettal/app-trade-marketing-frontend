@@ -129,20 +129,24 @@ export class Mercaderistas implements OnInit {
     });
   }
 
+  // Activar/desactivar usa un endpoint dedicado que solo toca ese campo —
+  // a diferencia de guardar() (edición completa), no revalida el resto del
+  // perfil, así que nunca queda bloqueado por datos antiguos del registro
+  // (p. ej. un email con formato inválido) que no tienen que ver con esto.
   desactivar(m: Usuario): void {
-    this.usuarioService.eliminar(m.id).subscribe(() => this.cargar());
+    this.error.set(null);
+    this.usuarioService.cambiarEstado(m.id, false).subscribe({
+      next: () => this.cargar(),
+      error: (err) => this.error.set(err?.error?.message || 'No fue posible desactivar el mercaderista'),
+    });
   }
 
   reactivar(m: Usuario): void {
-    this.usuarioService
-      .actualizar(m.id, {
-        nombre: m.nombre,
-        email: m.email,
-        region: m.region ?? undefined,
-        rol: m.rol,
-        activo: true,
-      })
-      .subscribe(() => this.cargar());
+    this.error.set(null);
+    this.usuarioService.cambiarEstado(m.id, true).subscribe({
+      next: () => this.cargar(),
+      error: (err) => this.error.set(err?.error?.message || 'No fue posible reactivar el mercaderista'),
+    });
   }
 
   // ---- Asignación de clientes ----
