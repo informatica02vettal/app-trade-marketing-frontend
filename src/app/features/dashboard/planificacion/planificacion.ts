@@ -22,6 +22,28 @@ function formatearFecha(fecha: Date): string {
   return `${anio}-${mes}-${dia}`;
 }
 
+// Lunes de la semana de `fecha` (getDay(): 0 = domingo ... 6 = sábado).
+function inicioSemana(fecha: Date): Date {
+  const dia = fecha.getDay();
+  const diferencia = dia === 0 ? -6 : 1 - dia;
+  const lunes = new Date(fecha);
+  lunes.setDate(fecha.getDate() + diferencia);
+  return lunes;
+}
+
+function finSemana(fecha: Date): Date {
+  const domingo = inicioSemana(fecha);
+  domingo.setDate(domingo.getDate() + 6);
+  return domingo;
+}
+
+type CampoBusquedaPlan = 'mercaderista' | 'cliente';
+
+// 'ACTIVAS' es un valor propio de la UI (no existe en el backend): agrupa
+// PENDIENTE + REPROGRAMADA sin incluir EJECUTADA, para el filtro por
+// defecto "pendientes y reprogramadas de esta semana".
+type FiltroEstadoLista = EstadoPlanVisita | '' | 'ACTIVAS';
+
 function nuevoFormulario() {
   return {
     clienteNombre: '',
@@ -67,10 +89,27 @@ export class Planificacion implements OnInit {
 
   readonly mercaderistas = signal<Usuario[]>([]);
   readonly plan = signal<PlanVisita[]>([]);
-  readonly filtroUsuarioId = signal<number | null>(null);
-  readonly filtroFechaDesde = signal<string>('');
-  readonly filtroFechaHasta = signal<string>('');
-  readonly filtroEstado = signal<EstadoPlanVisita | ''>('');
+
+  // Por defecto: semana actual, solo pendientes/reprogramadas (no completadas).
+  readonly filtroFechaDesde = signal<string>(formatearFecha(inicioSemana(new Date())));
+  readonly filtroFechaHasta = signal<string>(formatearFecha(finSemana(new Date())));
+  readonly filtroEstado = signal<FiltroEstadoLista>('ACTIVAS');
+
+  // Buscador combinado (select de campo + texto libre), aplicado del lado
+  // del cliente sobre lo ya cargado — no dispara una nueva llamada al backend.
+  readonly campoBusquedaPlan = signal<CampoBusquedaPlan>('mercaderista');
+  readonly textoBusquedaPlan = signal('');
+
+  readonly planFiltrado = computed(() => {
+    const termino = this.textoBusquedaPlan().trim().toLowerCase();
+    if (!termino) return this.plan();
+    const campo = this.campoBusquedaPlan();
+    return this.plan().filter((p) => {
+      const valor = campo === 'mercaderista' ? p.usuarioNombre : p.clienteNombre;
+      return (valor ?? '').toLowerCase().includes(termino);
+    });
+  });
+
   readonly guardando = signal(false);
   readonly mostrarModal = signal(false);
   readonly verificandoDuplicado = signal(false);
@@ -114,6 +153,7 @@ export class Planificacion implements OnInit {
 
   // ---- Productos propios a auditar (solo si el objetivo es "Auditoría de marca") ----
   readonly productos = signal<ProductoLocal[]>([]);
+  readonly mostrarBusquedaProductos = signal(false);
   readonly busquedaProducto = signal('');
   readonly filtroProductoMarca = signal('');
   readonly filtroProductoLinea = signal('');
@@ -194,19 +234,16 @@ export class Planificacion implements OnInit {
   }
 
   cargarPlan(): void {
-    this.planVisitaService
-      .listar(
-        this.filtroUsuarioId() ?? undefined,
-        this.filtroFechaDesde() || undefined,
-        this.filtroFechaHasta() || undefined,
-        this.filtroEstado() || undefined,
-      )
-      .subscribe((plan) => this.plan.set(plan));
-  }
+    const estado = this.filtroEstado();
+    // 'ACTIVAS' no existe en el backend: se trae sin filtrar por estado y se
+    // excluyen las EJECUTADA del lado del cliente.
+    const estadoBackend = estado === 'ACTIVAS' || estado === '' ? undefined : estado;
 
-  onFiltroUsuarioChange(valor: number | null): void {
-    this.filtroUsuarioId.set(valor);
-    this.cargarPlan();
+    this.planVisitaService
+      .listar(undefined, this.filtroFechaDesde() || undefined, this.filtroFechaHasta() || undefined, estadoBackend)
+      .subscribe((plan) => {
+        this.plan.set(estado === 'ACTIVAS' ? plan.filter((p) => p.estado !== 'EJECUTADA') : plan);
+      });
   }
 
   onFiltroFechaDesdeChange(valor: string): void {
@@ -220,7 +257,7 @@ export class Planificacion implements OnInit {
   }
 
   onFiltroEstadoChange(valor: string): void {
-    this.filtroEstado.set(valor as EstadoPlanVisita | '');
+    this.filtroEstado.set(valor as FiltroEstadoLista);
     this.cargarPlan();
   }
 
@@ -229,6 +266,7 @@ export class Planificacion implements OnInit {
     this.busquedaMercaderista.set('');
     this.mostrarSugerenciasMercaderista.set(false);
     this.subtiposDisponibles.set([]);
+    this.mostrarBusquedaProductos.set(false);
     this.busquedaProducto.set('');
     this.filtroProductoMarca.set('');
     this.filtroProductoLinea.set('');
@@ -272,6 +310,12 @@ export class Planificacion implements OnInit {
     setTimeout(() => this.mostrarSugerenciasMercaderista.set(false), 150);
   }
 
+  // Mismo caso que clienteSinSeleccionar(): el mercaderista solo queda
+  // elegido al hacer click en una sugerencia, no con solo escribir su nombre.
+  mercaderistaSinSeleccionar(): boolean {
+    return !!this.busquedaMercaderista().trim() && !this.nuevo.usuarioId && !this.mostrarSugerenciasMercaderista();
+  }
+
   limpiarMercaderista(): void {
     this.busquedaMercaderista.set('');
     this.mostrarSugerenciasMercaderista.set(false);
@@ -292,6 +336,14 @@ export class Planificacion implements OnInit {
 
   ocultarSugerenciasCliente(): void {
     setTimeout(() => this.mostrarSugerenciasCliente.set(false), 150);
+  }
+
+  // El cliente solo queda realmente elegido al hacer click en una sugerencia
+  // (seleccionarCliente) — escribir el nombre, aunque coincida exacto, no
+  // alcanza. Esto avisa cuando hay texto escrito pero ninguna selección
+  // real, en vez de dejar "Crear" bloqueado sin explicación.
+  clienteSinSeleccionar(): boolean {
+    return !!this.busquedaCliente().trim() && !this.clienteSeleccionado() && !this.mostrarSugerenciasCliente();
   }
 
   seleccionarCliente(asignacion: AsignacionCliente): void {
@@ -348,6 +400,10 @@ export class Planificacion implements OnInit {
   }
 
   // ---- Productos propios a auditar (Auditoría de marca) ----
+  toggleBusquedaProductos(): void {
+    this.mostrarBusquedaProductos.update((v) => !v);
+  }
+
   seleccionarProducto(p: ProductoLocal): void {
     if (this.productosSeleccionados().some((sel) => sel.id === p.id)) return;
     this.productosSeleccionados.set([...this.productosSeleccionados(), p]);
