@@ -17,8 +17,6 @@ export const DASHBOARD_ROUTES: Routes = [
       { path: 'pop', loadComponent: () => import('./pop/pop').then((m) => m.Pop) },
       { path: 'mercado', loadComponent: () => import('./mercado/mercado').then((m) => m.Mercado) },
       { path: 'geo', loadComponent: () => import('./geo/geo').then((m) => m.Geo) },
-      { path: 'kpis', loadComponent: () => import('./indicadores/indicadores').then((m) => m.Indicadores) },
-      { path: 'fase2', loadComponent: () => import('./fase2/fase2').then((m) => m.Fase2) },
       { path: 'catalogos', loadComponent: () => import('./catalogos/catalogos').then((m) => m.Catalogos) },
       { path: 'clientes', loadComponent: () => import('./clientes/clientes').then((m) => m.Clientes) },
       {
