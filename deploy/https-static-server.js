@@ -13,8 +13,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const HTTPS_PORT = 443;
-const HTTP_PORT = 80; 
+const HTTPS_PORT = 8444;
+const HTTP_PORT = 80;
 const ROOT = path.join(__dirname, '..', 'dist', 'app-trade-marketing-frontend', 'browser');
 const CERT_PATH = 'M:/web/certificado/server.crt';
 const KEY_PATH = 'M:/web/certificado/server.key';
