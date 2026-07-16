@@ -42,3 +42,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Certificado HTTPS autofirmado para probar GPS en dispositivos reales en dev
+/certs

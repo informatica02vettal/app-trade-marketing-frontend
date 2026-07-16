@@ -7,11 +7,12 @@ import { PlanVisitaService } from '../../../core/services/plan-visita.service';
 import { VisitaService } from '../../../core/services/visita.service';
 import { VisitaSessionService } from '../../../core/session/visita-session.service';
 import { VisitaReconstruccionService } from '../../../core/session/visita-reconstruccion.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ClienteErp } from '../../../core/models/cliente.model';
 import { PlanVisita } from '../../../core/models/plan-visita.model';
 import { ProductoResumen } from '../../../core/models/producto.model';
 import { Visita, VisitaCheckinRequest } from '../../../core/models/visita.model';
-import { obtenerGps } from '../../../core/utils/gps.util';
+import { mensajeGpsError, obtenerGpsConDiagnostico } from '../../../core/utils/gps.util';
 
 // Date.toISOString() convierte a UTC, no a la hora local del dispositivo:
 // pasadas las 8pm (Venezuela, UTC-4) ya cae en el día siguiente y "hoy"
@@ -36,6 +37,7 @@ export class Ruta implements OnInit {
   private readonly visitaService = inject(VisitaService);
   private readonly visitaSession = inject(VisitaSessionService);
   private readonly visitaReconstruccion = inject(VisitaReconstruccionService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   readonly usuario = this.authService.usuarioActual;
@@ -158,7 +160,14 @@ export class Ruta implements OnInit {
     if (!usuario || this.iniciandoVisita()) return;
 
     this.iniciandoVisita.set(true);
-    obtenerGps().then((coords) => {
+    obtenerGpsConDiagnostico().then(({ coords, error }) => {
+      // No se bloquea el check-in por falta de GPS (el mercaderista igual
+      // debe poder registrar la visita), pero si falló se le avisa por qué,
+      // en vez de guardar la visita sin ubicación y sin ninguna explicación.
+      if (error) {
+        this.toastService.mostrar(mensajeGpsError(error), 'info');
+      }
+
       const request: VisitaCheckinRequest = {
         planId: datos.planId,
         erpClienteId: datos.erpClienteId,

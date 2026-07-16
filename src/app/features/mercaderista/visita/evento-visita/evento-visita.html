@@ -32,6 +32,12 @@
               <button type="button" (click)="capturarGps()" class="text-brand-dim font-bold text-[12px]">Reintentar</button>
             }
           </div>
+          @if (!capturandoGps() && gpsErrorMotivo() === 'CONTEXTO_INSEGURO') {
+            <p class="text-muted text-[11px]">
+              Este sitio no usa una conexión segura (HTTPS), así que el navegador bloquea el GPS automáticamente sin
+              preguntar. No es algo que puedas activar tú — avisa a sistemas para que habiliten HTTPS en el servidor.
+            </p>
+          }
           @if (!capturandoGps() && gpsErrorMotivo() === 'PERMISO_DENEGADO') {
             <p class="text-muted text-[11px]">
               El navegador tiene bloqueado el permiso de ubicación para esta página. Tócalo desde el ícono de

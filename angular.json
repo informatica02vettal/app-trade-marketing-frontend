@@ -69,6 +69,12 @@
             },
             "development": {
               "buildTarget": "app-trade-marketing-frontend:build:development"
+            },
+            "https": {
+              "buildTarget": "app-trade-marketing-frontend:build:development",
+              "ssl": true,
+              "sslKey": "certs/dev-key.pem",
+              "sslCert": "certs/dev-cert.pem"
             }
           },
           "defaultConfiguration": "development"
