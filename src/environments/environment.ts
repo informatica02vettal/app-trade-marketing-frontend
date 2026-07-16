@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api-trade-marketing.vettal.com.ve/api/v1',
+  apiBaseUrl: 'http://192.168.1.2/api/v1',
 };
