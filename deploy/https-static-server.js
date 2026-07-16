@@ -1,21 +1,22 @@
-// Sirve el build de producción de Angular (dist/app-trade-marketing-frontend/browser)
-// por HTTPS con el certificado real de IT — reemplaza a "serve", que no
-// soporta HTTPS. Usa solo módulos nativos de Node (https, fs, path):
-// no requiere instalar ningún paquete en el servidor.
+// Sirve el build de producción de Angular por HTTPS con el certificado real
+// de IT — reemplaza a "serve", que no soporta HTTPS. Usa solo módulos
+// nativos de Node (https, fs, path): no requiere instalar ningún paquete.
 //
-// Ajusta CERT_PATH/KEY_PATH a donde copies el certificado real.
+// Vive en M:\web\vettal-trade-marketing-frontend\deploy\https-static-server.js,
+// como hermano de la carpeta "browser" (un nivel arriba) — así sobrevive a
+// que se reemplace el contenido de "browser" en cada despliegue nuevo.
 //
-// Uso: node deploy/https-static-server.js
-// (ejecutar desde la raíz del proyecto, o ajustar ROOT si se corre desde otro lado)
+// Uso: node deploy\https-static-server.js
+// (Startup Directory en NSSM: M:\web\vettal-trade-marketing-frontend)
 
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const HTTPS_PORT = 8444;
-const HTTP_PORT = 80;
-const ROOT = path.join(__dirname, '..', 'dist', 'app-trade-marketing-frontend', 'browser');
+const HTTPS_PORT = 4201;
+const HTTP_PORT = null; // el 80 no está abierto en el router, no tiene sentido levantarlo
+const ROOT = path.join(__dirname, '..', 'browser');
 const CERT_PATH = 'M:/web/certificado/server.crt';
 const KEY_PATH = 'M:/web/certificado/server.key';
 
